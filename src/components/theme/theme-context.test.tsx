@@ -41,3 +41,35 @@ it('reads a persisted light preference', () => {
   expect(result.current.theme).toBe('light')
   expect(document.documentElement.dataset.theme).toBe('light')
 })
+
+it('toggles when the t key is pressed', () => {
+  const { result } = renderHook(() => useTheme(), {
+    wrapper: ThemeProvider,
+  })
+
+  act(() => {
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 't' }))
+  })
+
+  expect(result.current.theme).toBe('light')
+  expect(document.documentElement.dataset.theme).toBe('light')
+})
+
+it('ignores the t shortcut while typing in a form field', () => {
+  const input = document.createElement('input')
+  document.body.append(input)
+  input.focus()
+
+  const { result } = renderHook(() => useTheme(), {
+    wrapper: ThemeProvider,
+  })
+
+  act(() => {
+    input.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 't', bubbles: true }),
+    )
+  })
+
+  expect(result.current.theme).toBe('dark')
+  input.remove()
+})

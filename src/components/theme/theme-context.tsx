@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useState,
@@ -69,6 +70,39 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const toggleTheme = useCallback(() => {
     setTheme((current) => (current === 'dark' ? 'light' : 'dark'))
   }, [])
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (
+        event.defaultPrevented ||
+        event.repeat ||
+        event.isComposing ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.altKey ||
+        event.key.toLowerCase() !== 't'
+      ) {
+        return
+      }
+
+      const target = event.target
+      if (
+        target instanceof HTMLElement &&
+        (target.isContentEditable ||
+          target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT')
+      ) {
+        return
+      }
+
+      event.preventDefault()
+      toggleTheme()
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [toggleTheme])
 
   const value = useMemo(() => ({ theme, toggleTheme }), [theme, toggleTheme])
 

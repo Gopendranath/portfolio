@@ -127,7 +127,12 @@ export function MobileNav() {
           <div className="mt-auto space-y-6 border-t border-line pt-6">
             <StatusBadge label={profile.availability} />
             <SocialLinks />
-            <ThemeToggle />
+            <div className="flex items-center justify-between gap-3">
+              <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted">
+                Theme
+              </span>
+              <ThemeToggle />
+            </div>
             <button
               type="button"
               disabled
