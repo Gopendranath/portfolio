@@ -8,6 +8,16 @@ export type {
   ContactResult,
   ProfileResult,
 } from './profile-tools'
+export {
+  createGetProjectTool,
+  createListProjectsTool,
+} from './project-tools'
+export type {
+  GetProjectInput,
+  GetProjectResult,
+  ListProjectsInput,
+  ListProjectsResult,
+} from './project-tools'
 export type {
   ProjectResult,
   SocialResult,
