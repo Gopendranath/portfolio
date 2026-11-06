@@ -150,6 +150,33 @@ it('sends on Enter and keeps Shift+Enter for a new line', async () => {
   expect((composer as HTMLTextAreaElement).value).toContain('line one')
 })
 
+it('caps the composer height once the message grows', async () => {
+  const user = userEvent.setup()
+  render(<ChatShell />)
+
+  const composer = screen.getByRole('textbox', {
+    name: 'Message Portfolio assistant',
+  }) as HTMLTextAreaElement
+
+  Object.defineProperty(composer, 'scrollHeight', {
+    configurable: true,
+    value: 240,
+  })
+  Object.defineProperty(composer, 'offsetHeight', {
+    configurable: true,
+    value: 46,
+  })
+  Object.defineProperty(composer, 'clientHeight', {
+    configurable: true,
+    value: 44,
+  })
+
+  await user.type(composer, 'A message that is long enough to need more room.')
+
+  expect(composer.style.height).toBe('160px')
+  expect(composer.style.overflowY).toBe('auto')
+})
+
 it('ignores Enter while an input method is composing', () => {
   render(<ChatShell />)
 

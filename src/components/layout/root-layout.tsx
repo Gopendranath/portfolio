@@ -40,7 +40,7 @@ export function RootLayout() {
             tabIndex={-1}
             className={
               isChat
-                ? 'mx-auto flex min-h-0 w-full max-w-[1120px] flex-1 animate-page-in flex-col overflow-hidden focus:outline-none'
+                ? 'flex min-h-0 w-full flex-1 animate-page-in flex-col overflow-hidden focus:outline-none'
                 : 'safe-x safe-x-lg mx-auto w-full max-w-[1120px] flex-1 animate-page-in py-10 focus:outline-none lg:py-16'
             }
           >

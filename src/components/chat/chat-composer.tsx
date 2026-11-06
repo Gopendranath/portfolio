@@ -1,5 +1,9 @@
+import { useLayoutEffect, useRef } from 'react'
 import type { FormEvent, KeyboardEvent } from 'react'
 import { ArrowRightIcon } from '../ui/icons'
+
+const MIN_COMPOSER_HEIGHT = 44
+const MAX_COMPOSER_HEIGHT = 160
 
 interface ChatComposerProps {
   profileName: string
@@ -14,7 +18,25 @@ export function ChatComposer({
   onChange,
   onSend,
 }: ChatComposerProps) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
   const canSend = value.trim().length > 0
+
+  useLayoutEffect(() => {
+    const textarea = textareaRef.current
+
+    if (!textarea) {
+      return
+    }
+
+    textarea.style.height = 'auto'
+    const borderHeight = textarea.offsetHeight - textarea.clientHeight
+    const contentHeight = textarea.scrollHeight + borderHeight
+    const nextHeight = Math.min(contentHeight, MAX_COMPOSER_HEIGHT)
+
+    textarea.style.height = `${Math.max(nextHeight, MIN_COMPOSER_HEIGHT)}px`
+    textarea.style.overflowY =
+      contentHeight > MAX_COMPOSER_HEIGHT ? 'auto' : 'hidden'
+  }, [value])
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -47,6 +69,7 @@ export function ChatComposer({
       </label>
       <div className="flex items-end gap-2">
         <textarea
+          ref={textareaRef}
           id="chat-composer"
           name="message"
           rows={1}
@@ -54,7 +77,7 @@ export function ChatComposer({
           onChange={(event) => onChange(event.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={`Message ${profileName}…`}
-          className="min-h-11 flex-1 resize-none border border-line bg-canvas px-3 py-2.5 text-sm leading-relaxed text-ink transition-colors placeholder:text-muted focus:border-accent focus:outline-none"
+          className="min-h-11 max-h-40 flex-1 resize-none border border-line bg-canvas px-3 py-2.5 text-sm leading-relaxed text-ink transition-colors placeholder:text-muted focus:border-accent focus:outline-none"
         />
         <button
           type="submit"
