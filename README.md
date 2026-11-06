@@ -72,6 +72,8 @@ Routes are files under `src/routes`:
 - `projects.tsx` — `/projects`
 - `about.tsx` — `/about`
 - `contact.tsx` — `/contact`
+- `chat.tsx` — `/chat` (preview; no chat backend yet)
+- `more.tsx` — `/more` (site details and planned SSH access)
 
 Adding a page means adding a route file and a navigation entry. The TanStack Router Vite plugin regenerates `src/routeTree.gen.ts`; never edit it manually.
 

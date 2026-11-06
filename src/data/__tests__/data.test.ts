@@ -52,12 +52,14 @@ describe('profile', () => {
 })
 
 describe('navigation', () => {
-  it('defines the four primary routes in order', () => {
+  it('defines the six primary routes in order', () => {
     expect(navItems.map((item) => item.label)).toEqual([
       'Home',
       'Projects',
       'About',
       'Contact',
+      'Chat',
+      'More',
     ])
   })
 })

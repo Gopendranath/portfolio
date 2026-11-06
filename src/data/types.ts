@@ -31,7 +31,13 @@ export interface Project {
   featured?: boolean
 }
 
-export type RoutePath = '/' | '/projects' | '/about' | '/contact'
+export type RoutePath =
+  | '/'
+  | '/projects'
+  | '/about'
+  | '/contact'
+  | '/chat'
+  | '/more'
 
 export interface NavItem {
   index: string
