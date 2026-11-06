@@ -3,6 +3,7 @@ import { profile } from '../../data/profile'
 import { siteYear } from '../../lib/site'
 import { Devtools } from '../devtools'
 import { ThemeProvider } from '../theme/theme-context'
+import { WebMcpTools } from '../webmcp/webmcp-tools'
 import { AppSidebar } from './app-sidebar'
 import { MobileNav } from './mobile-nav'
 import { ScrollBlur } from './scroll-blur'
@@ -18,6 +19,7 @@ export function RootLayout() {
   return (
     <ThemeProvider>
       <SidebarProvider>
+        <WebMcpTools />
         <SkipLink />
         <SidebarRouteSync />
         <AppSidebar />
