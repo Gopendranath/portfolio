@@ -12,7 +12,7 @@ export function ThemeToggle() {
       aria-label={`Switch to ${isDark ? 'light' : 'dark'} theme`}
       aria-keyshortcuts="T"
       title="Toggle theme (T)"
-      className="group inline-flex h-9 items-center gap-2 rounded-full border border-line bg-surface px-2.5 text-muted transition-colors hover:border-accent hover:text-accent"
+      className="group inline-flex h-9 items-center gap-2 rounded-full border border-line bg-surface p-[7px] text-muted transition-colors hover:border-accent hover:text-accent"
     >
       <span className="grid size-5 place-items-center rounded-full bg-accent text-accent-ink">
         {isDark ? (
