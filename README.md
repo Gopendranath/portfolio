@@ -42,7 +42,7 @@ pnpm lint       # Oxlint
 src/
   components/
     chat/        assistant and owner chat preview
-    home/        GitHub snapshot
+    home/        GitHub snapshot and contribution graph
     layout/      sidebar, mobile drawer, shell, context
     projects/    project card
     ui/          headers, labels, icons, links, status
@@ -61,8 +61,9 @@ Tests live in `__tests__` folders beside the module they cover.
 - `src/data/profile.ts` — name, bio, location, email, socials, availability, stack.
 - `src/data/projects.ts` — project titles, summaries, stack tags, and links.
 - `src/data/navigation.ts` — sidebar labels, indices, and paths.
+- `src/data/github-contributions.ts` — committed daily fallback counts for the contribution heatmap.
 
-Project data is curated locally. The Projects page does not call GitHub at runtime. The Home page fetches public profile statistics from the GitHub API through TanStack Query and falls back to a verified static snapshot when the API is unavailable or rate-limited.
+Project data is curated locally. The Projects page does not call GitHub at runtime. The Home page fetches public profile statistics from the GitHub API through TanStack Query and falls back to a verified static snapshot when the API is unavailable or rate-limited. It also renders a 53-week contribution heatmap from the public [jogruber GitHub contributions API](https://github.com/grubersjoe/github-contributions-api), with a committed fallback containing a real year of daily counts.
 
 ## Routing
 

@@ -1,4 +1,5 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
+import { ContributionGraph } from '../components/home/contribution-graph'
 import { GithubSnapshot } from '../components/home/github-snapshot'
 import { ProjectCard } from '../components/projects/project-card'
 import { ArrowRightIcon } from '../components/ui/icons'
@@ -123,6 +124,8 @@ function HomePage() {
       </section>
 
       <GithubSnapshot />
+
+      <ContributionGraph />
     </div>
   )
 }

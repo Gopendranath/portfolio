@@ -32,6 +32,7 @@ export type TooltipPlacement =
 interface TooltipProps {
   label: string
   placement?: TooltipPlacement
+  className?: string
   children: ReactNode
 }
 
@@ -114,6 +115,7 @@ const placementClasses: Record<TooltipPlacement, string> = {
 export function Tooltip({
   label,
   placement = 'top',
+  className = '',
   children,
 }: TooltipProps) {
   const triggerRef = useRef<HTMLSpanElement>(null)
@@ -207,7 +209,7 @@ export function Tooltip({
     >
       <span
         ref={triggerRef}
-        className="inline-flex"
+        className={`inline-flex ${className}`}
         onMouseEnter={open}
         onMouseLeave={close}
         onFocus={open}

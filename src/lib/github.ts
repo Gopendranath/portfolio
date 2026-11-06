@@ -16,7 +16,7 @@ interface GithubRepoResponse {
   stargazers_count: number
 }
 
-const GITHUB_USERNAME = 'Gopendranath'
+export const GITHUB_USERNAME = 'Gopendranath'
 const GITHUB_API = 'https://api.github.com'
 
 export const GITHUB_FALLBACK: GithubSnapshot = {
