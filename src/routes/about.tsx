@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Monogram } from '../components/layout/monogram'
+import { Avatar } from '../components/ui/avatar'
 import { DownloadIcon, MapPinIcon } from '../components/ui/icons'
 import { PageHeader } from '../components/ui/page-header'
 import { SectionLabel } from '../components/ui/section-label'
@@ -42,19 +42,23 @@ function AboutPage() {
 
       <div className="mt-14 grid gap-12 border-t border-line pt-10 lg:grid-cols-[0.8fr_1.2fr]">
         <div>
-          <div className="flex aspect-square w-full max-w-[320px] flex-col justify-between border border-line bg-surface/60 p-6">
-            <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-muted">
+          <div className="relative aspect-square w-full max-w-[320px] overflow-hidden border border-line bg-surface/60">
+            <Avatar
+              alt="Gopendranath Sasmal's GitHub avatar"
+              className="size-full"
+              sizes="320px"
+            />
+            <span className="absolute left-4 top-4 border border-line bg-canvas/85 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.2em] text-muted">
               Portfolio / 2026
             </span>
-            <div>
-              <Monogram className="size-16 text-xl" />
-              <p className="mt-5 text-2xl font-medium tracking-[-0.03em] text-ink">
-                {profile.name}
-              </p>
-              <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.16em] text-muted">
-                {profile.role}
-              </p>
-            </div>
+          </div>
+          <div className="mt-5">
+            <p className="text-2xl font-medium tracking-[-0.03em] text-ink">
+              {profile.name}
+            </p>
+            <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.16em] text-muted">
+              {profile.role}
+            </p>
           </div>
           <div className="mt-6 space-y-3">
             <p className="flex items-start gap-2 font-mono text-[9px] uppercase leading-relaxed tracking-[0.14em] text-muted">

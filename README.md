@@ -79,6 +79,12 @@ One QueryClient lives in `src/lib/query-client.ts`. It is injected into TanStack
 
 The public GitHub API is unauthenticated at runtime, so it can be rate-limited. The UI keeps working by rendering `GITHUB_FALLBACK`.
 
+## Images
+
+The avatar comes from the GitHub profile (`https://avatars.githubusercontent.com/u/71755844`). It is pre-optimized into 160, 320, and 460px WebP variants under `src/assets/avatar/` and imported through Vite, so production filenames are content-hashed and cacheable. The sidebar uses the 160px variant; About requests the 320px/460px variants through `srcSet`.
+
+See `src/assets/avatar/README.md` for the ffmpeg regeneration commands.
+
 ## Deployment
 
 The site is a client-side SPA. The host must rewrite unknown paths to `index.html` so deep links such as `/projects` work.

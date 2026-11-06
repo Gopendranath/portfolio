@@ -2,6 +2,7 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 import { GithubSnapshot } from '../components/home/github-snapshot'
 import { ProjectCard } from '../components/projects/project-card'
 import { ArrowRightIcon } from '../components/ui/icons'
+import { ScrambleText } from '../components/ui/scramble-text'
 import { SectionLabel } from '../components/ui/section-label'
 import { StatusBadge } from '../components/ui/status-badge'
 import { profile } from '../data/profile'
@@ -32,7 +33,7 @@ function HomePage() {
       <section className="max-w-4xl">
         <p className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
           <span className="h-px w-10 bg-accent" aria-hidden="true" />
-          {profile.role} · Bengaluru, India
+          <ScrambleText text={`${profile.role} · Bengaluru, India`} />
         </p>
 
         <h1 className="mt-8 text-[clamp(3rem,8vw,6.5rem)] font-medium leading-[0.9] tracking-[-0.06em] text-ink">

@@ -1,17 +1,22 @@
 import { Link } from '@tanstack/react-router'
 import { profile } from '../../data/profile'
 import { siteYear } from '../../lib/site'
+import { Avatar } from '../ui/avatar'
 import { DownloadIcon } from '../ui/icons'
+import { ScrambleText } from '../ui/scramble-text'
 import { SocialLinks } from '../ui/social-links'
 import { StatusBadge } from '../ui/status-badge'
-import { Monogram } from './monogram'
 import { PrimaryNav } from './primary-nav'
 
 export function AppSidebar() {
   return (
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-[280px] flex-col border-r border-line bg-canvas/95 px-6 py-8 lg:flex">
       <Link to="/" className="group flex items-center gap-3">
-        <Monogram className="transition-colors group-hover:border-accent/60" />
+        <Avatar
+          className="size-10 border border-line transition-colors group-hover:border-accent/60"
+          sizes="40px"
+          priority
+        />
         <span>
           <span className="block font-mono text-[9px] uppercase tracking-[0.22em] text-muted">
             Portfolio / 2026
@@ -22,9 +27,10 @@ export function AppSidebar() {
         </span>
       </Link>
 
-      <p className="mt-5 font-mono text-[10px] uppercase leading-relaxed tracking-[0.16em] text-muted">
-        {profile.role} — Bengaluru
-      </p>
+      <ScrambleText
+        text={`${profile.role} — Bengaluru`}
+        className="mt-5 block font-mono text-[10px] uppercase leading-relaxed tracking-[0.16em] text-muted"
+      />
 
       <PrimaryNav className="mt-12" />
 

@@ -1,10 +1,10 @@
 import { Link } from '@tanstack/react-router'
 import { useEffect, useRef } from 'react'
 import { profile } from '../../data/profile'
+import { Avatar } from '../ui/avatar'
 import { CloseIcon, DownloadIcon, MenuIcon } from '../ui/icons'
 import { SocialLinks } from '../ui/social-links'
 import { StatusBadge } from '../ui/status-badge'
-import { Monogram } from './monogram'
 import { PrimaryNav } from './primary-nav'
 import { useSidebar } from './sidebar-context'
 
@@ -30,7 +30,11 @@ export function MobileNav() {
     <>
       <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-line bg-canvas/95 px-5 backdrop-blur-md lg:hidden">
         <Link to="/" className="flex min-w-0 items-center gap-3">
-          <Monogram className="size-9 text-xs" />
+          <Avatar
+            className="size-9 border border-line"
+            sizes="36px"
+            priority
+          />
           <span className="truncate text-sm font-medium text-ink">
             {profile.name}
           </span>
@@ -66,7 +70,7 @@ export function MobileNav() {
               onClick={close}
               className="flex min-w-0 items-center gap-3"
             >
-              <Monogram className="size-9 text-xs" />
+              <Avatar className="size-9 border border-line" sizes="36px" />
               <span className="min-w-0">
                 <span className="block font-mono text-[9px] uppercase tracking-[0.2em] text-muted">
                   Portfolio / 2026
