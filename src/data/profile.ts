@@ -56,7 +56,7 @@ export const profile: Profile = {
     },
     {
       title: 'Backend',
-      items: ['Node.js', 'Express', 'REST APIs', 'JWT', 'OAuth 2.0'],
+      items: ['Node.js', 'Express', 'REST APIs', 'JWT', 'OAuth 2.0', '2FA'],
     },
     {
       title: 'Databases',
