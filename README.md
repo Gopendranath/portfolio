@@ -79,6 +79,12 @@ One QueryClient lives in `src/lib/query-client.ts`. It is injected into TanStack
 
 The public GitHub API is unauthenticated at runtime, so it can be rate-limited. The UI keeps working by rendering `GITHUB_FALLBACK`.
 
+## Theme
+
+Dark is the default. The sidebar and mobile drawer include a theme toggle; the choice is stored in `localStorage` under `theme` and applied before React mounts by a small inline script in `index.html` to avoid a flash.
+
+Theme tokens live in `src/index.css`. `html[data-theme="light"]` overrides the dark palette, including the dot-grid color and browser `color-scheme`. The toggle also updates the `theme-color` meta tag.
+
 ## Images
 
 The avatar comes from the GitHub profile (`https://avatars.githubusercontent.com/u/71755844`). It is pre-optimized into 160, 320, and 460px WebP variants under `src/assets/avatar/` and imported through Vite, so production filenames are content-hashed and cacheable. The sidebar uses the 160px variant; About requests the 320px/460px variants through `srcSet`.

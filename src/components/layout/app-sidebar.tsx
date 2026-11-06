@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { profile } from '../../data/profile'
 import { siteYear } from '../../lib/site'
+import { ThemeToggle } from '../theme/theme-toggle'
 import { Avatar } from '../ui/avatar'
 import { DownloadIcon } from '../ui/icons'
 import { ScrambleText } from '../ui/scramble-text'
@@ -43,6 +44,8 @@ export function AppSidebar() {
           </p>
           <SocialLinks />
         </div>
+
+        <ThemeToggle />
 
         <button
           type="button"

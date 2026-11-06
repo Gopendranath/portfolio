@@ -1,12 +1,23 @@
 import { Link } from '@tanstack/react-router'
 import { useEffect, useRef } from 'react'
 import { profile } from '../../data/profile'
+import { ThemeToggle } from '../theme/theme-toggle'
 import { Avatar } from '../ui/avatar'
 import { CloseIcon, DownloadIcon, MenuIcon } from '../ui/icons'
 import { SocialLinks } from '../ui/social-links'
 import { StatusBadge } from '../ui/status-badge'
 import { PrimaryNav } from './primary-nav'
 import { useSidebar } from './sidebar-context'
+
+const DRAWER_ANIMATION_MS = 220
+
+function prefersReducedMotion() {
+  return (
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  )
+}
 
 export function MobileNav() {
   const { isOpen, open, close } = useSidebar()
@@ -19,11 +30,28 @@ export function MobileNav() {
       return
     }
 
-    if (isOpen && !dialog.open) {
-      dialog.showModal()
-    } else if (!isOpen && dialog.open) {
-      dialog.close()
+    if (isOpen) {
+      dialog.removeAttribute('data-closing')
+      if (!dialog.open) {
+        dialog.showModal()
+      }
+      return
     }
+
+    if (!dialog.open) {
+      return
+    }
+
+    dialog.setAttribute('data-closing', 'true')
+    const timer = window.setTimeout(
+      () => {
+        dialog.close()
+        dialog.removeAttribute('data-closing')
+      },
+      prefersReducedMotion() ? 0 : DRAWER_ANIMATION_MS,
+    )
+
+    return () => window.clearTimeout(timer)
   }, [isOpen])
 
   return (
@@ -56,6 +84,10 @@ export function MobileNav() {
         id="mobile-navigation"
         aria-label="Site navigation"
         onClose={close}
+        onCancel={(event) => {
+          event.preventDefault()
+          close()
+        }}
         onClick={(event) => {
           if (event.target === event.currentTarget) {
             close()
@@ -95,6 +127,7 @@ export function MobileNav() {
           <div className="mt-auto space-y-6 border-t border-line pt-6">
             <StatusBadge label={profile.availability} />
             <SocialLinks />
+            <ThemeToggle />
             <button
               type="button"
               disabled
