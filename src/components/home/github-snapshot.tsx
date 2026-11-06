@@ -8,6 +8,8 @@ interface SnapshotStatProps {
   value: number
 }
 
+const numberFormat = new Intl.NumberFormat('en-US')
+
 function SnapshotStat({ label, value }: SnapshotStatProps) {
   return (
     <div>
@@ -15,7 +17,7 @@ function SnapshotStat({ label, value }: SnapshotStatProps) {
         {label}
       </dt>
       <dd className="mt-2 font-mono text-2xl tabular-nums tracking-[-0.04em] text-ink sm:text-3xl">
-        {new Intl.NumberFormat('en-US').format(value)}
+        {numberFormat.format(value)}
       </dd>
     </div>
   )
