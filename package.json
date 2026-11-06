@@ -10,7 +10,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "oxlint",
+    "lint": "biome lint .",
+    "check": "biome check .",
+    "format": "biome format --write .",
     "test": "vitest run",
     "test:watch": "vitest",
     "preview": "vite preview"
@@ -26,6 +28,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",
+    "@biomejs/biome": "2.6.6",
     "@rolldown/plugin-babel": "^0.3.0",
     "@tailwindcss/vite": "^4.3.4",
     "@tanstack/react-query-devtools": "5.106.1",
@@ -42,7 +45,6 @@
     "@vitejs/plugin-react": "^6.1.2",
     "babel-plugin-react-compiler": "^1.0.0",
     "jsdom": "31.0.0",
-    "oxlint": "^1.90.0",
     "tailwindcss": "^4.3.4",
     "typescript": "~7.0.2",
     "vite": "^8.3.6",

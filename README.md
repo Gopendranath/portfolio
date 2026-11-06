@@ -9,6 +9,7 @@ Personal portfolio for Gopendranath Sasmal, built as a single-page React app wit
 - Tailwind CSS 4
 - TanStack Router (file-based)
 - TanStack Query
+- Biome
 - Vitest + Testing Library
 
 ## Requirements
@@ -33,7 +34,9 @@ pnpm build      # TypeScript project build + production bundle
 pnpm preview    # Preview the production build
 pnpm test       # Vitest run
 pnpm test:watch # Vitest watch mode
-pnpm lint       # Oxlint
+pnpm lint       # Biome lint
+pnpm check      # Biome formatting and lint check
+pnpm format     # Write Biome formatting
 ```
 
 ## Project structure
