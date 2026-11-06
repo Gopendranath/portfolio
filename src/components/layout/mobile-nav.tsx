@@ -58,12 +58,11 @@ export function MobileNav() {
     <>
       <header className="safe-x sticky top-0 z-30 flex h-16 items-center justify-between border-b border-line bg-canvas/95 backdrop-blur-md lg:hidden">
         <Link to="/" className="flex min-w-0 items-center gap-3">
-          <Avatar
-            className="size-9 border border-line"
-            sizes="36px"
-            priority
-          />
-          <span className="truncate text-sm font-medium text-ink" translate="no">
+          <Avatar className="size-9 border border-line" sizes="36px" priority />
+          <span
+            className="truncate text-sm font-medium text-ink"
+            translate="no"
+          >
             {profile.name}
           </span>
         </Link>
@@ -88,7 +87,7 @@ export function MobileNav() {
           event.preventDefault()
           close()
         }}
-        onClick={(event) => {
+        onPointerDown={(event) => {
           if (event.target === event.currentTarget) {
             close()
           }
@@ -107,7 +106,10 @@ export function MobileNav() {
                 <span className="block font-mono text-[9px] uppercase tracking-[0.2em] text-muted">
                   Portfolio / 2026
                 </span>
-                <span className="mt-0.5 block truncate text-sm font-medium text-ink" translate="no">
+                <span
+                  className="mt-0.5 block truncate text-sm font-medium text-ink"
+                  translate="no"
+                >
                   {profile.name}
                 </span>
               </span>

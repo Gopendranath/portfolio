@@ -53,7 +53,10 @@ function AboutPage() {
             </span>
           </div>
           <div className="mt-5">
-            <p className="text-2xl font-medium tracking-[-0.03em] text-ink" translate="no">
+            <p
+              className="text-2xl font-medium tracking-[-0.03em] text-ink"
+              translate="no"
+            >
               {profile.name}
             </p>
             <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.16em] text-muted">
@@ -76,7 +79,10 @@ function AboutPage() {
         </div>
       </div>
 
-      <section aria-label="Technical stack" className="mt-20 border-t border-line pt-10">
+      <section
+        aria-label="Technical stack"
+        className="mt-20 border-t border-line pt-10"
+      >
         <SectionLabel>Stack</SectionLabel>
         <div className="mt-8 grid gap-8 sm:grid-cols-2">
           {profile.stack.map((group) => (
@@ -99,7 +105,10 @@ function AboutPage() {
         </div>
       </section>
 
-      <section aria-label="Working principles" className="mt-20 border-t border-line pt-10">
+      <section
+        aria-label="Working principles"
+        className="mt-20 border-t border-line pt-10"
+      >
         <SectionLabel>How I work</SectionLabel>
         <div className="mt-8 grid gap-8 md:grid-cols-3">
           {principles.map((principle, index) => (

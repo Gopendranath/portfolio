@@ -25,7 +25,7 @@ export function RootLayout() {
         <SidebarRouteSync />
         <AppSidebar />
         <MobileNav />
-        <ScrollBlur pathname={pathname} />
+        <ScrollBlur key={pathname} />
 
         <div
           className={

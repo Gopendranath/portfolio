@@ -1,8 +1,4 @@
-import type {
-  ChatMessage,
-  ChatProfile,
-  ChatProfileId,
-} from './types'
+import type { ChatMessage, ChatProfile, ChatProfileId } from './types'
 
 export const chatProfiles: readonly ChatProfile[] = [
   {

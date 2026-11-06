@@ -9,7 +9,9 @@ export function SidebarRouteSync() {
   const { close } = useSidebar()
 
   useEffect(() => {
-    close()
+    if (pathname) {
+      close()
+    }
   }, [close, pathname])
 
   return null

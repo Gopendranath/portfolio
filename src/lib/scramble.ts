@@ -1,5 +1,4 @@
-const SCRAMBLE_CHARS =
-  'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!<>-_\\/[]{}=+*^?#'
+const SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!<>-_\\/[]{}=+*^?#'
 
 export function buildScrambledText(
   text: string,

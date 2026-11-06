@@ -13,11 +13,7 @@ function readScrollEdges(): ScrollEdges {
   )
 }
 
-interface ScrollBlurProps {
-  pathname: string
-}
-
-export function ScrollBlur({ pathname }: ScrollBlurProps) {
+export function ScrollBlur() {
   const [edges, setEdges] = useState<ScrollEdges>(readScrollEdges)
 
   useLayoutEffect(() => {
@@ -39,7 +35,8 @@ export function ScrollBlur({ pathname }: ScrollBlurProps) {
       window.removeEventListener('scroll', update)
       window.removeEventListener('resize', update)
     }
-  }, [pathname])
+    // The parent remounts this component on navigation via `key={pathname}`.
+  }, [])
 
   return (
     <>

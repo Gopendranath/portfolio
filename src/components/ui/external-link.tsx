@@ -2,7 +2,10 @@ import type { AnchorHTMLAttributes, ReactNode } from 'react'
 import { ArrowUpRightIcon } from './icons'
 
 interface ExternalLinkProps
-  extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href' | 'target' | 'rel'> {
+  extends Omit<
+    AnchorHTMLAttributes<HTMLAnchorElement>,
+    'href' | 'target' | 'rel'
+  > {
   href: string
   children: ReactNode
   showIcon?: boolean

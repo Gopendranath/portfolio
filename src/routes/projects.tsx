@@ -34,11 +34,7 @@ function ProjectsPage() {
 
       <div className="mt-8 grid gap-4 content-auto [contain-intrinsic-size:auto_600px] md:grid-cols-2">
         {projects.map((project, index) => (
-          <ProjectCard
-            key={project.slug}
-            project={project}
-            index={index + 1}
-          />
+          <ProjectCard key={project.slug} project={project} index={index + 1} />
         ))}
       </div>
 

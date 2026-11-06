@@ -10,9 +10,7 @@ export function ThemeToggle() {
     <Tooltip label="Toggle theme (T)" placement="right">
       <TooltipTrigger
         type="button"
-        onClick={(event) =>
-          toggleTheme({ x: event.clientX, y: event.clientY })
-        }
+        onClick={(event) => toggleTheme({ x: event.clientX, y: event.clientY })}
         aria-label={`Switch to ${isDark ? 'light' : 'dark'} theme`}
         aria-keyshortcuts="T"
         className="group inline-flex h-9 items-center gap-2 rounded-full border border-line bg-surface p-[7px] text-muted transition-colors hover:border-accent hover:text-accent"

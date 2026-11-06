@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  createGetProjectTool,
-  createListProjectsTool,
-} from '../project-tools'
+import { createGetProjectTool, createListProjectsTool } from '../project-tools'
 import type { GetProjectInput } from '../project-tools'
 
 const options = { signal: new AbortController().signal }
@@ -177,9 +174,7 @@ describe('get-project', () => {
       error: 'Pass a project slug.',
       expected: 'slug: string',
     })
-    expect(
-      createGetProjectTool().execute({ slug: '   ' }, options),
-    ).toEqual({
+    expect(createGetProjectTool().execute({ slug: '   ' }, options)).toEqual({
       error: 'Pass a project slug.',
       expected: 'slug: string',
     })
@@ -198,9 +193,7 @@ describe('get-project', () => {
   })
 
   it('returns available slugs for an unknown project', () => {
-    expect(
-      createGetProjectTool().execute({ slug: 'nope' }, options),
-    ).toEqual({
+    expect(createGetProjectTool().execute({ slug: 'nope' }, options)).toEqual({
       error: 'Project "nope" not found.',
       availableSlugs: allSlugs,
     })
@@ -214,9 +207,7 @@ describe('get-project', () => {
 
     first.availableSlugs.push('injected')
 
-    expect(
-      createGetProjectTool().execute({ slug: 'nope' }, options),
-    ).toEqual({
+    expect(createGetProjectTool().execute({ slug: 'nope' }, options)).toEqual({
       error: 'Project "nope" not found.',
       availableSlugs: allSlugs,
     })

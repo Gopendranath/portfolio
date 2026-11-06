@@ -41,13 +41,7 @@ export const projects: readonly Project[] = [
     year: '2026',
     summary:
       'A browser-based lab that runs Debian Linux and Node.js entirely client-side using CheerpX and WebContainers.',
-    stack: [
-      'TypeScript',
-      'WebAssembly',
-      'CheerpX',
-      'WebContainers',
-      'xterm',
-    ],
+    stack: ['TypeScript', 'WebAssembly', 'CheerpX', 'WebContainers', 'xterm'],
     links: [
       {
         label: 'Code',

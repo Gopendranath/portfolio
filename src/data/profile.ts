@@ -11,7 +11,7 @@ export const profile: Profile = {
   availability: 'Open to work',
   bio: 'Full-stack developer building web products across React, TypeScript, Node.js, Java, Spring Boot, and AI. I care about interfaces that feel fast, systems that stay maintainable, and work that ships. Currently open to full-stack roles in Bengaluru or remote.',
   about: [
-    "I’m a full-stack developer who likes the whole path: a sharp interface, a clear API, and the infrastructure that keeps it running. My work spans React and Next.js on the front end; Node.js, Python, and Java with Spring Boot on the back end; and recent projects in RAG, LangGraph, Spring AI, and browser-based tooling.",
+    'I’m a full-stack developer who likes the whole path: a sharp interface, a clear API, and the infrastructure that keeps it running. My work spans React and Next.js on the front end; Node.js, Python, and Java with Spring Boot on the back end; and recent projects in RAG, LangGraph, Spring AI, and browser-based tooling.',
     'I learn by building. That has meant shipping a cinematic movie library, running Linux in the browser with WebAssembly, and writing browser extensions for everyday developer annoyances. Outside code, I am usually trekking or exploring something new in open source.',
   ],
   socials: [

@@ -13,10 +13,9 @@ export function ProfileList({
   onSelect,
 }: ProfileListProps) {
   return (
-    <div
-      role="group"
+    <fieldset
       aria-label="Chat profiles"
-      className="grid grid-cols-2 gap-2 md:grid-cols-1"
+      className="m-0 grid min-w-0 grid-cols-2 gap-2 border-0 p-0 md:grid-cols-1"
     >
       {profiles.map((profile) => {
         const isActive = profile.id === activeProfileId
@@ -54,6 +53,6 @@ export function ProfileList({
           </button>
         )
       })}
-    </div>
+    </fieldset>
   )
 }

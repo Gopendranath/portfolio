@@ -25,9 +25,7 @@ export function MessageBubble({
   return (
     <article
       aria-label={`${isUser ? 'You' : profile.name}: ${message.body}`}
-      className={`group flex items-end gap-2.5 ${
-        isUser ? 'justify-end' : ''
-      }`}
+      className={`group flex items-end gap-2.5 ${isUser ? 'justify-end' : ''}`}
     >
       {isUser ? null : <ChatAvatar profile={profile} size="sm" />}
       <div

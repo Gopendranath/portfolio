@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import type { KeyboardEvent } from 'react'
 
 interface MessageEditorProps {
@@ -15,10 +16,16 @@ export function MessageEditor({
   onSave,
   onKeyDown,
 }: MessageEditorProps) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    textareaRef.current?.focus()
+  }, [])
+
   return (
     <div>
       <textarea
-        autoFocus
+        ref={textareaRef}
         aria-label="Edit message"
         rows={3}
         value={draft}

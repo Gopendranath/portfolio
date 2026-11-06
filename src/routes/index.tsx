@@ -95,10 +95,7 @@ function HomePage() {
         </div>
       </section>
 
-      <section
-        aria-label="Core stack"
-        className="border-t border-line pt-10"
-      >
+      <section aria-label="Core stack" className="border-t border-line pt-10">
         <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
           <div>
             <SectionLabel>Stack</SectionLabel>
@@ -115,7 +112,10 @@ function HomePage() {
                 translate="no"
                 className="flex items-center gap-2"
               >
-                <span className="size-1 shrink-0 bg-accent" aria-hidden="true" />
+                <span
+                  className="size-1 shrink-0 bg-accent"
+                  aria-hidden="true"
+                />
                 {technology}
               </li>
             ))}

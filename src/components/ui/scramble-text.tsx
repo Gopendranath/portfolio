@@ -117,9 +117,7 @@ export function ScrambleText({
       : undefined
 
   if (reducedMotion) {
-    return (
-      <ScrambleMarkup display={text} text={text} className={className} />
-    )
+    return <ScrambleMarkup display={text} text={text} className={className} />
   }
 
   return (

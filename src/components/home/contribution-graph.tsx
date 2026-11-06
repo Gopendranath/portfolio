@@ -8,7 +8,10 @@ import {
   githubContributionsQuery,
   groupContributionsIntoWeeks,
 } from '../../lib/github-contributions'
-import type { ContributionLevel } from '../../lib/github-contributions'
+import type {
+  ContributionLevel,
+  ContributionWeek,
+} from '../../lib/github-contributions'
 import { ExternalLink } from '../ui/external-link'
 import { SectionLabel } from '../ui/section-label'
 import { Tooltip, TooltipTrigger } from '../ui/tooltip'
@@ -23,7 +26,19 @@ const levelClasses: Record<ContributionLevel, string> = {
   4: 'bg-accent',
 }
 
-const weekdayLabels = ['', 'Mon', '', 'Wed', '', 'Fri', '']
+const weekdayRows = [
+  { id: 'sun', label: '' },
+  { id: 'mon', label: 'Mon' },
+  { id: 'tue', label: '' },
+  { id: 'wed', label: 'Wed' },
+  { id: 'thu', label: '' },
+  { id: 'fri', label: 'Fri' },
+  { id: 'sat', label: '' },
+] as const
+
+function getWeekKey(week: ContributionWeek) {
+  return week.days.find((day) => day !== null)?.date ?? 'empty-week'
+}
 
 export function ContributionGraph() {
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -65,12 +80,14 @@ export function ContributionGraph() {
   useEffect(() => {
     const node = scrollRef.current
 
-    if (node) {
-      node.scrollLeft = node.scrollWidth
+    if (!node || contributions.days.length === 0) {
+      return
     }
+
+    node.scrollLeft = node.scrollWidth
   }, [contributions.days])
 
-  function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+  function handleKeyDown(event: KeyboardEvent<HTMLFieldSetElement>) {
     if (!(event.target instanceof HTMLButtonElement)) {
       return
     }
@@ -161,15 +178,15 @@ export function ContributionGraph() {
         className="mt-8 overflow-x-auto overscroll-x-contain pb-2"
       >
         <div className="min-w-[640px]">
-          <div
-            role="group"
+          <fieldset
             aria-label={`GitHub contribution heatmap for the last 12 months. ${contributions.total} contributions.`}
             onKeyDown={handleKeyDown}
+            className="m-0 min-w-0 border-0 p-0"
           >
             <div className="flex gap-[3px] pl-8" aria-hidden="true">
-              {weeks.map((_, weekIndex) => (
+              {weeks.map((week, weekIndex) => (
                 <div
-                  key={weekIndex}
+                  key={getWeekKey(week)}
                   className="relative h-3.5 min-w-0 flex-1"
                 >
                   {monthLabels[weekIndex] ? (
@@ -193,26 +210,26 @@ export function ContributionGraph() {
                 style={{ gridTemplateRows: 'repeat(7, minmax(0, 1fr))' }}
                 aria-hidden="true"
               >
-                {weekdayLabels.map((label, index) => (
+                {weekdayRows.map((row) => (
                   <div
-                    key={index}
+                    key={row.id}
                     className="flex items-center justify-end leading-none"
                   >
-                    {label}
+                    {row.label}
                   </div>
                 ))}
               </div>
 
               <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
-                {weekdayLabels.map((_, rowIndex) => (
-                  <div key={rowIndex} className="flex gap-[3px]">
-                    {weeks.map((week, weekIndex) => {
+                {weekdayRows.map((row, rowIndex) => (
+                  <div key={row.id} className="flex gap-[3px]">
+                    {weeks.map((week) => {
                       const day = week.days[rowIndex]
 
                       if (!day) {
                         return (
                           <div
-                            key={`${weekIndex}-${rowIndex}`}
+                            key={`${getWeekKey(week)}-${row.id}`}
                             className="min-w-0 flex-1"
                             aria-hidden="true"
                           >
@@ -248,7 +265,7 @@ export function ContributionGraph() {
                 ))}
               </div>
             </div>
-          </div>
+          </fieldset>
 
           <div className="mt-3 flex items-center justify-end gap-2 font-mono text-[8px] uppercase tracking-[0.12em] text-muted">
             <span>Less</span>

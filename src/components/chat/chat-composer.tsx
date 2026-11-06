@@ -36,7 +36,7 @@ export function ChatComposer({
     textarea.style.height = `${Math.max(nextHeight, MIN_COMPOSER_HEIGHT)}px`
     textarea.style.overflowY =
       contentHeight > MAX_COMPOSER_HEIGHT ? 'auto' : 'hidden'
-  }, [value])
+  })
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()

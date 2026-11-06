@@ -1,9 +1,4 @@
-import {
-  useCallback,
-  useMemo,
-  useState,
-  type ReactNode,
-} from 'react'
+import { useCallback, useMemo, useState, type ReactNode } from 'react'
 import { SidebarContext } from './sidebar-context'
 
 export function SidebarProvider({ children }: { children: ReactNode }) {

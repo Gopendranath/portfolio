@@ -17,11 +17,12 @@ export function MessageList({
 
   useEffect(() => {
     const log = logRef.current
+    const lastMessage = messages.at(-1)
 
-    if (log) {
+    if (log && lastMessage) {
       log.scrollTop = log.scrollHeight
     }
-  }, [messages, profile.id])
+  }, [messages])
 
   return (
     <div

@@ -29,9 +29,7 @@ it('switches to the owner thread', async () => {
   const user = userEvent.setup()
   render(<ChatShell />)
 
-  await user.click(
-    screen.getByRole('button', { name: /Gopendranath Sasmal/i }),
-  )
+  await user.click(screen.getByRole('button', { name: /Gopendranath Sasmal/i }))
 
   expect(
     screen.getByRole('log', { name: 'Gopendranath Sasmal messages' }),
@@ -68,9 +66,7 @@ it('keeps a separate draft for each profile', async () => {
     screen.getByRole('textbox', { name: 'Message Portfolio assistant' }),
     'draft for the assistant',
   )
-  await user.click(
-    screen.getByRole('button', { name: /Gopendranath Sasmal/i }),
-  )
+  await user.click(screen.getByRole('button', { name: /Gopendranath Sasmal/i }))
 
   const ownerComposer = screen.getByRole('textbox', {
     name: 'Message Gopendranath Sasmal',
@@ -78,16 +74,12 @@ it('keeps a separate draft for each profile', async () => {
   expect(ownerComposer).toHaveValue('')
   await user.type(ownerComposer, 'draft for the owner')
 
-  await user.click(
-    screen.getByRole('button', { name: /Portfolio assistant/i }),
-  )
+  await user.click(screen.getByRole('button', { name: /Portfolio assistant/i }))
   expect(
     screen.getByRole('textbox', { name: 'Message Portfolio assistant' }),
   ).toHaveValue('draft for the assistant')
 
-  await user.click(
-    screen.getByRole('button', { name: /Gopendranath Sasmal/i }),
-  )
+  await user.click(screen.getByRole('button', { name: /Gopendranath Sasmal/i }))
   expect(
     screen.getByRole('textbox', { name: 'Message Gopendranath Sasmal' }),
   ).toHaveValue('draft for the owner')
@@ -97,9 +89,7 @@ it('keeps sent messages in their own thread', async () => {
   const user = userEvent.setup()
   render(<ChatShell />)
 
-  await user.click(
-    screen.getByRole('button', { name: /Gopendranath Sasmal/i }),
-  )
+  await user.click(screen.getByRole('button', { name: /Gopendranath Sasmal/i }))
   await user.type(
     screen.getByRole('textbox', { name: 'Message Gopendranath Sasmal' }),
     'Owner-only message',
@@ -108,9 +98,7 @@ it('keeps sent messages in their own thread', async () => {
 
   expect(screen.getByText('Owner-only message')).toBeInTheDocument()
 
-  await user.click(
-    screen.getByRole('button', { name: /Portfolio assistant/i }),
-  )
+  await user.click(screen.getByRole('button', { name: /Portfolio assistant/i }))
 
   expect(screen.queryByText('Owner-only message')).not.toBeInTheDocument()
 })
@@ -236,7 +224,9 @@ it('edits an own message and replaces the sent time with the edit time', async (
   const editedMeta = within(editedMessage).getByText(/edited/i)
 
   expect(editedMeta).toHaveTextContent(/^edited\s+\d{2}:\d{2}$/)
-  expect(within(editedMessage).queryByText(sentTime ?? '')).not.toBeInTheDocument()
+  expect(
+    within(editedMessage).queryByText(sentTime ?? ''),
+  ).not.toBeInTheDocument()
 })
 
 it('ignores Enter while an input method is composing', () => {

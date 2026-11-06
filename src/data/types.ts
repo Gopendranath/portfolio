@@ -1,9 +1,4 @@
-export type SocialId =
-  | 'github'
-  | 'linkedin'
-  | 'x'
-  | 'website'
-  | 'email'
+export type SocialId = 'github' | 'linkedin' | 'x' | 'website' | 'email'
 
 export interface SocialLink {
   id: SocialId

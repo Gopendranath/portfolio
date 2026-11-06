@@ -3,14 +3,11 @@ import { GITHUB_FALLBACK, toGithubSnapshot } from '../github'
 
 describe('toGithubSnapshot', () => {
   it('uses profile counts and sums stars from original repos only', () => {
-    const snapshot = toGithubSnapshot(
-      { public_repos: 7, followers: 3 },
-      [
-        { fork: false, stargazers_count: 4 },
-        { fork: false, stargazers_count: 2 },
-        { fork: true, stargazers_count: 99 },
-      ],
-    )
+    const snapshot = toGithubSnapshot({ public_repos: 7, followers: 3 }, [
+      { fork: false, stargazers_count: 4 },
+      { fork: false, stargazers_count: 2 },
+      { fork: true, stargazers_count: 99 },
+    ])
 
     expect(snapshot).toEqual({
       publicRepos: 7,

@@ -24,9 +24,8 @@ function SnapshotStat({ label, value }: SnapshotStatProps) {
 }
 
 export function GithubSnapshot() {
-  const { data, isError, isFetching, isPlaceholderData } = useQuery(
-    githubSnapshotQuery,
-  )
+  const { data, isError, isFetching, isPlaceholderData } =
+    useQuery(githubSnapshotQuery)
   const snapshot = data ?? GITHUB_FALLBACK
   const hasFetchedData = data !== undefined && data !== GITHUB_FALLBACK
   const sourceLabel = isFetching

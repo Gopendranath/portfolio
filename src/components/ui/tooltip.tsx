@@ -1,5 +1,6 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useId,
@@ -80,7 +81,10 @@ function resolvePlacement(
     return 'bottom-right'
   }
 
-  if (preferred === 'bottom' && rect.bottom + TOOLTIP_GAP + TOOLTIP_ESTIMATED_HEIGHT > window.innerHeight) {
+  if (
+    preferred === 'bottom' &&
+    rect.bottom + TOOLTIP_GAP + TOOLTIP_ESTIMATED_HEIGHT > window.innerHeight
+  ) {
     return 'top'
   }
 
@@ -123,7 +127,7 @@ export function Tooltip({
   const [position, setPosition] = useState<TooltipPosition | null>(null)
   const tooltipId = useId()
 
-  function open() {
+  const open = useCallback(() => {
     const trigger = triggerRef.current
 
     if (!trigger) {
@@ -150,7 +154,10 @@ export function Tooltip({
       top = rect.bottom + TOOLTIP_GAP
     }
 
-    if (resolvedPlacement === 'top-left' || resolvedPlacement === 'bottom-left') {
+    if (
+      resolvedPlacement === 'top-left' ||
+      resolvedPlacement === 'bottom-left'
+    ) {
       left = rect.left
     } else if (
       resolvedPlacement === 'top-right' ||
@@ -181,11 +188,41 @@ export function Tooltip({
 
     setPosition({ left, top, placement: resolvedPlacement })
     setIsOpen(true)
-  }
+  }, [placement])
 
-  function close() {
+  const close = useCallback(() => {
     setIsOpen(false)
-  }
+  }, [])
+
+  useEffect(() => {
+    const trigger = triggerRef.current
+
+    if (!trigger) {
+      return
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        close()
+      }
+    }
+
+    trigger.addEventListener('mouseenter', open)
+    trigger.addEventListener('mouseleave', close)
+    trigger.addEventListener('focusin', open)
+    trigger.addEventListener('focusout', close)
+    trigger.addEventListener('click', close)
+    trigger.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      trigger.removeEventListener('mouseenter', open)
+      trigger.removeEventListener('mouseleave', close)
+      trigger.removeEventListener('focusin', open)
+      trigger.removeEventListener('focusout', close)
+      trigger.removeEventListener('click', close)
+      trigger.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [close, open])
 
   useEffect(() => {
     if (!isOpen) {
@@ -207,20 +244,7 @@ export function Tooltip({
     <TooltipContext.Provider
       value={{ describedBy: isOpen ? tooltipId : undefined }}
     >
-      <span
-        ref={triggerRef}
-        className={`inline-flex ${className}`}
-        onMouseEnter={open}
-        onMouseLeave={close}
-        onFocus={open}
-        onBlur={close}
-        onClick={close}
-        onKeyDown={(event) => {
-          if (event.key === 'Escape') {
-            close()
-          }
-        }}
-      >
+      <span ref={triggerRef} className={`inline-flex ${className}`}>
         {children}
       </span>
       {isOpen && position
