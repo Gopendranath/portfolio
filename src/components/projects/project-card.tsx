@@ -8,7 +8,7 @@ interface ProjectCardProps {
 
 export function ProjectCard({ project, index }: ProjectCardProps) {
   return (
-    <article className="group relative flex h-full flex-col border border-line bg-surface/60 p-5 transition-colors hover:border-muted/60 sm:p-6">
+    <article className="cursor-target group relative flex h-full flex-col border border-line bg-surface/60 p-5 transition-colors hover:border-muted/60 sm:p-6">
       <div className="flex items-center justify-between gap-4 font-mono text-[9px] uppercase tracking-[0.18em] text-muted">
         <span>{String(index).padStart(2, '0')}</span>
         <span>{project.year}</span>

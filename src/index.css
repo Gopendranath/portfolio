@@ -73,6 +73,24 @@
   }
 }
 
+@layer components {
+  .surface-tinted {
+    background-color: color-mix(
+      in oklab,
+      var(--color-accent) 5%,
+      var(--color-surface)
+    );
+  }
+
+  html[data-theme="light"] .surface-tinted {
+    background-color: color-mix(
+      in oklab,
+      var(--color-accent) 4%,
+      var(--color-canvas)
+    );
+  }
+}
+
 @layer base {
   :root {
     --dot-color: rgb(255 255 255 / 0.035);

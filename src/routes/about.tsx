@@ -42,14 +42,14 @@ function AboutPage() {
 
       <div className="mt-14 grid gap-12 border-t border-line pt-10 lg:grid-cols-[0.8fr_1.2fr]">
         <div>
-          <div className="relative aspect-square w-full max-w-[320px] overflow-hidden border border-line bg-surface/60">
+          <div className="cursor-target relative aspect-square w-full max-w-[320px] overflow-hidden border border-line bg-surface/60">
             <Avatar
               alt="Gopendranath Sasmal’s GitHub avatar"
               className="size-full"
               sizes="320px"
             />
           </div>
-          <div className="mt-5">
+          <div className="cursor-target mt-5 w-fit">
             <p
               className="text-2xl font-medium tracking-[-0.03em] text-ink"
               translate="no"
@@ -61,7 +61,7 @@ function AboutPage() {
             </p>
           </div>
           <div className="mt-6 space-y-3">
-            <p className="flex items-center gap-2 font-mono text-[9px] uppercase leading-relaxed tracking-[0.14em] text-muted">
+            <p className="cursor-target flex w-fit items-center gap-2 font-mono text-[9px] uppercase leading-relaxed tracking-[0.14em] text-muted">
               <MapPinIcon className="size-3.5 shrink-0" />
               {profile.location}
             </p>
@@ -94,7 +94,7 @@ function AboutPage() {
                 {group.items.map((item) => (
                   <li
                     key={item}
-                    className="border border-line bg-surface/60 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.1em] text-muted"
+                    className="cursor-target border border-line bg-surface/60 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.1em] text-muted transition-colors hover:border-accent hover:bg-accent/10 hover:text-accent"
                   >
                     {item}
                   </li>
@@ -112,7 +112,10 @@ function AboutPage() {
         <SectionLabel>How I work</SectionLabel>
         <div className="mt-8 grid gap-8 md:grid-cols-3">
           {principles.map((principle, index) => (
-            <div key={principle.title} className="border-l border-line pl-5">
+            <div
+              key={principle.title}
+              className="cursor-target border-l border-line pl-5"
+            >
               <span className="font-mono text-[9px] tracking-[0.18em] text-muted">
                 {String(index + 1).padStart(2, '0')}
               </span>

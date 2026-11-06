@@ -26,7 +26,7 @@ export function AppSidebar() {
         </span>
       </Link>
 
-      <p className="mt-4 whitespace-nowrap font-mono text-[9px] uppercase leading-relaxed tracking-[0.14em] text-muted">
+      <p className="cursor-target mt-4 whitespace-nowrap font-mono text-[9px] uppercase leading-relaxed tracking-[0.14em] text-muted">
         Bengaluru, IN · {profile.timezone}
       </p>
 

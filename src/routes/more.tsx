@@ -1,4 +1,5 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
+import { AppearanceControls } from '../components/appearance/appearance-controls'
 import { ArrowRightIcon } from '../components/ui/icons'
 import { ExternalLink } from '../components/ui/external-link'
 import { PageHeader } from '../components/ui/page-header'
@@ -19,7 +20,7 @@ const features = [
   },
   {
     title: 'Theme control',
-    body: 'Dark by default, with a light palette that persists locally. Press T outside a form field to toggle it.',
+    body: 'Dark by default, with a light palette that persists locally. Accent colors and cursor styles can be adjusted below.',
   },
   {
     title: 'Project index',
@@ -65,7 +66,7 @@ function MorePage() {
       <PageHeader
         eyebrow="06 / More"
         title="About this site."
-        description="How the portfolio is built, what it can do, and where the chat and SSH access are heading."
+        description="How the portfolio is built, what it can do, how to tune the look, and where the chat and SSH access are heading."
       />
 
       <section
@@ -124,6 +125,8 @@ function MorePage() {
           ))}
         </div>
       </section>
+
+      <AppearanceControls />
 
       <section
         aria-label="SSH access"

@@ -105,7 +105,7 @@ function HomePage() {
             </p>
           </div>
 
-          <ul className="grid grid-cols-2 gap-x-6 gap-y-3 font-mono text-[10px] uppercase tracking-[0.14em] text-muted sm:grid-cols-4">
+          <ul className="cursor-target grid grid-cols-2 gap-x-6 gap-y-3 font-mono text-[10px] uppercase tracking-[0.14em] text-muted sm:grid-cols-4">
             {coreStack.map((technology) => (
               <li
                 key={technology}
