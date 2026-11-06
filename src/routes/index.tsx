@@ -123,9 +123,9 @@ function HomePage() {
         </div>
       </section>
 
-      <GithubSnapshot />
-
       <ContributionGraph />
+
+      <GithubSnapshot />
     </div>
   )
 }
