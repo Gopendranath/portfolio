@@ -33,3 +33,22 @@ it('renders the verified static fallback when GitHub is unavailable', async () =
   expect(screen.getByText('Followers')).toBeInTheDocument()
   expect(screen.getByText('Stars')).toBeInTheDocument()
 })
+
+it('announces snapshot source changes to screen readers', async () => {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn().mockRejectedValue(new Error('GitHub unavailable')),
+  )
+
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false, gcTime: 0 } },
+  })
+
+  render(
+    <QueryClientProvider client={queryClient}>
+      <GithubSnapshot />
+    </QueryClientProvider>,
+  )
+
+  expect(await screen.findByRole('status')).toBeInTheDocument()
+})

@@ -44,7 +44,7 @@ function AboutPage() {
         <div>
           <div className="relative aspect-square w-full max-w-[320px] overflow-hidden border border-line bg-surface/60">
             <Avatar
-              alt="Gopendranath Sasmal's GitHub avatar"
+              alt="Gopendranath Sasmal’s GitHub avatar"
               className="size-full"
               sizes="320px"
             />
@@ -53,7 +53,7 @@ function AboutPage() {
             </span>
           </div>
           <div className="mt-5">
-            <p className="text-2xl font-medium tracking-[-0.03em] text-ink">
+            <p className="text-2xl font-medium tracking-[-0.03em] text-ink" translate="no">
               {profile.name}
             </p>
             <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.16em] text-muted">

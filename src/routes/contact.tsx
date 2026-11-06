@@ -21,14 +21,15 @@ function ContactPage() {
     <div>
       <PageHeader
         eyebrow="04 / Contact"
-        title="Let's build something."
-        description="I'm open to full-stack roles and product collaborations. The fastest way to reach me is email."
+        title="Let’s build something."
+        description="I’m open to full-stack roles and product collaborations. The fastest way to reach me is email."
       />
 
       <div className="mt-14 grid gap-12 border-t border-line pt-10 lg:grid-cols-[1.1fr_0.9fr]">
         <div>
           <a
             href={`mailto:${profile.email}`}
+            translate="no"
             className="block text-[clamp(1.65rem,4vw,3.2rem)] font-medium leading-tight tracking-[-0.035em] text-ink transition-colors hover:text-accent"
           >
             <span className="block">gopendranathsasmal7</span>

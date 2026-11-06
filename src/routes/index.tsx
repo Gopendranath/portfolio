@@ -41,9 +41,11 @@ function HomePage() {
           <span> · Bengaluru, India</span>
         </p>
 
-        <h1 className="mt-8 text-[clamp(3rem,8vw,6.5rem)] font-medium leading-[0.9] tracking-[-0.06em] text-ink">
-          {profile.firstName}
-          <span className="block text-muted">{profile.lastName}</span>
+        <h1 className="mt-8 text-balance text-[clamp(3rem,8vw,6.5rem)] font-medium leading-[0.9] tracking-[-0.06em] text-ink">
+          <span translate="no">{profile.firstName}</span>
+          <span className="block text-muted" translate="no">
+            {profile.lastName}
+          </span>
         </h1>
 
         <p className="mt-8 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
@@ -81,7 +83,7 @@ function HomePage() {
           </Link>
         </div>
 
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-8 grid gap-4 content-auto [contain-intrinsic-size:auto_500px] sm:grid-cols-2 xl:grid-cols-3">
           {featuredProjects.map((project, index) => (
             <ProjectCard
               key={project.slug}
@@ -107,7 +109,11 @@ function HomePage() {
 
           <ul className="grid grid-cols-2 gap-x-6 gap-y-3 font-mono text-[10px] uppercase tracking-[0.14em] text-muted sm:grid-cols-4">
             {coreStack.map((technology) => (
-              <li key={technology} className="flex items-center gap-2">
+              <li
+                key={technology}
+                translate="no"
+                className="flex items-center gap-2"
+              >
                 <span className="size-1 shrink-0 bg-accent" aria-hidden="true" />
                 {technology}
               </li>

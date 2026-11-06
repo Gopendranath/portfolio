@@ -34,6 +34,7 @@ export function SocialLinks({
               href={social.href}
               aria-label={social.label}
               title={social.label}
+              translate="no"
               target={isExternal ? '_blank' : undefined}
               rel={isExternal ? 'noreferrer noopener' : undefined}
               className={

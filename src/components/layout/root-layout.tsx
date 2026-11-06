@@ -29,13 +29,13 @@ export function RootLayout() {
             id="main-content"
             key={pathname}
             tabIndex={-1}
-            className="mx-auto w-full max-w-[1120px] flex-1 animate-page-in px-5 py-10 focus:outline-none sm:px-8 lg:px-12 lg:py-16"
+            className="safe-x safe-x-lg mx-auto w-full max-w-[1120px] flex-1 animate-page-in py-10 focus:outline-none lg:py-16"
           >
             <Outlet />
           </main>
 
           <footer className="border-t border-line">
-            <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-4 px-5 py-8 sm:px-8 md:flex-row md:items-center md:justify-between lg:px-12">
+            <div className="safe-x safe-x-lg mx-auto flex w-full max-w-[1120px] flex-col gap-4 py-8 md:flex-row md:items-center md:justify-between">
               <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted">
                 © {siteYear} {profile.name}
               </p>

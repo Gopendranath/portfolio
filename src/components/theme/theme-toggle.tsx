@@ -8,7 +8,10 @@ export function ThemeToggle() {
   return (
     <button
       type="button"
-      onClick={toggleTheme}
+      data-theme-toggle
+      onClick={(event) =>
+        toggleTheme({ x: event.clientX, y: event.clientY })
+      }
       aria-label={`Switch to ${isDark ? 'light' : 'dark'} theme`}
       aria-keyshortcuts="T"
       title="Toggle theme (T)"

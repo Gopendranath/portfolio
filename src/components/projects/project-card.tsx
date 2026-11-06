@@ -26,6 +26,7 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
         {project.stack.map((technology) => (
           <li
             key={technology}
+            translate="no"
             className="border border-line bg-canvas px-2 py-1 font-mono text-[9px] uppercase tracking-[0.1em] text-muted"
           >
             {technology}

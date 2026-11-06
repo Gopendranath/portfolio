@@ -14,8 +14,8 @@ function SnapshotStat({ label, value }: SnapshotStatProps) {
       <dt className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted">
         {label}
       </dt>
-      <dd className="mt-2 font-mono text-2xl tracking-[-0.04em] text-ink sm:text-3xl">
-        {value}
+      <dd className="mt-2 font-mono text-2xl tabular-nums tracking-[-0.04em] text-ink sm:text-3xl">
+        {new Intl.NumberFormat('en-US').format(value)}
       </dd>
     </div>
   )
@@ -28,7 +28,7 @@ export function GithubSnapshot() {
   const snapshot = data ?? GITHUB_FALLBACK
   const hasFetchedData = data !== undefined && data !== GITHUB_FALLBACK
   const sourceLabel = isFetching
-    ? 'Syncing'
+    ? 'Syncing…'
     : isError
       ? hasFetchedData
         ? 'Cached GitHub data'
@@ -40,13 +40,16 @@ export function GithubSnapshot() {
   return (
     <section
       aria-label="GitHub snapshot"
-      className="border border-line bg-surface/60 p-5 sm:p-6"
+      className="border border-line bg-surface/60 p-5 content-auto [contain-intrinsic-size:auto_400px] sm:p-6"
     >
       <div className="flex flex-wrap items-center justify-between gap-4">
         <SectionLabel className="min-w-[10rem] flex-1">
           GitHub snapshot
         </SectionLabel>
-        <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted">
+        <span
+          role="status"
+          className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted"
+        >
           {sourceLabel}
         </span>
       </div>

@@ -56,14 +56,14 @@ export function MobileNav() {
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-line bg-canvas/95 px-5 backdrop-blur-md lg:hidden">
+      <header className="safe-x sticky top-0 z-30 flex h-16 items-center justify-between border-b border-line bg-canvas/95 backdrop-blur-md lg:hidden">
         <Link to="/" className="flex min-w-0 items-center gap-3">
           <Avatar
             className="size-9 border border-line"
             sizes="36px"
             priority
           />
-          <span className="truncate text-sm font-medium text-ink">
+          <span className="truncate text-sm font-medium text-ink" translate="no">
             {profile.name}
           </span>
         </Link>
@@ -95,7 +95,7 @@ export function MobileNav() {
         }}
         className="m-0 h-dvh max-h-none w-[min(88vw,340px)] max-w-none border-r border-line bg-canvas p-0 text-ink [&::backdrop]:bg-black/75 [&::backdrop]:backdrop-blur-sm"
       >
-        <div className="flex h-full flex-col overflow-y-auto px-6 py-6">
+        <div className="safe-x safe-t safe-b flex h-full flex-col overflow-y-auto overscroll-contain">
           <div className="flex items-center justify-between gap-4">
             <Link
               to="/"
@@ -107,7 +107,7 @@ export function MobileNav() {
                 <span className="block font-mono text-[9px] uppercase tracking-[0.2em] text-muted">
                   Portfolio / 2026
                 </span>
-                <span className="mt-0.5 block truncate text-sm font-medium text-ink">
+                <span className="mt-0.5 block truncate text-sm font-medium text-ink" translate="no">
                   {profile.name}
                 </span>
               </span>

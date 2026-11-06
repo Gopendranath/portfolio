@@ -8,12 +8,18 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import { flushSync } from 'react-dom'
 
 export type Theme = 'dark' | 'light'
 
+export interface ThemeToggleOrigin {
+  x: number
+  y: number
+}
+
 interface ThemeContextValue {
   theme: Theme
-  toggleTheme: () => void
+  toggleTheme: (origin?: ThemeToggleOrigin) => void
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
@@ -97,9 +103,51 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     applyTheme(theme)
   }, [theme])
 
-  const toggleTheme = useCallback(() => {
-    setTheme((current) => (current === 'dark' ? 'light' : 'dark'))
-  }, [])
+  const toggleTheme = useCallback(
+    (origin?: ThemeToggleOrigin) => {
+      const next: Theme = theme === 'dark' ? 'light' : 'dark'
+
+      if (
+        origin &&
+        typeof document !== 'undefined' &&
+        'startViewTransition' in document &&
+        typeof window !== 'undefined' &&
+        !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+      ) {
+        const { x, y } = origin
+        const endRadius = Math.hypot(
+          Math.max(x, window.innerWidth - x),
+          Math.max(y, window.innerHeight - y),
+        )
+        const transition = (
+          document as Document & {
+            startViewTransition: (callback: () => void) => {
+              ready: Promise<void>
+            }
+          }
+        ).startViewTransition(() => {
+          flushSync(() => setTheme(next))
+        })
+        void transition.ready.then(() => {
+          document.documentElement.animate(
+            [
+              { clipPath: `circle(0px at ${x}px ${y}px)` },
+              { clipPath: `circle(${endRadius}px at ${x}px ${y}px)` },
+            ],
+            {
+              duration: 500,
+              easing: 'cubic-bezier(0.23, 1, 0.32, 1)',
+              pseudoElement: '::view-transition-new(root)',
+            },
+          )
+        })
+        return
+      }
+
+      setTheme(next)
+    },
+    [theme],
+  )
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -127,7 +175,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       }
 
       event.preventDefault()
-      toggleTheme()
+      toggleTheme({
+        x: window.innerWidth / 2,
+        y: window.innerHeight / 2,
+      })
     }
 
     window.addEventListener('keydown', handleKeyDown)

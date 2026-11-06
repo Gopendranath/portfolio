@@ -22,7 +22,7 @@ export function AppSidebar() {
           <span className="block font-mono text-[9px] uppercase tracking-[0.22em] text-muted">
             Portfolio / 2026
           </span>
-          <span className="mt-1 block text-sm font-medium text-ink">
+          <span className="mt-1 block text-sm font-medium text-ink" translate="no">
             {profile.name}
           </span>
         </span>

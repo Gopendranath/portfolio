@@ -35,6 +35,15 @@
   html {
     color-scheme: dark;
     scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-muted) transparent;
+    -webkit-tap-highlight-color: rgb(199 244 100 / 0.25);
+  }
+
+  @media (pointer: fine) {
+    html {
+      overscroll-behavior: none;
+    }
   }
 
   html[data-theme="light"] {
@@ -86,6 +95,11 @@
     cursor: pointer;
   }
 
+  button,
+  a {
+    touch-action: manipulation;
+  }
+
   ::selection {
     background: var(--color-accent);
     color: var(--color-accent-ink);
@@ -100,12 +114,57 @@
     overflow: hidden;
   }
 
+  @supports not (scrollbar-color: auto) {
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: var(--color-muted);
+      border: 2px solid transparent;
+      border-radius: 8px;
+      background-clip: content-box;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background-color: var(--color-accent);
+      border: 2px solid transparent;
+      border-radius: 8px;
+      background-clip: content-box;
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    html {
+      scrollbar-color: var(--color-ink) transparent;
+    }
+  }
+
   html[data-theme-switching],
   html[data-theme-switching] *,
   html[data-theme-switching] *::before,
   html[data-theme-switching] *::after {
     transition-duration: 0s !important;
     transition-delay: 0s !important;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+  }
+
+  ::view-transition-old(root) {
+    z-index: 1;
+  }
+
+  ::view-transition-new(root) {
+    z-index: 2147483646;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -120,6 +179,33 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
     }
+  }
+}
+
+.safe-x {
+  padding-left: max(1.25rem, env(safe-area-inset-left));
+  padding-right: max(1.25rem, env(safe-area-inset-right));
+}
+
+.safe-t {
+  padding-top: max(1.5rem, env(safe-area-inset-top));
+}
+
+.safe-b {
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+}
+
+@media (min-width: 40rem) {
+  .safe-x {
+    padding-left: max(2rem, env(safe-area-inset-left));
+    padding-right: max(2rem, env(safe-area-inset-right));
+  }
+}
+
+@media (min-width: 64rem) {
+  .safe-x-lg {
+    padding-left: max(3rem, env(safe-area-inset-left));
+    padding-right: max(3rem, env(safe-area-inset-right));
   }
 }
 

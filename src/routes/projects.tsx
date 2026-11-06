@@ -32,7 +32,7 @@ function ProjectsPage() {
         </span>
       </div>
 
-      <div className="mt-8 grid gap-4 md:grid-cols-2">
+      <div className="mt-8 grid gap-4 content-auto [contain-intrinsic-size:auto_600px] md:grid-cols-2">
         {projects.map((project, index) => (
           <ProjectCard
             key={project.slug}
