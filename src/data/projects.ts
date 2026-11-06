@@ -86,9 +86,22 @@ export const projects: readonly Project[] = [
     title: 'I-hate-NPM',
     year: '2026',
     summary:
-      'A Chrome and Firefox extension that rewrites npm install commands to pnpm, yarn, or bun.',
-    stack: ['JavaScript', 'Chrome Extension', 'Firefox', 'npm'],
+      'A Chrome and Firefox extension that replaces npm commands on any webpage with pnpm, yarn, bun, deno, or bit. Published on the Chrome Web Store.',
+    stack: [
+      'JavaScript',
+      'Chrome Extension',
+      'Firefox',
+      'npm',
+      'pnpm',
+      'Bun',
+      'Deno',
+      'Bit',
+    ],
     links: [
+      {
+        label: 'Chrome Web Store',
+        href: 'https://chromewebstore.google.com/detail/i-hate-npm/mknigjikipkdnnpeifcgmckobgpbklej',
+      },
       { label: 'Code', href: 'https://github.com/Gopendranath/I-hate-NPM' },
     ],
   },

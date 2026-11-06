@@ -19,6 +19,21 @@ describe('profile', () => {
       'email',
     ])
   })
+
+  it('lists the Java and Spring stack', () => {
+    expect(
+      profile.stack.find((group) => group.title === 'Java & Spring')?.items,
+    ).toEqual([
+      'Java',
+      'Spring Boot',
+      'Spring AI',
+      'Spring Data JPA',
+      'Spring Security',
+      'Hibernate',
+      'Maven',
+      'JUnit',
+    ])
+  })
 })
 
 describe('navigation', () => {
@@ -52,5 +67,18 @@ describe('projects', () => {
           project.links.every((link) => link.href.startsWith('https://')),
       ),
     ).toBe(true)
+  })
+
+  it('links I-hate-NPM to the Chrome Web Store', () => {
+    const project = projects.find(
+      (candidate) => candidate.slug === 'i-hate-npm',
+    )
+
+    expect(project?.links).toContainEqual({
+      label: 'Chrome Web Store',
+      href: 'https://chromewebstore.google.com/detail/i-hate-npm/mknigjikipkdnnpeifcgmckobgpbklej',
+    })
+    expect(project?.summary).toContain('deno')
+    expect(project?.summary).toContain('bit')
   })
 })
