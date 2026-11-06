@@ -42,6 +42,7 @@ export function ChatShell() {
       id: `local-${nextMessageId.current}`,
       author: 'user',
       body,
+      sentAt: Date.now(),
     }
 
     setMessages((current) => ({
@@ -49,6 +50,17 @@ export function ChatShell() {
       [activeProfileId]: [...current[activeProfileId], message],
     }))
     setDrafts((current) => ({ ...current, [activeProfileId]: '' }))
+  }
+
+  function editMessage(id: string, body: string) {
+    setMessages((current) => ({
+      ...current,
+      [activeProfileId]: current[activeProfileId].map((message) =>
+        message.id === id
+          ? { ...message, body, editedAt: Date.now() }
+          : message,
+      ),
+    }))
   }
 
   function updateDraft(value: string) {
@@ -99,7 +111,11 @@ export function ChatShell() {
           </div>
         </header>
 
-        <MessageList messages={activeMessages} profile={activeProfile} />
+        <MessageList
+          messages={activeMessages}
+          profile={activeProfile}
+          onEditMessage={editMessage}
+        />
         <ChatComposer
           profileName={activeProfile.name}
           value={activeDraft}

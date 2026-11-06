@@ -1,7 +1,11 @@
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { expect, it } from 'vitest'
+import { afterEach, expect, it, vi } from 'vitest'
 import { ChatShell } from '../chat-shell'
+
+afterEach(() => {
+  Reflect.deleteProperty(navigator, 'clipboard')
+})
 
 it('renders two profiles and defaults to the assistant thread', () => {
   render(<ChatShell />)
@@ -175,6 +179,64 @@ it('caps the composer height once the message grows', async () => {
 
   expect(composer.style.height).toBe('160px')
   expect(composer.style.overflowY).toBe('auto')
+})
+
+it('copies an incoming message from its hover actions', async () => {
+  const user = userEvent.setup()
+  const writeText = vi.fn().mockResolvedValue(undefined)
+  Object.defineProperty(navigator, 'clipboard', {
+    configurable: true,
+    value: { writeText },
+  })
+  render(<ChatShell />)
+
+  const message = screen.getByRole('article', {
+    name: /Portfolio assistant: Hi/,
+  })
+
+  expect(
+    within(message).queryByRole('button', { name: 'Edit message' }),
+  ).not.toBeInTheDocument()
+
+  await user.click(
+    within(message).getByRole('button', { name: 'Copy message' }),
+  )
+
+  await vi.waitFor(() =>
+    expect(writeText).toHaveBeenCalledWith(
+      'Hi — I’m the portfolio assistant. Ask me about projects, stack choices, or availability.',
+    ),
+  )
+})
+
+it('edits an own message and replaces the sent time with the edit time', async () => {
+  const user = userEvent.setup()
+  render(<ChatShell />)
+
+  const ownMessage = screen.getByRole('article', {
+    name: /You: What is terminal-web-vm/,
+  })
+  const sentTime = within(ownMessage).getByText(/^\d{2}:\d{2}$/).textContent
+
+  expect(
+    within(ownMessage).getByRole('button', { name: 'Copy message' }),
+  ).toBeInTheDocument()
+  await user.click(
+    within(ownMessage).getByRole('button', { name: 'Edit message' }),
+  )
+
+  const editor = screen.getByRole('textbox', { name: 'Edit message' })
+  await user.clear(editor)
+  await user.type(editor, 'What is CheerpX?')
+  await user.click(screen.getByRole('button', { name: 'Save edit' }))
+
+  const editedMessage = screen.getByRole('article', {
+    name: /You: What is CheerpX/,
+  })
+  const editedMeta = within(editedMessage).getByText(/edited/i)
+
+  expect(editedMeta).toHaveTextContent(/^edited\s+\d{2}:\d{2}$/)
+  expect(within(editedMessage).queryByText(sentTime ?? '')).not.toBeInTheDocument()
 })
 
 it('ignores Enter while an input method is composing', () => {

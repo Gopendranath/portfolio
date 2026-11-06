@@ -75,4 +75,6 @@ export interface ChatMessage {
   id: string
   author: ChatAuthor
   body: string
+  sentAt: number
+  editedAt?: number
 }

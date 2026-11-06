@@ -5,9 +5,14 @@ import { MessageBubble } from './message-bubble'
 interface MessageListProps {
   messages: readonly ChatMessage[]
   profile: ChatProfile
+  onEditMessage: (id: string, body: string) => void
 }
 
-export function MessageList({ messages, profile }: MessageListProps) {
+export function MessageList({
+  messages,
+  profile,
+  onEditMessage,
+}: MessageListProps) {
   const logRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -28,7 +33,12 @@ export function MessageList({ messages, profile }: MessageListProps) {
       className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain p-4 [scrollbar-gutter:stable] sm:p-5"
     >
       {messages.map((message) => (
-        <MessageBubble key={message.id} message={message} profile={profile} />
+        <MessageBubble
+          key={message.id}
+          message={message}
+          profile={profile}
+          onEdit={onEditMessage}
+        />
       ))}
     </div>
   )
