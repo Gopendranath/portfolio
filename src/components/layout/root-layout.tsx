@@ -5,6 +5,7 @@ import { Devtools } from '../devtools'
 import { ThemeProvider } from '../theme/theme-context'
 import { AppSidebar } from './app-sidebar'
 import { MobileNav } from './mobile-nav'
+import { ScrollBlur } from './scroll-blur'
 import { SidebarProvider } from './sidebar-context'
 import { SidebarRouteSync } from './sidebar-route-sync'
 import { SkipLink } from './skip-link'
@@ -21,6 +22,7 @@ export function RootLayout() {
         <SidebarRouteSync />
         <AppSidebar />
         <MobileNav />
+        <ScrollBlur pathname={pathname} />
 
         <div className="flex min-h-dvh flex-col lg:pl-[280px]">
           <main

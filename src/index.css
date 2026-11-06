@@ -115,6 +115,16 @@
   }
 }
 
+.scroll-blur-top {
+  mask-image: linear-gradient(to bottom, black, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, black, transparent);
+}
+
+.scroll-blur-bottom {
+  mask-image: linear-gradient(to top, black, transparent);
+  -webkit-mask-image: linear-gradient(to top, black, transparent);
+}
+
 #mobile-navigation {
   opacity: 0;
   transform: translateX(-100%);
