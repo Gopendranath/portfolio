@@ -42,7 +42,7 @@ export function PrimaryNav({ className = '', onNavigate }: PrimaryNavProps) {
                   </span>
                   <span
                     aria-hidden="true"
-                    className={`ml-auto h-px w-6 transition-colors ${
+                    className={`ml-auto h-px w-6 self-center transition-colors ${
                       isActive ? 'bg-accent' : 'bg-line/60 group-hover:bg-muted'
                     }`}
                   />
