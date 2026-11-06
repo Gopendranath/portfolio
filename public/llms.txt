@@ -14,7 +14,7 @@ Availability: Open to work. Resume is not currently published.
 - [Projects](/projects) : All six projects with stacks and links
 - [About](/about) : Background, principles, full stack breakdown
 - [Contact](/contact) : Email, socials, location and timezone details
-- [Chat](/chat) : Preview of a planned terminal-first chat with GitHub sign-in, an AI assistant, and direct owner messages. No chat backend or SSH endpoint exists yet.
+- [Chat](/chat) : Interactive preview of the portfolio assistant and owner threads. Messages stay on the page and are not sent. No chat backend or SSH endpoint exists yet.
 - [More](/more) : How the site is built, its features, colophon, and planned SSH access to the chat backend
 
 ## Projects

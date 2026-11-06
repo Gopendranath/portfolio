@@ -65,7 +65,7 @@ function MorePage() {
       <PageHeader
         eyebrow="06 / More"
         title="About this site."
-        description="How the portfolio is built, what it can do, and where the terminal-first chat is heading."
+        description="How the portfolio is built, what it can do, and where the chat and SSH access are heading."
       />
 
       <section
@@ -180,7 +180,7 @@ function MorePage() {
             to="/chat"
             className="group inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.14em] text-muted transition-colors hover:text-accent"
           >
-            Chat roadmap
+            Open chat preview
             <ArrowRightIcon className="size-3.5 transition-transform duration-150 ease-out group-hover:translate-x-1" />
           </Link>
         </div>

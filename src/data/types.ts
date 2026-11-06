@@ -60,3 +60,19 @@ export interface Profile {
   stack: readonly StackGroup[]
   resumeAvailable: boolean
 }
+
+export type ChatProfileId = 'assistant' | 'owner'
+
+export type ChatAuthor = 'user' | ChatProfileId
+
+export interface ChatProfile {
+  id: ChatProfileId
+  name: string
+  role: string
+}
+
+export interface ChatMessage {
+  id: string
+  author: ChatAuthor
+  body: string
+}
