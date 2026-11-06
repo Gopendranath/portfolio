@@ -15,3 +15,16 @@ it('shows custom tooltips for icon-only social links', async () => {
 
   expect(await screen.findByRole('tooltip')).toHaveTextContent('GitHub')
 })
+
+it('shows custom tooltips for labeled social links', async () => {
+  const user = userEvent.setup()
+  render(<SocialLinks showLabels />)
+
+  const github = screen.getByRole('link', { name: 'GitHub' })
+
+  expect(github).not.toHaveAttribute('title')
+
+  await user.hover(github)
+
+  expect(await screen.findByRole('tooltip')).toHaveTextContent('GitHub')
+})

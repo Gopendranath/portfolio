@@ -19,7 +19,15 @@ interface TooltipContextValue {
 
 const TooltipContext = createContext<TooltipContextValue | null>(null)
 
-export type TooltipPlacement = 'top' | 'right' | 'bottom' | 'left'
+export type TooltipPlacement =
+  | 'top'
+  | 'top-left'
+  | 'top-right'
+  | 'right'
+  | 'bottom'
+  | 'bottom-left'
+  | 'bottom-right'
+  | 'left'
 
 interface TooltipProps {
   label: string
@@ -63,11 +71,30 @@ function resolvePlacement(
     return 'bottom'
   }
 
+  if (preferred === 'top-left' && rect.top < 56) {
+    return 'bottom-left'
+  }
+
+  if (preferred === 'top-right' && rect.top < 56) {
+    return 'bottom-right'
+  }
+
+  if (preferred === 'bottom' && rect.bottom + TOOLTIP_GAP + TOOLTIP_ESTIMATED_HEIGHT > window.innerHeight) {
+    return 'top'
+  }
+
   if (
-    preferred === 'bottom' &&
+    preferred === 'bottom-left' &&
     rect.bottom + TOOLTIP_GAP + TOOLTIP_ESTIMATED_HEIGHT > window.innerHeight
   ) {
-    return 'top'
+    return 'top-left'
+  }
+
+  if (
+    preferred === 'bottom-right' &&
+    rect.bottom + TOOLTIP_GAP + TOOLTIP_ESTIMATED_HEIGHT > window.innerHeight
+  ) {
+    return 'top-right'
   }
 
   return preferred
@@ -75,7 +102,11 @@ function resolvePlacement(
 
 const placementClasses: Record<TooltipPlacement, string> = {
   top: '-translate-x-1/2 -translate-y-full',
+  'top-left': '-translate-y-full',
+  'top-right': '-translate-x-full -translate-y-full',
   bottom: '-translate-x-1/2',
+  'bottom-left': '',
+  'bottom-right': '-translate-x-full',
   right: '-translate-y-1/2',
   left: '-translate-x-full -translate-y-1/2',
 }
@@ -101,12 +132,29 @@ export function Tooltip({
     const resolvedPlacement = resolvePlacement(rect, placement)
     const centerX = rect.left + rect.width / 2
     const centerY = rect.top + rect.height / 2
+    const isTop =
+      resolvedPlacement === 'top' ||
+      resolvedPlacement === 'top-left' ||
+      resolvedPlacement === 'top-right'
+    const isBottom =
+      resolvedPlacement === 'bottom' ||
+      resolvedPlacement === 'bottom-left' ||
+      resolvedPlacement === 'bottom-right'
 
     let left = centerX
     let top = rect.top - TOOLTIP_GAP
 
-    if (resolvedPlacement === 'bottom') {
+    if (isBottom) {
       top = rect.bottom + TOOLTIP_GAP
+    }
+
+    if (resolvedPlacement === 'top-left' || resolvedPlacement === 'bottom-left') {
+      left = rect.left
+    } else if (
+      resolvedPlacement === 'top-right' ||
+      resolvedPlacement === 'bottom-right'
+    ) {
+      left = rect.right
     } else if (resolvedPlacement === 'right') {
       left = rect.right + TOOLTIP_GAP
       top = centerY
@@ -115,8 +163,16 @@ export function Tooltip({
       top = centerY
     }
 
-    if (resolvedPlacement === 'top' || resolvedPlacement === 'bottom') {
-      left = clamp(left, 60, window.innerWidth - 60)
+    if (isTop || isBottom) {
+      const isCorner =
+        resolvedPlacement.endsWith('left') ||
+        resolvedPlacement.endsWith('right')
+
+      left = clamp(
+        left,
+        isCorner ? 8 : 60,
+        isCorner ? window.innerWidth - 8 : window.innerWidth - 60,
+      )
     } else {
       top = clamp(top, 20, window.innerHeight - 20)
     }

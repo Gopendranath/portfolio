@@ -59,3 +59,51 @@ it('positions to the right when requested', async () => {
 
   expect(tooltip).toHaveStyle({ left: '54px', top: '118px' })
 })
+
+it('positions at top-right and bottom-left corners', async () => {
+  const user = userEvent.setup()
+  const rect = {
+    x: 10,
+    y: 100,
+    top: 100,
+    left: 10,
+    right: 46,
+    bottom: 136,
+    width: 36,
+    height: 36,
+    toJSON: () => ({}),
+  } as DOMRect
+
+  const { unmount } = render(
+    <Tooltip label="Top right" placement="top-right">
+      <TooltipTrigger type="button">TR</TooltipTrigger>
+    </Tooltip>,
+  )
+  const topTrigger = screen.getByRole('button', { name: 'TR' })
+  vi.spyOn(
+    topTrigger.parentElement as HTMLSpanElement,
+    'getBoundingClientRect',
+  ).mockReturnValue(rect)
+  await user.hover(topTrigger)
+  expect(await screen.findByRole('tooltip')).toHaveStyle({
+    left: '46px',
+    top: '92px',
+  })
+  unmount()
+
+  render(
+    <Tooltip label="Bottom left" placement="bottom-left">
+      <TooltipTrigger type="button">BL</TooltipTrigger>
+    </Tooltip>,
+  )
+  const bottomTrigger = screen.getByRole('button', { name: 'BL' })
+  vi.spyOn(
+    bottomTrigger.parentElement as HTMLSpanElement,
+    'getBoundingClientRect',
+  ).mockReturnValue(rect)
+  await user.hover(bottomTrigger)
+  expect(await screen.findByRole('tooltip')).toHaveStyle({
+    left: '10px',
+    top: '144px',
+  })
+})
