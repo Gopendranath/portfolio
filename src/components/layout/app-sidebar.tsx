@@ -27,10 +27,10 @@ export function AppSidebar() {
         </span>
       </Link>
 
-      <ScrambleText
-        text={`${profile.role} — Bengaluru`}
-        className="mt-5 block font-mono text-[10px] uppercase leading-relaxed tracking-[0.16em] text-muted"
-      />
+      <p className="mt-5 font-mono text-[10px] uppercase leading-relaxed tracking-[0.16em] text-muted">
+        <ScrambleText text={profile.role} animateOnHover />
+        <span> — Bengaluru</span>
+      </p>
 
       <PrimaryNav className="mt-12" />
 

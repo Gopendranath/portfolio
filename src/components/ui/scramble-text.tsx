@@ -1,4 +1,9 @@
-import { useEffect, useState, useSyncExternalStore } from 'react'
+import {
+  useEffect,
+  useState,
+  useSyncExternalStore,
+  type PointerEventHandler,
+} from 'react'
 import { buildScrambledText, initialScramble } from '../../lib/scramble'
 
 const FRAME_MS = 28
@@ -26,19 +31,22 @@ function getReducedMotionSnapshot() {
 interface ScrambleTextProps {
   text: string
   className?: string
+  animateOnHover?: boolean
 }
 
 function ScrambleMarkup({
   display,
   text,
   className,
+  onPointerEnter,
 }: {
   display: string
   text: string
   className: string
+  onPointerEnter?: PointerEventHandler<HTMLSpanElement>
 }) {
   return (
-    <span className={className}>
+    <span className={className} onPointerEnter={onPointerEnter}>
       <span data-scramble aria-hidden="true">
         {display}
       </span>
@@ -50,9 +58,11 @@ function ScrambleMarkup({
 function AnimatedScramble({
   text,
   className,
+  onPointerEnter,
 }: {
   text: string
   className: string
+  onPointerEnter?: PointerEventHandler<HTMLSpanElement>
 }) {
   const [display, setDisplay] = useState(() => initialScramble(text))
 
@@ -76,16 +86,35 @@ function AnimatedScramble({
   }, [text])
 
   return (
-    <ScrambleMarkup display={display} text={text} className={className} />
+    <ScrambleMarkup
+      display={display}
+      text={text}
+      className={className}
+      onPointerEnter={onPointerEnter}
+    />
   )
 }
 
-export function ScrambleText({ text, className = '' }: ScrambleTextProps) {
+export function ScrambleText({
+  text,
+  className = '',
+  animateOnHover = false,
+}: ScrambleTextProps) {
   const reducedMotion = useSyncExternalStore(
     subscribeToReducedMotion,
     getReducedMotionSnapshot,
     () => false,
   )
+  const [replay, setReplay] = useState(0)
+
+  const onPointerEnter: PointerEventHandler<HTMLSpanElement> | undefined =
+    animateOnHover && !reducedMotion
+      ? (event) => {
+          if (event.pointerType === 'mouse') {
+            setReplay((value) => value + 1)
+          }
+        }
+      : undefined
 
   if (reducedMotion) {
     return (
@@ -93,5 +122,12 @@ export function ScrambleText({ text, className = '' }: ScrambleTextProps) {
     )
   }
 
-  return <AnimatedScramble key={text} text={text} className={className} />
+  return (
+    <AnimatedScramble
+      key={`${text}-${replay}`}
+      text={text}
+      className={className}
+      onPointerEnter={onPointerEnter}
+    />
+  )
 }

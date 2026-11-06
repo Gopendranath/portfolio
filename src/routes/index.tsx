@@ -33,7 +33,8 @@ function HomePage() {
       <section className="max-w-4xl">
         <p className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
           <span className="h-px w-10 bg-accent" aria-hidden="true" />
-          <ScrambleText text={`${profile.role} · Bengaluru, India`} />
+          <ScrambleText text={profile.role} animateOnHover />
+          <span> · Bengaluru, India</span>
         </p>
 
         <h1 className="mt-8 text-[clamp(3rem,8vw,6.5rem)] font-medium leading-[0.9] tracking-[-0.06em] text-ink">
