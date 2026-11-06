@@ -38,7 +38,16 @@ describe('profile', () => {
   it('lists databases as a separate stack group', () => {
     expect(
       profile.stack.find((group) => group.title === 'Databases')?.items,
-    ).toEqual(['PostgreSQL', 'MongoDB', 'MySQL', 'Firebase', 'Supabase'])
+    ).toEqual([
+      'PostgreSQL',
+      'MySQL',
+      'SQLite',
+      'MongoDB',
+      'Firebase',
+      'Supabase',
+      'Redis',
+      'Vector DB',
+    ])
   })
 })
 

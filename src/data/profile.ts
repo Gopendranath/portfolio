@@ -60,7 +60,16 @@ export const profile: Profile = {
     },
     {
       title: 'Databases',
-      items: ['PostgreSQL', 'MongoDB', 'MySQL', 'Firebase', 'Supabase'],
+      items: [
+        'PostgreSQL',
+        'MySQL',
+        'SQLite',
+        'MongoDB',
+        'Firebase',
+        'Supabase',
+        'Redis',
+        'Vector DB',
+      ],
     },
     {
       title: 'Java & Spring',
