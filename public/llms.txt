@@ -41,6 +41,10 @@ Cloud and DevOps: AWS, Docker, Vercel, Netlify, Git, Linux.
 - [t3rminal](https://t3rminal.vercel.app) : Separate terminal-style browser project
 - [Email](mailto:gopendranathsasmal7@gmail.com) : Preferred contact channel
 
+## WebMCP
+
+In supported browsers, this site exposes five read-only WebMCP tools for agent Q&A: `get-profile`, `list-projects`, `get-project`, `check-availability`, and `get-contact`. Each returns structured data from the same source as the pages above.
+
 ## Optional
 
 - [GitHub profile stats](https://github.com/Gopendranath) : Public repos, followers, and stars shown on the home page via the GitHub API
