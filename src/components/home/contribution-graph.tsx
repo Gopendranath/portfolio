@@ -49,6 +49,9 @@ export function ContributionGraph() {
     [contributions.days],
   )
   const monthLabels = useMemo(() => getMonthLabels(weeks), [weeks])
+  const lastMonthLabelIndex = monthLabels.findLastIndex(
+    (label) => label !== null,
+  )
   const dayIndexByDate = useMemo(
     () =>
       new Map(
@@ -167,10 +170,16 @@ export function ContributionGraph() {
               {weeks.map((_, weekIndex) => (
                 <div
                   key={weekIndex}
-                  className="h-3.5 min-w-0 flex-1"
+                  className="relative h-3.5 min-w-0 flex-1"
                 >
                   {monthLabels[weekIndex] ? (
-                    <span className="block whitespace-nowrap font-mono text-[8px] uppercase tracking-[0.12em] text-muted">
+                    <span
+                      className={`whitespace-nowrap font-mono text-[8px] uppercase tracking-[0.12em] text-muted ${
+                        weekIndex === lastMonthLabelIndex
+                          ? 'absolute right-0 top-0'
+                          : 'block'
+                      }`}
+                    >
                       {monthLabels[weekIndex]}
                     </span>
                   ) : null}
