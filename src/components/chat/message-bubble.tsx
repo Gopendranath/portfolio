@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { KeyboardEvent } from 'react'
 import type { ChatMessage, ChatProfile } from '../../data/types'
+import { Tooltip, TooltipTrigger } from '../ui/tooltip'
 import { ChatAvatar } from './chat-avatar'
 
 const timeFormatter = new Intl.DateTimeFormat('en-GB', {
@@ -180,23 +181,27 @@ export function MessageBubble({
 
           {isEditing ? null : (
             <div className="flex items-center gap-1 opacity-100 transition-opacity md:pointer-events-none md:opacity-0 md:group-focus-within:pointer-events-auto md:group-focus-within:opacity-100 md:group-hover:pointer-events-auto md:group-hover:opacity-100">
-              <button
-                type="button"
-                aria-label="Copy message"
-                onClick={copyMessage}
-                className="border border-line px-2 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-muted transition-colors hover:border-accent hover:text-accent"
-              >
-                {copyLabel}
-              </button>
-              {isUser ? (
-                <button
+              <Tooltip label="Copy message">
+                <TooltipTrigger
                   type="button"
-                  aria-label="Edit message"
-                  onClick={startEditing}
+                  aria-label="Copy message"
+                  onClick={copyMessage}
                   className="border border-line px-2 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-muted transition-colors hover:border-accent hover:text-accent"
                 >
-                  Edit
-                </button>
+                  {copyLabel}
+                </TooltipTrigger>
+              </Tooltip>
+              {isUser ? (
+                <Tooltip label="Edit message">
+                  <TooltipTrigger
+                    type="button"
+                    aria-label="Edit message"
+                    onClick={startEditing}
+                    className="border border-line px-2 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-muted transition-colors hover:border-accent hover:text-accent"
+                  >
+                    Edit
+                  </TooltipTrigger>
+                </Tooltip>
               ) : null}
             </div>
           )}
