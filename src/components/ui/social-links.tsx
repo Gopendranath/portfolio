@@ -2,6 +2,7 @@ import type { ComponentType, SVGProps } from 'react'
 import { profile } from '../../data/profile'
 import type { SocialId } from '../../data/types'
 import { GitHubIcon, GlobeIcon, LinkedInIcon, MailIcon, XIcon } from '../ui/icons'
+import { Tooltip, TooltipLink } from './tooltip'
 
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>
 
@@ -30,22 +31,32 @@ export function SocialLinks({
 
         return (
           <li key={social.id}>
-            <a
-              href={social.href}
-              aria-label={social.label}
-              title={social.label}
-              translate="no"
-              target={isExternal ? '_blank' : undefined}
-              rel={isExternal ? 'noreferrer noopener' : undefined}
-              className={
-                showLabels
-                  ? 'inline-flex items-center gap-2 px-2 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-muted transition-colors hover:text-accent'
-                  : 'inline-flex size-9 items-center justify-center border border-line text-muted transition-colors hover:border-accent hover:text-accent'
-              }
-            >
-              <Icon className="size-4" />
-              {showLabels ? <span>{social.label}</span> : null}
-            </a>
+            {showLabels ? (
+              <a
+                href={social.href}
+                aria-label={social.label}
+                translate="no"
+                target={isExternal ? '_blank' : undefined}
+                rel={isExternal ? 'noreferrer noopener' : undefined}
+                className="inline-flex items-center gap-2 px-2 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-muted transition-colors hover:text-accent"
+              >
+                <Icon className="size-4" />
+                <span>{social.label}</span>
+              </a>
+            ) : (
+              <Tooltip label={social.label} placement="right">
+                <TooltipLink
+                  href={social.href}
+                  aria-label={social.label}
+                  translate="no"
+                  target={isExternal ? '_blank' : undefined}
+                  rel={isExternal ? 'noreferrer noopener' : undefined}
+                  className="inline-flex size-9 items-center justify-center border border-line text-muted transition-colors hover:border-accent hover:text-accent"
+                >
+                  <Icon className="size-4" />
+                </TooltipLink>
+              </Tooltip>
+            )}
           </li>
         )
       })}

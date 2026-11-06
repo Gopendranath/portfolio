@@ -6,7 +6,11 @@ import {
   useRef,
   useState,
 } from 'react'
-import type { ButtonHTMLAttributes, ReactNode } from 'react'
+import type {
+  AnchorHTMLAttributes,
+  ButtonHTMLAttributes,
+  ReactNode,
+} from 'react'
 import { createPortal } from 'react-dom'
 
 interface TooltipContextValue {
@@ -15,18 +19,72 @@ interface TooltipContextValue {
 
 const TooltipContext = createContext<TooltipContextValue | null>(null)
 
+export type TooltipPlacement = 'top' | 'right' | 'bottom' | 'left'
+
 interface TooltipProps {
   label: string
+  placement?: TooltipPlacement
   children: ReactNode
 }
 
 interface TooltipPosition {
   left: number
   top: number
-  placement: 'top' | 'bottom'
+  placement: TooltipPlacement
 }
 
-export function Tooltip({ label, children }: TooltipProps) {
+const TOOLTIP_GAP = 8
+const TOOLTIP_ESTIMATED_WIDTH = 140
+const TOOLTIP_ESTIMATED_HEIGHT = 32
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max)
+}
+
+function resolvePlacement(
+  rect: DOMRect,
+  preferred: TooltipPlacement,
+): TooltipPlacement {
+  if (
+    preferred === 'right' &&
+    rect.right + TOOLTIP_GAP + TOOLTIP_ESTIMATED_WIDTH > window.innerWidth
+  ) {
+    return 'left'
+  }
+
+  if (
+    preferred === 'left' &&
+    rect.left - TOOLTIP_GAP - TOOLTIP_ESTIMATED_WIDTH < 0
+  ) {
+    return 'right'
+  }
+
+  if (preferred === 'top' && rect.top < 56) {
+    return 'bottom'
+  }
+
+  if (
+    preferred === 'bottom' &&
+    rect.bottom + TOOLTIP_GAP + TOOLTIP_ESTIMATED_HEIGHT > window.innerHeight
+  ) {
+    return 'top'
+  }
+
+  return preferred
+}
+
+const placementClasses: Record<TooltipPlacement, string> = {
+  top: '-translate-x-1/2 -translate-y-full',
+  bottom: '-translate-x-1/2',
+  right: '-translate-y-1/2',
+  left: '-translate-x-full -translate-y-1/2',
+}
+
+export function Tooltip({
+  label,
+  placement = 'top',
+  children,
+}: TooltipProps) {
   const triggerRef = useRef<HTMLSpanElement>(null)
   const [isOpen, setIsOpen] = useState(false)
   const [position, setPosition] = useState<TooltipPosition | null>(null)
@@ -40,17 +98,30 @@ export function Tooltip({ label, children }: TooltipProps) {
     }
 
     const rect = trigger.getBoundingClientRect()
-    const placement = rect.top < 56 ? 'bottom' : 'top'
-    const halfWidth = 60
+    const resolvedPlacement = resolvePlacement(rect, placement)
+    const centerX = rect.left + rect.width / 2
+    const centerY = rect.top + rect.height / 2
 
-    setPosition({
-      left: Math.min(
-        Math.max(rect.left + rect.width / 2, halfWidth),
-        window.innerWidth - halfWidth,
-      ),
-      top: placement === 'top' ? rect.top - 8 : rect.bottom + 8,
-      placement,
-    })
+    let left = centerX
+    let top = rect.top - TOOLTIP_GAP
+
+    if (resolvedPlacement === 'bottom') {
+      top = rect.bottom + TOOLTIP_GAP
+    } else if (resolvedPlacement === 'right') {
+      left = rect.right + TOOLTIP_GAP
+      top = centerY
+    } else if (resolvedPlacement === 'left') {
+      left = rect.left - TOOLTIP_GAP
+      top = centerY
+    }
+
+    if (resolvedPlacement === 'top' || resolvedPlacement === 'bottom') {
+      left = clamp(left, 60, window.innerWidth - 60)
+    } else {
+      top = clamp(top, 20, window.innerHeight - 20)
+    }
+
+    setPosition({ left, top, placement: resolvedPlacement })
     setIsOpen(true)
   }
 
@@ -100,8 +171,8 @@ export function Tooltip({ label, children }: TooltipProps) {
               id={tooltipId}
               role="tooltip"
               style={{ left: position.left, top: position.top }}
-              className={`pointer-events-none fixed z-[80] -translate-x-1/2 whitespace-nowrap border border-line bg-elevated px-2 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-ink shadow-[0_4px_16px_rgb(0_0_0/0.35)] ${
-                position.placement === 'top' ? '-translate-y-full' : ''
+              className={`pointer-events-none fixed z-[80] whitespace-nowrap border border-line bg-elevated px-2 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-ink shadow-[0_4px_16px_rgb(0_0_0/0.35)] ${
+                placementClasses[position.placement]
               }`}
             >
               {label}
@@ -121,4 +192,14 @@ export function TooltipTrigger({
   const ids = [describedBy, context?.describedBy].filter(Boolean).join(' ')
 
   return <button {...props} aria-describedby={ids || undefined} />
+}
+
+export function TooltipLink({
+  'aria-describedby': describedBy,
+  ...props
+}: AnchorHTMLAttributes<HTMLAnchorElement>) {
+  const context = useContext(TooltipContext)
+  const ids = [describedBy, context?.describedBy].filter(Boolean).join(' ')
+
+  return <a {...props} aria-describedby={ids || undefined} />
 }
