@@ -1,0 +1,46 @@
+# Gopendranath Sasmal — Portfolio
+
+> Full-stack developer in Bengaluru building web products across React, TypeScript, Java, Spring Boot, Node.js, and AI. Open to full-stack roles in Bengaluru or remote.
+
+This is a personal portfolio site. Pages are client-rendered React (TanStack Router); the content below is the authoritative summary for agents that cannot execute JavaScript. In-site links are root-relative; use them against the origin serving this file.
+
+Contact: gopendranathsasmal7@gmail.com
+Location: BTM Layout, Bengaluru, India (IST, UTC+5:30)
+Availability: Open to work. Resume is not currently published.
+
+## Pages
+
+- [Home](/) : Introduction, bio, featured projects, core stack, live GitHub snapshot
+- [Projects](/projects) : All six projects with stacks and links
+- [About](/about) : Background, principles, full stack breakdown
+- [Contact](/contact) : Email, socials, location and timezone details
+
+## Projects
+
+- [Movie-app-web](https://movie-web9834.netlify.app) : Cinematic movie library with 100 curated films, watchlists, ratings, and a noir-inspired interface. Responsive web app plus Expo Android build. Stack: React 19, TypeScript, Tailwind v4, Supabase, OMDB. Code: https://github.com/Gopendranath/Movie-app-web
+- [product-management](https://product-management-seven-pied.vercel.app) : Responsive product dashboard over DummyJSON with search, pagination, and CRUD in a shadcn/ui interface. Stack: Next.js, TypeScript, Tailwind, shadcn/ui, DummyJSON. Code: https://github.com/Gopendranath/product-management
+- [terminal-web-vm](https://github.com/Gopendranath/terminal-web-vm) : Browser-based lab running Debian Linux and Node.js entirely client-side with CheerpX and WebContainers. Stack: TypeScript, WebAssembly, CheerpX, WebContainers, xterm.
+- [RAG PDF Chat](https://github.com/Gopendranath/frontend-rag-chat-agent) : Full-stack RAG app for chatting with PDFs and images, pairing a Next.js interface with LangChain ingestion and vector search. Stack: Next.js, TypeScript, LangChain, Mistral AI, Gemini embeddings. Backend: https://github.com/Gopendranath/Rag-pdf-chat-backend
+- [I-hate-NPM](https://chromewebstore.google.com/detail/i-hate-npm/mknigjikipkdnnpeifcgmckobgpbklej) : Chrome and Firefox extension that replaces npm commands on any webpage with pnpm, yarn, bun, deno, or bit. Published on the Chrome Web Store. Code: https://github.com/Gopendranath/I-hate-NPM
+- [Walmart_v1](https://walmart-clone-v1.vercel.app/) : E-commerce storefront clone with Auth0 authentication and a shadcn/ui interface. Stack: React, TypeScript, Auth0, shadcn/ui, Vercel. Code: https://github.com/Gopendranath/Walmart_v1
+
+## Stack
+
+Frontend: React, Next.js, TypeScript, Tailwind CSS, shadcn/ui, Redux, Zustand.
+Backend: Node.js, Express, REST APIs, JWT, OAuth 2.0.
+Databases: PostgreSQL, MySQL, SQLite, MongoDB, Firebase, Supabase, Redis, vector databases.
+Java: Java, Spring Boot, Spring AI, Spring Data JPA, Spring Security, Hibernate, Maven, JUnit.
+AI: LangChain, LangGraph, RAG, Mistral AI, Gemini embeddings.
+Cloud and DevOps: AWS, Docker, Vercel, Netlify, Git, Linux.
+
+## Profiles
+
+- [GitHub](https://github.com/Gopendranath) : Source for all projects above
+- [LinkedIn](https://linkedin.com/in/gns99) : Professional profile
+- [X](https://x.com/AssassinsEmper1) : Short-form posts
+- [t3rminal](https://t3rminal.vercel.app) : Separate terminal-style browser project
+- [Email](mailto:gopendranathsasmal7@gmail.com) : Preferred contact channel
+
+## Optional
+
+- [GitHub profile stats](https://github.com/Gopendranath) : Public repos, followers, and stars shown on the home page via the GitHub API
