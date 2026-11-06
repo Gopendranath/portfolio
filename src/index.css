@@ -100,6 +100,14 @@
     overflow: hidden;
   }
 
+  html[data-theme-switching],
+  html[data-theme-switching] *,
+  html[data-theme-switching] *::before,
+  html[data-theme-switching] *::after {
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     html {
       scroll-behavior: auto;

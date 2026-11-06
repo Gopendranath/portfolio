@@ -5,6 +5,7 @@ import { ThemeProvider, useTheme } from './theme-context'
 beforeEach(() => {
   localStorage.clear()
   delete document.documentElement.dataset.theme
+  delete document.documentElement.dataset.themeSwitching
   let meta = document.querySelector('meta[name="theme-color"]')
   if (!meta) {
     meta = document.createElement('meta')
@@ -29,6 +30,17 @@ it('defaults to dark and persists the selected theme', () => {
   expect(result.current.theme).toBe('dark')
   expect(document.documentElement.dataset.theme).toBe('dark')
   expect(localStorage.getItem('theme')).toBe('dark')
+})
+
+it('suppresses color transitions while the theme changes', () => {
+  const { result } = renderHook(() => useTheme(), {
+    wrapper: ThemeProvider,
+  })
+
+  act(() => result.current.toggleTheme())
+
+  expect(document.documentElement.dataset.themeSwitching).toBe('true')
+  expect(document.documentElement.dataset.theme).toBe('light')
 })
 
 it('reads a persisted light preference', () => {

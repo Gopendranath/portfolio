@@ -43,12 +43,42 @@ function getInitialTheme(): Theme {
   return 'dark'
 }
 
+let themeSwitchId = 0
+
+function clearThemeSwitching(root: HTMLElement, id: number) {
+  if (id === themeSwitchId) {
+    delete root.dataset.themeSwitching
+  }
+}
+
+// Disable hover/color transitions for one painted frame so the whole page
+// switches theme at once instead of fading section by section.
+function beginThemeSwitch(root: HTMLElement) {
+  const id = ++themeSwitchId
+  root.dataset.themeSwitching = 'true'
+
+  if (typeof requestAnimationFrame !== 'function') {
+    window.setTimeout(() => clearThemeSwitching(root, id), 0)
+    return
+  }
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => clearThemeSwitching(root, id))
+  })
+}
+
 function applyTheme(theme: Theme) {
   if (typeof document === 'undefined') {
     return
   }
 
-  document.documentElement.dataset.theme = theme
+  const root = document.documentElement
+
+  if (root.dataset.theme !== theme) {
+    beginThemeSwitch(root)
+    root.dataset.theme = theme
+  }
+
   document
     .querySelector('meta[name="theme-color"]')
     ?.setAttribute('content', themeColors[theme])
