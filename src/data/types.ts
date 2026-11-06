@@ -42,6 +42,7 @@ export interface NavItem {
 export interface Profile {
   name: string
   firstName: string
+  lastName: string
   role: string
   location: string
   timezone: string

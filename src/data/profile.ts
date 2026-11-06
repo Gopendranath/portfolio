@@ -3,6 +3,7 @@ import type { Profile } from './types'
 export const profile: Profile = {
   name: 'Gopendranath Sasmal',
   firstName: 'Gopendranath',
+  lastName: 'Sasmal',
   role: 'Full Stack Developer',
   location: 'BTM Layout, Bengaluru, India',
   timezone: 'IST (UTC+5:30)',
