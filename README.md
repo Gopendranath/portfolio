@@ -93,21 +93,69 @@ See `src/assets/avatar/README.md` for the ffmpeg regeneration commands.
 
 ## Deployment
 
-The site is a client-side SPA. The host must rewrite unknown paths to `index.html` so deep links such as `/projects` work.
+The site is a static client-side SPA. No server runtime, environment variables, or database are required.
 
-Vercel (`vercel.json`):
+### Required steps
 
-```json
-{
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
-}
-```
+1. Use Node.js `^22.22.2`, `^24.15.0`, or `>=26` with pnpm 12+.
+2. Install dependencies from the lockfile:
 
-Netlify (`public/_redirects`):
+   ```bash
+   pnpm install --frozen-lockfile
+   ```
 
-```text
-/* /index.html 200
-```
+3. Build the production bundle:
+
+   ```bash
+   pnpm build
+   ```
+
+   This runs `tsc -b` then Vite and writes `dist/`. A TypeScript error fails the build.
+
+4. Configure SPA rewrites so unknown paths serve `index.html`. Deep links such as `/projects` break without this.
+
+   Vercel (`vercel.json` at the repository root):
+
+   ```json
+   {
+     "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+   }
+   ```
+
+   Netlify (`public/_redirects`):
+
+   ```text
+   /* /index.html 200
+   ```
+
+5. Serve `dist/` over HTTPS.
+
+### WebMCP in production
+
+WebMCP is progressive enhancement. Without an Origin Trial token, the site works normally and the five tools are only exposed in Chromium with `chrome://flags/#enable-webmcp-testing`.
+
+To expose the tools to regular Chrome users:
+
+1. Register the exact production origin at the [Chrome WebMCP Origin Trial](https://developer.chrome.com/origintrials/#/register_trial/4163014905550602241). Enter the origin only, with no path. Chrome 149+ is required.
+2. Add the generated token to the `<head>` of `index.html` before building:
+
+   ```html
+   <meta http-equiv="origin-trial" content="PASTE_TOKEN_HERE" />
+   ```
+
+   The token is public and safe to commit. It is bound to one origin, so preview deployments and new custom domains need their own registration.
+
+3. Rebuild and redeploy, then verify in Chrome with the testing flag off:
+
+   ```js
+   await document.modelContext.getTools()
+   ```
+
+   Expect `get-profile`, `list-projects`, `get-project`, `check-availability`, and `get-contact`.
+
+4. Renew the token before it expires. Chrome tokens typically last about six weeks; the Origin Trials portal shows the exact date.
+
+Microsoft Edge uses a separate [Origin Trials program](https://developer.microsoft.com/microsoft-edge/origin-trials). A Chrome token does not enable WebMCP in Edge.
 
 ## Notes
 
