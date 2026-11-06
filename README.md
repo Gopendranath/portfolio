@@ -13,7 +13,7 @@ Personal portfolio for Gopendranath Sasmal, built as a single-page React app wit
 
 ## Requirements
 
-- Node.js `^20.19.0` or `>=22.12.0`
+- Node.js `^22.22.2`, `^24.15.0`, or `>=26`
 - pnpm 12+
 
 ## Development

@@ -7,7 +7,7 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-it('renders the verified fallback when GitHub is unavailable', () => {
+it('renders the verified static fallback when GitHub is unavailable', async () => {
   vi.stubGlobal(
     'fetch',
     vi.fn().mockRejectedValue(new Error('GitHub unavailable')),
@@ -23,6 +23,9 @@ it('renders the verified fallback when GitHub is unavailable', () => {
     </QueryClientProvider>,
   )
 
+  expect(
+    await screen.findByText('Static snapshot', undefined, { timeout: 4000 }),
+  ).toBeInTheDocument()
   expect(screen.getByText('75')).toBeInTheDocument()
   expect(screen.getByText('12')).toBeInTheDocument()
   expect(screen.getByText('29')).toBeInTheDocument()

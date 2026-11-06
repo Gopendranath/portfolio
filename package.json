@@ -2,6 +2,10 @@
   "name": "portfolio-dev-v1",
   "private": true,
   "version": "0.0.0",
+  "engines": {
+    "node": "^22.22.2 || ^24.15.0 || >=26"
+  },
+  "packageManager": "pnpm@12.18.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
