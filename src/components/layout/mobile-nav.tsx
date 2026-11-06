@@ -103,11 +103,8 @@ export function MobileNav() {
             >
               <Avatar className="size-9 border border-line" sizes="36px" />
               <span className="min-w-0">
-                <span className="block font-mono text-[9px] uppercase tracking-[0.2em] text-muted">
-                  Portfolio / 2026
-                </span>
                 <span
-                  className="mt-0.5 block truncate text-sm font-medium text-ink"
+                  className="block truncate text-sm font-medium text-ink"
                   translate="no"
                 >
                   {profile.name}

@@ -48,9 +48,6 @@ function AboutPage() {
               className="size-full"
               sizes="320px"
             />
-            <span className="absolute left-4 top-4 border border-line bg-canvas/85 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.2em] text-muted">
-              Portfolio / 2026
-            </span>
           </div>
           <div className="mt-5">
             <p
