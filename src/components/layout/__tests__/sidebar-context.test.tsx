@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react'
 import { expect, it } from 'vitest'
-import { SidebarProvider, useSidebar } from './sidebar-context'
+import { SidebarProvider, useSidebar } from '../sidebar-context'
 
 it('opens, toggles, and closes the drawer', () => {
   const { result } = renderHook(() => useSidebar(), {

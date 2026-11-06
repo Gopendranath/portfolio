@@ -53,6 +53,8 @@ src/
   routeTree.gen.ts  # generated, do not edit
 ```
 
+Tests live in `__tests__` folders beside the module they cover.
+
 ## Content
 
 - `src/data/profile.ts` — name, bio, location, email, socials, availability, stack.

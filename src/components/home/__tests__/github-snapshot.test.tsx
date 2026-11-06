@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
-import { GithubSnapshot } from './github-snapshot'
+import { GithubSnapshot } from '../github-snapshot'
 
 afterEach(() => {
   vi.unstubAllGlobals()

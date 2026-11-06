@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { resolveScrollEdges } from './scroll'
+import { resolveScrollEdges } from '../scroll'
 
 describe('resolveScrollEdges', () => {
   it('hides the top blur at the top of a scrollable page', () => {

@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { profile } from '../../data/profile'
+import { profile } from '../../../data/profile'
 import {
   createCheckAvailabilityTool,
   createGetContactTool,
   createGetProfileTool,
-} from './profile-tools'
+} from '../profile-tools'
 
 const options = { signal: new AbortController().signal }
 

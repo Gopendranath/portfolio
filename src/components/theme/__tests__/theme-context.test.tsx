@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react'
 import { beforeEach, expect, it, vi } from 'vitest'
-import { ThemeProvider, useTheme } from './theme-context'
+import { ThemeProvider, useTheme } from '../theme-context'
 
 beforeEach(() => {
   localStorage.clear()

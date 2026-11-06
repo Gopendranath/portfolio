@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
-import { WebMcpTools } from './webmcp-tools'
+import { WebMcpTools } from '../webmcp-tools'
 
 interface RegisteredTool {
   name: string

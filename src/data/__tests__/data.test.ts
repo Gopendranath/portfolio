@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { navItems } from './navigation'
-import { profile } from './profile'
-import { projects } from './projects'
+import { navItems } from '../navigation'
+import { profile } from '../profile'
+import { projects } from '../projects'
 
 describe('profile', () => {
   it('contains the real contact details', () => {

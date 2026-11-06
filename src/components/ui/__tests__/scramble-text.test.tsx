@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { buildScrambledText } from '../../lib/scramble'
-import { ScrambleText } from './scramble-text'
+import { buildScrambledText } from '../../../lib/scramble'
+import { ScrambleText } from '../scramble-text'
 
 afterEach(() => {
   vi.useRealTimers()

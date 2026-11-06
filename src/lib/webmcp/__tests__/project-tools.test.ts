@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest'
 import {
   createGetProjectTool,
   createListProjectsTool,
-} from './project-tools'
-import type { GetProjectInput } from './project-tools'
+} from '../project-tools'
+import type { GetProjectInput } from '../project-tools'
 
 const options = { signal: new AbortController().signal }
 const allSlugs = [
