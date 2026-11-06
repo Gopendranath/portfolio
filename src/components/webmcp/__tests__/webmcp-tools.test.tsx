@@ -83,3 +83,28 @@ it('registers agent-facing metadata and normalizes execution results', async () 
 
   unmount()
 })
+
+it('handles a registration aborted during unmount', async () => {
+  const registerTool = vi.fn(
+    (_tool: RegisteredTool, options: { signal: AbortSignal }) =>
+      new Promise<void>((_resolve, reject) => {
+        options.signal.addEventListener('abort', () => {
+          const error = new Error('signal is aborted without reason')
+          error.name = 'AbortError'
+          reject(error)
+        })
+      }),
+  )
+
+  Object.defineProperty(document, 'modelContext', {
+    configurable: true,
+    value: { registerTool },
+  })
+
+  const { unmount } = render(<WebMcpTools />)
+  unmount()
+
+  await new Promise((resolve) => setTimeout(resolve, 0))
+
+  expect(registerTool).toHaveBeenCalledTimes(5)
+})

@@ -25,3 +25,9 @@ export type {
   WebMcpExecuteOptions,
   WebMcpTool,
 } from './tool'
+export { useWebMCP } from './use-webmcp'
+export type {
+  WebMcpToolOptions,
+  WebMcpToolResponse,
+  WebMcpToolState,
+} from './use-webmcp'

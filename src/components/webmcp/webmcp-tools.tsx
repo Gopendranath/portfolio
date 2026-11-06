@@ -1,10 +1,10 @@
-import { useWebMCP } from 'use-webmcp-tool'
 import {
   createCheckAvailabilityTool,
   createGetContactTool,
   createGetProfileTool,
   createGetProjectTool,
   createListProjectsTool,
+  useWebMCP,
 } from '../../lib/webmcp'
 import type {
   AvailabilityResult,
