@@ -1,6 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { ChatShell } from '../components/chat/chat-shell'
-import { PageHeader } from '../components/ui/page-header'
 import { pageHead } from '../lib/seo'
 
 export const Route = createFileRoute('/chat')({
@@ -14,13 +13,7 @@ export const Route = createFileRoute('/chat')({
 
 function ChatPage() {
   return (
-    <div>
-      <PageHeader
-        eyebrow="05 / Chat"
-        title="Chat."
-        description="Preview two threads: the portfolio assistant and a direct line to the owner. Messages stay on this page until the authenticated backend ships."
-      />
-
+    <div className="flex h-[calc(100dvh-4rem)] min-h-0 flex-col overflow-hidden lg:h-dvh">
       <ChatShell />
     </div>
   )

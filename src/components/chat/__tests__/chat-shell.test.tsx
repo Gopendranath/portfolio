@@ -19,9 +19,6 @@ it('renders two profiles and defaults to the assistant thread', () => {
     screen.getByRole('log', { name: 'Portfolio assistant messages' }),
   ).toBeInTheDocument()
   expect(screen.getByText(/What is terminal-web-vm/i)).toBeInTheDocument()
-  expect(
-    screen.getByText(/messages stay on this page and are not sent/i),
-  ).toBeInTheDocument()
 })
 
 it('switches to the owner thread', async () => {

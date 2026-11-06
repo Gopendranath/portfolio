@@ -25,7 +25,7 @@ export function MessageList({ messages, profile }: MessageListProps) {
       aria-live="polite"
       aria-relevant="additions"
       aria-label={`${profile.name} messages`}
-      className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain p-4 sm:p-5"
+      className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain p-4 [scrollbar-gutter:stable] sm:p-5"
     >
       {messages.map((message) => (
         <MessageBubble key={message.id} message={message} profile={profile} />

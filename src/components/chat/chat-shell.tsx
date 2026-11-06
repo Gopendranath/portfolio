@@ -58,27 +58,33 @@ export function ChatShell() {
   return (
     <section
       aria-label="Chat preview"
-      className="mt-10 flex h-[min(620px,calc(100dvh-22rem))] min-h-[440px] flex-col overflow-hidden border border-line bg-surface/20 md:grid md:grid-cols-[280px_minmax(0,1fr)]"
+      className="flex min-h-0 flex-1 flex-col overflow-hidden md:grid md:grid-cols-[280px_minmax(0,1fr)]"
     >
-      <div className="border-b border-line p-3 md:border-b-0 md:border-r md:p-4">
-        <ProfileList
-          profiles={chatProfiles}
-          activeProfileId={activeProfileId}
-          onSelect={setActiveProfileId}
-        />
-        <p className="mt-4 hidden font-mono text-[9px] uppercase leading-relaxed tracking-[0.14em] text-muted md:block">
-          Two threads. One preview.
-          <br />
-          No account required.
-        </p>
+      <div className="flex shrink-0 flex-col border-b border-line p-4 md:border-b-0 md:border-r">
+        <div className="shrink-0">
+          <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-accent">
+            05 / Chat
+          </p>
+          <h1 className="mt-1 text-xl font-medium tracking-[-0.02em] text-ink">
+            Chat.
+          </h1>
+        </div>
+
+        <div className="mt-4">
+          <ProfileList
+            profiles={chatProfiles}
+            activeProfileId={activeProfileId}
+            onSelect={setActiveProfileId}
+          />
+        </div>
       </div>
 
       <section
         id="chat-thread"
         aria-labelledby="chat-thread-title"
-        className="flex min-h-0 flex-1 flex-col"
+        className="flex min-h-0 flex-1 flex-col overflow-hidden"
       >
-        <header className="flex items-center gap-3 border-b border-line p-4">
+        <header className="flex shrink-0 items-center gap-3 border-b border-line p-4">
           <ChatAvatar profile={activeProfile} />
           <div className="min-w-0">
             <h2
@@ -92,16 +98,6 @@ export function ChatShell() {
             </p>
           </div>
         </header>
-
-        <p className="border-b border-line bg-canvas/40 px-4 py-2 font-mono text-[9px] uppercase leading-relaxed tracking-[0.12em] text-muted">
-          <span
-            className="mr-2 inline-block size-1.5 bg-accent align-middle"
-            aria-hidden="true"
-          />
-          <span>
-            Preview — messages stay on this page and are not sent.
-          </span>
-        </p>
 
         <MessageList messages={activeMessages} profile={activeProfile} />
         <ChatComposer
