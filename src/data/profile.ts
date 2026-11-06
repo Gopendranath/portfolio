@@ -56,15 +56,11 @@ export const profile: Profile = {
     },
     {
       title: 'Backend',
-      items: [
-        'Node.js',
-        'Express',
-        'REST APIs',
-        'JWT',
-        'OAuth 2.0',
-        'MongoDB',
-        'PostgreSQL',
-      ],
+      items: ['Node.js', 'Express', 'REST APIs', 'JWT', 'OAuth 2.0'],
+    },
+    {
+      title: 'Databases',
+      items: ['PostgreSQL', 'MongoDB', 'MySQL', 'Firebase', 'Supabase'],
     },
     {
       title: 'Java & Spring',
