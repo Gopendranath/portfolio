@@ -61,11 +61,14 @@ function AboutPage() {
             </p>
           </div>
           <div className="mt-6 space-y-3">
-            <p className="flex items-start gap-2 font-mono text-[9px] uppercase leading-relaxed tracking-[0.14em] text-muted">
-              <MapPinIcon className="mt-0.5 size-3.5 shrink-0" />
+            <p className="flex items-center gap-2 font-mono text-[9px] uppercase leading-relaxed tracking-[0.14em] text-muted">
+              <MapPinIcon className="size-3.5 shrink-0" />
               {profile.location}
             </p>
-            <StatusBadge label={profile.availability} />
+            <StatusBadge
+              iconClassName="size-3.5"
+              label={profile.availability}
+            />
           </div>
         </div>
 

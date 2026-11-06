@@ -14,6 +14,7 @@
   --color-accent: #c7f464;
   --color-accent-ink: #0a0b0a;
 
+  --ease-spring: cubic-bezier(0.34, 1.32, 0.64, 1);
   --animate-page-in: page-in 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -25,6 +26,50 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes avatar-shine {
+  0% {
+    opacity: 0;
+    transform: translateX(-250%) rotate(18deg);
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(350%) rotate(18deg);
+  }
+}
+
+.avatar-frame::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  bottom: -50%;
+  left: 0;
+  width: 45%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(255 255 255 / 0.55),
+    transparent
+  );
+  opacity: 0;
+  transform: translateX(-250%) rotate(18deg);
+  pointer-events: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .avatar-frame:hover::after {
+    animation: avatar-shine 650ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .avatar-frame:hover::after {
+    animation: none;
   }
 }
 

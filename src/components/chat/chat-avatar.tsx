@@ -11,18 +11,22 @@ export function ChatAvatar({ profile, size = 'md' }: ChatAvatarProps) {
 
   if (profile.id === 'owner') {
     return (
-      <Avatar
-        alt=""
-        className={`${dimensions} border border-line`}
-        sizes={size === 'sm' ? '32px' : '40px'}
-      />
+      <span
+        className={`avatar-frame relative block shrink-0 overflow-hidden border border-line ${dimensions}`}
+      >
+        <Avatar
+          alt=""
+          className="size-full"
+          sizes={size === 'sm' ? '32px' : '40px'}
+        />
+      </span>
     )
   }
 
   return (
     <span
       aria-hidden="true"
-      className={`${dimensions} flex shrink-0 items-center justify-center border border-line bg-canvas font-mono text-[10px] tracking-[0.12em] text-accent`}
+      className={`avatar-frame relative flex shrink-0 items-center justify-center overflow-hidden border border-line bg-canvas font-mono text-[10px] tracking-[0.12em] text-accent ${dimensions}`}
     >
       AI
     </span>

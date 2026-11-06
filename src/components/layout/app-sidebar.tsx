@@ -12,22 +12,22 @@ import { PrimaryNav } from './primary-nav'
 export function AppSidebar() {
   return (
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-[280px] flex-col overflow-y-auto overscroll-contain border-r border-line bg-canvas/95 px-6 py-8 lg:flex">
-      <Link to="/" className="group flex items-center gap-3">
-        <Avatar
-          className="size-10 border border-line transition-colors group-hover:border-accent/60"
-          sizes="40px"
-          priority
-        />
-        <span>
+      <Link to="/" className="group flex items-start gap-3">
+        <span className="avatar-frame relative block size-10 shrink-0 overflow-hidden border border-line transition-colors group-hover:border-accent/60">
+          <Avatar className="size-full" sizes="40px" priority />
+        </span>
+        <span className="min-w-0">
           <span className="block text-sm font-medium text-ink" translate="no">
             {profile.name}
+          </span>
+          <span className="mt-1.5 block font-mono text-[9px] uppercase leading-relaxed tracking-[0.16em] text-muted">
+            <ScrambleText text={profile.role} animateOnHover />
           </span>
         </span>
       </Link>
 
-      <p className="mt-5 font-mono text-[10px] uppercase leading-relaxed tracking-[0.16em] text-muted">
-        <ScrambleText text={profile.role} animateOnHover />
-        <span> — Bengaluru</span>
+      <p className="mt-4 whitespace-nowrap font-mono text-[9px] uppercase leading-relaxed tracking-[0.14em] text-muted">
+        Bengaluru, IN · {profile.timezone}
       </p>
 
       <PrimaryNav className="mt-12" />
