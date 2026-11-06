@@ -1,7 +1,5 @@
 import {
-  createContext,
   useCallback,
-  useContext,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -9,20 +7,8 @@ import {
   type ReactNode,
 } from 'react'
 import { flushSync } from 'react-dom'
-
-export type Theme = 'dark' | 'light'
-
-export interface ThemeToggleOrigin {
-  x: number
-  y: number
-}
-
-interface ThemeContextValue {
-  theme: Theme
-  toggleTheme: (origin?: ThemeToggleOrigin) => void
-}
-
-const ThemeContext = createContext<ThemeContextValue | null>(null)
+import { ThemeContext } from './theme-context'
+import type { Theme, ThemeToggleOrigin } from './theme-context'
 
 const themeColors: Record<Theme, string> = {
   dark: '#08090a',
@@ -190,14 +176,4 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   return (
     <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
   )
-}
-
-export function useTheme() {
-  const context = useContext(ThemeContext)
-
-  if (!context) {
-    throw new Error('useTheme must be used within a ThemeProvider')
-  }
-
-  return context
 }
