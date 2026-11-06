@@ -326,8 +326,8 @@ The test environment already uses jsdom with `src/test/setup.ts`.
 - Defer the production Origin Trial token until a verified production origin
   exists. The token is required for Chrome and Edge users outside the testing
   flag.
-- Commit `.mwgrc` with the feature; guidance says the Origin Trial opt-in file
-  should be shared.
+- No repository-level WebMCP config file is required; local testing uses the
+  Chrome flag, and production uses the Origin Trial token at deploy time.
 - Add a `## WebMCP` section to `public/llms.txt` listing the five tool names.
 
 ## Local verification

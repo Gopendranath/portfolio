@@ -3,6 +3,7 @@ import {
   createGetProjectTool,
   createListProjectsTool,
 } from './project-tools'
+import type { GetProjectInput } from './project-tools'
 
 const options = { signal: new AbortController().signal }
 const allSlugs = [
@@ -44,10 +45,7 @@ describe('list-projects', () => {
   })
 
   it('returns all projects when input is missing', () => {
-    const result = createListProjectsTool().execute(
-      undefined as never,
-      options,
-    )
+    const result = createListProjectsTool().execute(undefined, options)
     if (!('projects' in result)) throw new Error('Expected a project list')
 
     expect(result.count).toBe(6)
@@ -128,6 +126,18 @@ describe('list-projects', () => {
       expected: 'featuredOnly: boolean',
     })
   })
+
+  it('rejects null featuredOnly values instead of defaulting them', () => {
+    expect(
+      createListProjectsTool().execute(
+        { featuredOnly: null as unknown as boolean },
+        options,
+      ),
+    ).toEqual({
+      error: 'featuredOnly must be a boolean.',
+      expected: 'featuredOnly: boolean',
+    })
+  })
 })
 
 describe('get-project', () => {
@@ -157,6 +167,16 @@ describe('get-project', () => {
   })
 
   it('rejects a missing or blank slug', () => {
+    expect(createGetProjectTool().execute(undefined, options)).toEqual({
+      error: 'Pass a project slug.',
+      expected: 'slug: string',
+    })
+    expect(
+      createGetProjectTool().execute({} as GetProjectInput, options),
+    ).toEqual({
+      error: 'Pass a project slug.',
+      expected: 'slug: string',
+    })
     expect(
       createGetProjectTool().execute({ slug: '   ' }, options),
     ).toEqual({
@@ -178,6 +198,22 @@ describe('get-project', () => {
   })
 
   it('returns available slugs for an unknown project', () => {
+    expect(
+      createGetProjectTool().execute({ slug: 'nope' }, options),
+    ).toEqual({
+      error: 'Project "nope" not found.',
+      availableSlugs: allSlugs,
+    })
+  })
+
+  it('does not let callers mutate the published slug list', () => {
+    const first = createGetProjectTool().execute({ slug: 'nope' }, options)
+    if (!('availableSlugs' in first)) {
+      throw new Error('Expected available slugs')
+    }
+
+    first.availableSlugs.push('injected')
+
     expect(
       createGetProjectTool().execute({ slug: 'nope' }, options),
     ).toEqual({

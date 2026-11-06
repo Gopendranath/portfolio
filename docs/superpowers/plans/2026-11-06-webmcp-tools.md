@@ -282,7 +282,7 @@ export type {
 pnpm vitest run src/lib/webmcp/profile-tools.test.ts
 ```
 
-Expected: PASS, 4 tests.
+Expected: PASS, 6 tests.
 
 - [ ] **Step 8: Commit**
 
@@ -584,7 +584,7 @@ export type {
 pnpm vitest run src/lib/webmcp/project-tools.test.ts
 ```
 
-Expected: PASS, 13 tests.
+Expected: PASS, 15 tests.
 
 - [ ] **Step 5: Commit**
 
@@ -601,7 +601,6 @@ git commit -m "feat(webmcp): add project listing and lookup tools"
 - Create: `src/components/webmcp/webmcp-tools.tsx`
 - Test: `src/components/webmcp/webmcp-tools.test.tsx`
 - Modify: `src/components/layout/root-layout.tsx`
-- Add: `.mwgrc`
 
 **Interfaces:**
 - Consumes: all five factory functions and their result types from `../../lib/webmcp`.
@@ -745,7 +744,7 @@ Then make it the first child of `SidebarProvider`:
 pnpm vitest run src/components/webmcp/webmcp-tools.test.tsx
 ```
 
-Expected: PASS, 2 tests.
+Expected: PASS, 3 tests.
 
 - [ ] **Step 6: Run the full verification suite**
 
@@ -758,10 +757,10 @@ pnpm build
 
 Expected: all tests pass, `tsc` exits 0, `oxlint` exits 0, Vite build succeeds.
 
-- [ ] **Step 7: Commit the component, mount, and Origin Trial opt-in**
+- [ ] **Step 7: Commit the component and mount**
 
 ```powershell
-git add src/components/webmcp/webmcp-tools.tsx src/components/webmcp/webmcp-tools.test.tsx src/components/layout/root-layout.tsx .mwgrc
+git add src/components/webmcp/webmcp-tools.tsx src/components/webmcp/webmcp-tools.test.tsx src/components/layout/root-layout.tsx
 git commit -m "feat(webmcp): expose portfolio tools to browser agents"
 ```
 

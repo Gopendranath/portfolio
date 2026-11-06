@@ -32,15 +32,27 @@ describe('get-profile', () => {
   })
 
   it('ignores missing input', () => {
-    expect(() =>
-      createGetProfileTool().execute(undefined as never, options),
-    ).not.toThrow()
+    const result = createGetProfileTool().execute(undefined, options)
+
+    expect(result.name).toBe('Gopendranath Sasmal')
+    expect(result.socials).toHaveLength(4)
   })
 })
 
 describe('check-availability', () => {
   it('reports availability, location, and resume status', () => {
     expect(createCheckAvailabilityTool().execute({}, options)).toEqual({
+      availability: 'Open to work',
+      openToWork: true,
+      location: 'BTM Layout, Bengaluru, India',
+      timezone: 'IST (UTC+5:30)',
+      resumeAvailable: false,
+      note: 'Resume is not published on this site.',
+    })
+  })
+
+  it('reports availability when input is missing', () => {
+    expect(createCheckAvailabilityTool().execute(undefined, options)).toEqual({
       availability: 'Open to work',
       openToWork: true,
       location: 'BTM Layout, Bengaluru, India',
@@ -66,5 +78,11 @@ describe('get-contact', () => {
       'X',
       't3rminal.vercel.app',
     ])
+  })
+
+  it('returns contact details when input is missing', () => {
+    expect(createGetContactTool().execute(undefined, options).email).toBe(
+      'gopendranathsasmal7@gmail.com',
+    )
   })
 })

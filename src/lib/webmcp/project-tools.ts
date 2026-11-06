@@ -74,7 +74,9 @@ export function createListProjectsTool(): WebMcpTool<
     annotations: { readOnlyHint: true },
     execute: (input) => {
       const technology = input?.technology
-      const featuredOnly = input?.featuredOnly ?? false
+      const rawFeaturedOnly = input?.featuredOnly
+      const featuredOnly =
+        rawFeaturedOnly === undefined ? false : rawFeaturedOnly
 
       if (technology !== undefined && typeof technology !== 'string') {
         return {
@@ -133,7 +135,7 @@ export function createGetProjectTool(): WebMcpTool<
       properties: {
         slug: {
           type: 'string',
-          enum: availableSlugs,
+          enum: [...availableSlugs],
           description: 'Project slug returned by list-projects.',
         },
       },
@@ -158,7 +160,7 @@ export function createGetProjectTool(): WebMcpTool<
       if (!project) {
         return {
           error: `Project "${value}" not found.`,
-          availableSlugs,
+          availableSlugs: [...availableSlugs],
         }
       }
 

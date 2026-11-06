@@ -4,6 +4,8 @@ import { WebMcpTools } from './webmcp-tools'
 
 interface RegisteredTool {
   name: string
+  description: string
+  inputSchema?: Record<string, unknown>
   annotations?: { readOnlyHint?: boolean }
   execute: (
     input: unknown,
@@ -55,4 +57,29 @@ it('registers five read-only tools and removes them on unmount', () => {
 
 it('does nothing when document.modelContext is absent', () => {
   expect(() => render(<WebMcpTools />).unmount()).not.toThrow()
+})
+
+it('registers agent-facing metadata and normalizes execution results', async () => {
+  const { tools } = installModelContext()
+  const { unmount } = render(<WebMcpTools />)
+
+  const profile = tools.get('get-profile')
+  const project = tools.get('get-project')
+
+  expect(profile?.description).toContain('professional profile')
+  expect(profile?.inputSchema).toEqual({ type: 'object', properties: {} })
+  expect(project?.inputSchema).toMatchObject({
+    type: 'object',
+    required: ['slug'],
+  })
+
+  const result = await profile?.execute(
+    {},
+    { signal: new AbortController().signal },
+  )
+
+  expect(result).toMatchObject({ content: [{ type: 'text' }] })
+  expect(JSON.stringify(result)).toContain('Gopendranath Sasmal')
+
+  unmount()
 })

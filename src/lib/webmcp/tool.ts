@@ -7,7 +7,7 @@ export interface WebMcpTool<Input, Output> {
   readonly description: string
   readonly inputSchema: Record<string, unknown>
   readonly annotations: { readonly readOnlyHint: true }
-  execute: (input: Input, options: WebMcpExecuteOptions) => Output
+  execute: (input: Input | undefined, options: WebMcpExecuteOptions) => Output
 }
 
 export interface SocialResult {
