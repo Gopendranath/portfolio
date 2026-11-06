@@ -1,0 +1,58 @@
+{
+  "name": "Gopendranath Sasmal Portfolio",
+  "description": "Personal portfolio of Gopendranath Sasmal, a full-stack developer in Bengaluru. Includes project summaries, technical stack, contact details, and five read-only WebMCP tools.",
+  "pages": [
+    {
+      "title": "Home",
+      "path": "/",
+      "description": "Introduction, bio, featured projects, core stack, and GitHub activity."
+    },
+    {
+      "title": "Projects",
+      "path": "/projects",
+      "description": "All portfolio projects with stacks, summaries, and links."
+    },
+    {
+      "title": "About",
+      "path": "/about",
+      "description": "Background, working principles, and full technical stack."
+    },
+    {
+      "title": "Contact",
+      "path": "/contact",
+      "description": "Email, social profiles, location, and timezone."
+    },
+    {
+      "title": "Chat",
+      "path": "/chat",
+      "description": "Interactive preview of the portfolio assistant."
+    },
+    {
+      "title": "More",
+      "path": "/more",
+      "description": "Site features, appearance settings, colophon, and planned SSH access."
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-profile",
+      "description": "Returns the professional profile, role, location, timezone, bio, stack, and social profiles."
+    },
+    {
+      "name": "list-projects",
+      "description": "Lists portfolio projects with summaries, stacks, years, and links."
+    },
+    {
+      "name": "get-project",
+      "description": "Returns one project by slug."
+    },
+    {
+      "name": "check-availability",
+      "description": "Reports availability for work, location, timezone, and resume status."
+    },
+    {
+      "name": "get-contact",
+      "description": "Returns email, social profiles, location, and timezone."
+    }
+  ]
+}
