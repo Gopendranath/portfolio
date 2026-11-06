@@ -1,12 +1,11 @@
 import {
   HeadContent,
   Link,
-  Outlet,
   Scripts,
   createRootRouteWithContext,
 } from '@tanstack/react-router'
 import type { QueryClient } from '@tanstack/react-query'
-import { Devtools } from '../components/devtools'
+import { RootLayout } from '../components/layout/root-layout'
 
 export interface RouterContext {
   queryClient: QueryClient
@@ -52,11 +51,8 @@ function RootComponent() {
   return (
     <>
       <HeadContent />
-      <div className="min-h-dvh">
-        <Outlet />
-      </div>
+      <RootLayout />
       <Scripts />
-      <Devtools />
     </>
   )
 }
