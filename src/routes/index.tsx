@@ -21,6 +21,7 @@ const coreStack = [
   'Spring AI',
   'Tailwind CSS',
   'PostgreSQL',
+  'Redis',
   'LangChain',
   'Docker',
 ]
