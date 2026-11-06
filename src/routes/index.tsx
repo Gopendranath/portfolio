@@ -6,6 +6,7 @@ import { SectionLabel } from '../components/ui/section-label'
 import { StatusBadge } from '../components/ui/status-badge'
 import { profile } from '../data/profile'
 import { projects } from '../data/projects'
+import { SITE_DESCRIPTION, SITE_TITLE, pageHead } from '../lib/seo'
 
 const featuredProjects = projects.filter((project) => project.featured)
 
@@ -21,16 +22,7 @@ const coreStack = [
 ]
 
 export const Route = createFileRoute('/')({
-  head: () => ({
-    meta: [
-      { title: 'Gopendranath Sasmal — Full Stack Developer' },
-      {
-        name: 'description',
-        content:
-          'Full-stack developer in Bengaluru building web products across React, TypeScript, Node.js, and AI. Open to full-stack roles.',
-      },
-    ],
-  }),
+  head: () => pageHead(SITE_TITLE, SITE_DESCRIPTION),
   component: HomePage,
 })
 
@@ -71,6 +63,7 @@ function HomePage() {
       </section>
 
       <section aria-label="Selected work">
+        <h2 className="sr-only">Selected work</h2>
         <div className="flex items-end justify-between gap-6">
           <SectionLabel className="flex-1">Selected work</SectionLabel>
           <Link

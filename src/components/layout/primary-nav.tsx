@@ -28,7 +28,7 @@ export function PrimaryNav({ className = '', onNavigate }: PrimaryNavProps) {
                   />
                   <span
                     className={`font-mono text-[10px] tracking-[0.18em] ${
-                      isActive ? 'text-accent' : 'text-muted/70'
+                      isActive ? 'text-accent' : 'text-muted'
                     }`}
                   >
                     {item.index}

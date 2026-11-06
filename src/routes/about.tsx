@@ -5,6 +5,7 @@ import { PageHeader } from '../components/ui/page-header'
 import { SectionLabel } from '../components/ui/section-label'
 import { StatusBadge } from '../components/ui/status-badge'
 import { profile } from '../data/profile'
+import { pageHead } from '../lib/seo'
 
 const principles = [
   {
@@ -22,16 +23,11 @@ const principles = [
 ]
 
 export const Route = createFileRoute('/about')({
-  head: () => ({
-    meta: [
-      { title: 'About — Gopendranath Sasmal' },
-      {
-        name: 'description',
-        content:
-          'About Gopendranath Sasmal, a full-stack developer focused on React, TypeScript, Node.js, AI, and maintainable product work.',
-      },
-    ],
-  }),
+  head: () =>
+    pageHead(
+      'About — Gopendranath Sasmal',
+      'About Gopendranath Sasmal, a full-stack developer focused on React, TypeScript, Node.js, AI, and maintainable product work.',
+    ),
   component: AboutPage,
 })
 

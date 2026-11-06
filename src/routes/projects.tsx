@@ -4,18 +4,14 @@ import { ExternalLink } from '../components/ui/external-link'
 import { PageHeader } from '../components/ui/page-header'
 import { SectionLabel } from '../components/ui/section-label'
 import { projects } from '../data/projects'
+import { pageHead } from '../lib/seo'
 
 export const Route = createFileRoute('/projects')({
-  head: () => ({
-    meta: [
-      { title: 'Projects — Gopendranath Sasmal' },
-      {
-        name: 'description',
-        content:
-          'Selected full-stack projects across React, TypeScript, AI, WebAssembly, and browser tooling.',
-      },
-    ],
-  }),
+  head: () =>
+    pageHead(
+      'Projects — Gopendranath Sasmal',
+      'Selected full-stack projects across React, TypeScript, AI, WebAssembly, and browser tooling.',
+    ),
   component: ProjectsPage,
 })
 
@@ -28,6 +24,7 @@ function ProjectsPage() {
         description="Six projects across product interfaces, AI systems, and browser tooling. Each one shipped or built to solve a real problem."
       />
 
+      <h2 className="sr-only">All projects</h2>
       <div className="mt-14 flex items-center justify-between gap-6 border-t border-line pt-6">
         <SectionLabel className="flex-1">All projects</SectionLabel>
         <span className="shrink-0 font-mono text-[9px] uppercase tracking-[0.16em] text-muted">

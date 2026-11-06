@@ -5,18 +5,14 @@ import { SectionLabel } from '../components/ui/section-label'
 import { SocialLinks } from '../components/ui/social-links'
 import { StatusBadge } from '../components/ui/status-badge'
 import { profile } from '../data/profile'
+import { pageHead } from '../lib/seo'
 
 export const Route = createFileRoute('/contact')({
-  head: () => ({
-    meta: [
-      { title: 'Contact — Gopendranath Sasmal' },
-      {
-        name: 'description',
-        content:
-          'Get in touch with Gopendranath Sasmal about full-stack roles, product work, and collaborations.',
-      },
-    ],
-  }),
+  head: () =>
+    pageHead(
+      'Contact — Gopendranath Sasmal',
+      'Get in touch with Gopendranath Sasmal about full-stack roles, product work, and collaborations.',
+    ),
   component: ContactPage,
 })
 

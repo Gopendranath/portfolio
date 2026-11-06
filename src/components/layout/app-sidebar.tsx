@@ -47,7 +47,7 @@ export function AppSidebar() {
           <DownloadIcon className="size-3.5" />
         </button>
 
-        <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted/70">
+        <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted">
           © {siteYear} {profile.firstName}
         </p>
       </div>

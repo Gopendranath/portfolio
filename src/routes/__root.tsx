@@ -6,25 +6,14 @@ import {
 } from '@tanstack/react-router'
 import type { QueryClient } from '@tanstack/react-query'
 import { RootLayout } from '../components/layout/root-layout'
+import { SITE_DESCRIPTION, SITE_TITLE, pageHead } from '../lib/seo'
 
 export interface RouterContext {
   queryClient: QueryClient
 }
 
-const siteTitle = 'Gopendranath Sasmal — Full Stack Developer'
-const siteDescription =
-  'Full-stack developer in Bengaluru building web products across React, TypeScript, Node.js, and AI. Open to full-stack roles.'
-
 export const Route = createRootRouteWithContext<RouterContext>()({
-  head: () => ({
-    meta: [
-      { title: siteTitle },
-      { name: 'description', content: siteDescription },
-      { property: 'og:title', content: siteTitle },
-      { property: 'og:description', content: siteDescription },
-      { property: 'og:type', content: 'website' },
-    ],
-  }),
+  head: () => pageHead(SITE_TITLE, SITE_DESCRIPTION),
   component: RootComponent,
   notFoundComponent: NotFound,
   errorComponent: ({ error, reset }) => (

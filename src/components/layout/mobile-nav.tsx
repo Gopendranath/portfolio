@@ -61,7 +61,11 @@ export function MobileNav() {
       >
         <div className="flex h-full flex-col overflow-y-auto px-6 py-6">
           <div className="flex items-center justify-between gap-4">
-            <Link to="/" onClick={close} className="flex min-w-0 items-center gap-3">
+            <Link
+              to="/"
+              onClick={close}
+              className="flex min-w-0 items-center gap-3"
+            >
               <Monogram className="size-9 text-xs" />
               <span className="min-w-0">
                 <span className="block font-mono text-[9px] uppercase tracking-[0.2em] text-muted">
