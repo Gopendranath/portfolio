@@ -1,4 +1,5 @@
 import { Outlet, useRouterState } from '@tanstack/react-router'
+import { Analytics } from '@vercel/analytics/react'
 import { profile } from '../../data/profile'
 import { siteYear } from '../../lib/site'
 import { AppearanceProvider } from '../appearance/appearance-provider'
@@ -27,6 +28,7 @@ export function RootLayout() {
       <AppearanceProvider>
         <SidebarProvider>
           <WebMcpTools />
+          <Analytics route={pathname} path={pathname} />
           <SkipLink />
           <SidebarRouteSync />
           <AppSidebar />
