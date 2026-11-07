@@ -2,7 +2,7 @@
 
 Personal portfolio for Gopendranath Sasmal, built as a single-page React app with a persistent sidebar. Dark technical visual system, real project data, and a small GitHub snapshot powered by TanStack Query.
 
-Live: <https://portfolio-zeta-coral-18.vercel.app>
+Live: <https://gopendra.is-a.dev>
 
 ## Stack
 
