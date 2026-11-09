@@ -3,6 +3,7 @@ import {
   type Particle,
   type ParticleTone,
   type PointTarget,
+  type PointerForce,
   type RgbColor,
   createParticles,
   parseColor,
@@ -18,7 +19,14 @@ import {
 
 const SPRITE_SIZE = 24
 const SPAWN_PADDING = 24
-const IDLE_AMPLITUDE = 0.5
+const DRIFT_ANGLE = Math.PI / 6
+const DRIFT_DISTANCE = 2.5
+const SCAN_PERIOD_SECONDS = 7
+const SCAN_BAND = 80
+const POINTER_RADIUS = 90
+const POINTER_STRENGTH = 3200
+
+type SpriteTone = ParticleTone | 'accent'
 
 interface ParticleNameLine {
   text: string
@@ -33,9 +41,10 @@ interface ParticleNameProps {
 interface ParticleColors {
   ink: RgbColor
   muted: RgbColor
+  accent: RgbColor
 }
 
-type ParticleSprites = Record<ParticleTone, HTMLCanvasElement>
+type ParticleSprites = Record<SpriteTone, HTMLCanvasElement>
 
 function isCanvasSupported(): boolean {
   if (typeof document === 'undefined') {
@@ -60,6 +69,7 @@ function readColors(): ParticleColors {
   return {
     ink,
     muted: parseColor(style.getPropertyValue('--color-muted')) ?? ink,
+    accent: parseColor(style.getPropertyValue('--color-accent')) ?? ink,
   }
 }
 
@@ -97,6 +107,7 @@ function buildSprites(colors: ParticleColors): ParticleSprites {
   return {
     ink: buildSprite(colors.ink),
     muted: buildSprite(colors.muted),
+    accent: buildSprite(colors.accent),
   }
 }
 
@@ -153,6 +164,7 @@ export function ParticleName({ lines, className }: ParticleNameProps) {
     let cancelled = false
     let fontsReady = false
     let activated = false
+    let pointer: PointerForce | null = null
     let dprQuery: MediaQueryList | null = null
 
     function sampleTargets(): PointTarget[] {
@@ -252,10 +264,19 @@ export function ParticleName({ lines, className }: ParticleNameProps) {
     function drawParticles() {
       ctx.clearRect(0, 0, width, height)
 
+      const drift = reduced ? 0 : DRIFT_DISTANCE
+      const driftX = Math.cos(DRIFT_ANGLE) * drift
+      const driftY = -Math.sin(DRIFT_ANGLE) * drift
+      const scanX = reduced
+        ? Number.NEGATIVE_INFINITY
+        : -SCAN_BAND +
+          ((elapsed % SCAN_PERIOD_SECONDS) / SCAN_PERIOD_SECONDS) *
+            (width + SCAN_BAND * 2)
+
       for (const particle of particles) {
-        const drift = reduced ? 0 : IDLE_AMPLITUDE
-        const x = particle.x + Math.sin(elapsed * 0.7 + particle.phase) * drift
-        const y = particle.y + Math.cos(elapsed * 0.53 + particle.phase) * drift
+        const sway = Math.sin(elapsed * 0.8 + particle.phase)
+        const x = particle.x + driftX * sway
+        const y = particle.y + driftY * sway
         const size = particle.size
 
         ctx.drawImage(
@@ -265,6 +286,19 @@ export function ParticleName({ lines, className }: ParticleNameProps) {
           size * 2,
           size * 2,
         )
+
+        if (reduced) {
+          continue
+        }
+
+        const scanDistance = Math.abs(x - scanX)
+
+        if (scanDistance < SCAN_BAND) {
+          const glow = size * 1.9
+          ctx.globalAlpha = (1 - scanDistance / SCAN_BAND) * 0.85
+          ctx.drawImage(sprites.accent, x - glow, y - glow, glow * 2, glow * 2)
+          ctx.globalAlpha = 1
+        }
       }
     }
 
@@ -289,7 +323,7 @@ export function ParticleName({ lines, className }: ParticleNameProps) {
       const delta = lastTime === 0 ? 0 : (now - lastTime) / 1000
       lastTime = now
       elapsed += delta
-      stepParticles(particles, delta, elapsed)
+      stepParticles(particles, delta, elapsed, pointer ?? undefined)
       drawParticles()
       activate()
       animationFrame = window.requestAnimationFrame(frame)
@@ -416,6 +450,24 @@ export function ParticleName({ lines, className }: ParticleNameProps) {
       syncRunning()
     }
 
+    const onPointerMove = (event: PointerEvent) => {
+      if (event.pointerType !== 'mouse' && event.pointerType !== 'pen') {
+        return
+      }
+
+      const rect = headingElement.getBoundingClientRect()
+      pointer = {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top,
+        radius: POINTER_RADIUS,
+        strength: POINTER_STRENGTH,
+      }
+    }
+
+    const onPointerLeave = () => {
+      pointer = null
+    }
+
     const themeObserver = new MutationObserver(updateColors)
     themeObserver.observe(document.documentElement, {
       attributes: true,
@@ -440,6 +492,10 @@ export function ParticleName({ lines, className }: ParticleNameProps) {
 
     motionQuery.addEventListener('change', onMotionChange)
     document.addEventListener('visibilitychange', onVisibilityChange)
+    headingElement.addEventListener('pointermove', onPointerMove, {
+      passive: true,
+    })
+    headingElement.addEventListener('pointerleave', onPointerLeave)
     watchDpr()
     void setup()
 
@@ -453,6 +509,8 @@ export function ParticleName({ lines, className }: ParticleNameProps) {
       dprQuery?.removeEventListener('change', onDprChange)
       motionQuery.removeEventListener('change', onMotionChange)
       document.removeEventListener('visibilitychange', onVisibilityChange)
+      headingElement.removeEventListener('pointermove', onPointerMove)
+      headingElement.removeEventListener('pointerleave', onPointerLeave)
       ctx.clearRect(0, 0, canvasElement.width, canvasElement.height)
     }
   }, [lineKey, supported])

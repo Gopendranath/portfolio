@@ -102,6 +102,38 @@ describe('stepParticles', () => {
   })
 })
 
+describe('stepParticles pointer force', () => {
+  it('pushes a particle away from the pointer', () => {
+    const particle = seedParticle({ targetX: 10, targetY: 0 })
+    particle.x = 10
+    particle.y = 0
+
+    stepParticles([particle], 1 / 60, 0, {
+      x: 0,
+      y: 0,
+      radius: 100,
+      strength: 3000,
+    })
+
+    expect(particle.x).toBeGreaterThan(10)
+  })
+
+  it('ignores particles outside the pointer radius', () => {
+    const particle = seedParticle({ targetX: 300, targetY: 0 })
+    particle.x = 300
+    particle.y = 0
+
+    stepParticles([particle], 1 / 60, 0, {
+      x: 0,
+      y: 0,
+      radius: 100,
+      strength: 3000,
+    })
+
+    expect(particle.x).toBe(300)
+  })
+})
+
 describe('retargetParticles', () => {
   it('updates every target and tone', () => {
     const particles = createParticles(

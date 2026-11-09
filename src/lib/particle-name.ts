@@ -32,6 +32,13 @@ export interface RgbColor {
   b: number
 }
 
+export interface PointerForce {
+  x: number
+  y: number
+  radius: number
+  strength: number
+}
+
 const FRICTION = 0.86
 const MAX_STEP_SECONDS = 1 / 30
 
@@ -116,8 +123,10 @@ export function stepParticles(
   particles: Particle[],
   deltaSeconds: number,
   elapsedSeconds: number,
+  pointer?: PointerForce,
 ): void {
   const dt = Math.min(deltaSeconds, MAX_STEP_SECONDS)
+  const radiusSq = pointer ? pointer.radius * pointer.radius : 0
 
   for (const particle of particles) {
     if (particle.delay > elapsedSeconds) {
@@ -132,6 +141,20 @@ export function stepParticles(
       (particle.vy +
         (particle.targetY - particle.y) * particle.stiffness * dt) *
       FRICTION
+
+    if (pointer) {
+      const dx = particle.x - pointer.x
+      const dy = particle.y - pointer.y
+      const distanceSq = dx * dx + dy * dy
+
+      if (distanceSq < radiusSq && distanceSq > 0.01) {
+        const distance = Math.sqrt(distanceSq)
+        const push = pointer.strength * (1 - distance / pointer.radius) * dt
+        particle.vx += (dx / distance) * push
+        particle.vy += (dy / distance) * push
+      }
+    }
+
     particle.x += particle.vx * dt
     particle.y += particle.vy * dt
   }
