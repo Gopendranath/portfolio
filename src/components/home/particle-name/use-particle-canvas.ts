@@ -21,7 +21,7 @@ import { sampleTextTargets } from './sample'
 const SPAWN_PADDING = 24
 const POINTER_RADIUS = 90
 const POINTER_STRENGTH = 4600
-const DUST_RATIO = 0.1
+const DUST_RATIO = 0.2
 const MAX_DUST = 480
 
 interface UseParticleCanvasOptions {
@@ -379,7 +379,8 @@ export function useParticleCanvas({
 
     return () => {
       cancelled = true
-      stop()
+      running = false
+      window.cancelAnimationFrame(animationFrame)
       window.cancelAnimationFrame(resizeFrame)
       themeObserver.disconnect()
       resizeObserver.disconnect()

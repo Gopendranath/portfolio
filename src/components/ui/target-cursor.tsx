@@ -13,6 +13,7 @@ import {
   type RefObject,
 } from 'react'
 import { createPortal } from 'react-dom'
+import { spring } from './target-cursor-spring'
 
 export interface TargetCursorProps {
   targetSelector?: string
@@ -34,25 +35,8 @@ export interface TargetCursorProps {
   container?: RefObject<HTMLElement | null> | HTMLElement | null
 }
 
-type Spring = { x: number; v: number }
-
 const CORNER_ANGLES = [0, 90, 180, 270]
 const QUARTER = Math.PI / 2
-
-const spring = (
-  state: Spring,
-  goal: number,
-  stiffness: number,
-  damping: number,
-  dt: number,
-) => {
-  const steps = 2
-  const h = dt / steps
-  for (let i = 0; i < steps; i++) {
-    state.v += (stiffness * (goal - state.x) - damping * state.v) * h
-    state.x += state.v * h
-  }
-}
 
 const resolveElement = (
   value: TargetCursorProps['container'],
@@ -103,7 +87,11 @@ const TargetCursor = ({
     container,
   }
   const settingsRef = useRef(settings)
-  settingsRef.current = settings
+
+  useEffect(() => {
+    settingsRef.current = settings
+    wakeRef.current?.()
+  })
 
   useEffect(() => {
     const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)')
@@ -428,10 +416,6 @@ const TargetCursor = ({
     }
   }, [host])
 
-  useEffect(() => {
-    wakeRef.current?.()
-  })
-
   if (!host) return null
 
   return createPortal(
@@ -447,16 +431,16 @@ const TargetCursor = ({
           ref={(element) => {
             cornerRefs.current[i] = element
           }}
-          className="absolute top-0 left-0 box-border origin-top-left border-solid [border-color:var(--target-cursor-color,#ffffff)] will-change-transform"
+          className="absolute top-0 left-0 box-border origin-top-left border-solid [border-color:var(--target-cursor-color,#ffffff)]"
         />
       ))}
       <span
         ref={dotRef}
-        className="absolute top-0 left-0 rounded-full [background:var(--target-cursor-color,#ffffff)] will-change-transform"
+        className="absolute top-0 left-0 rounded-full [background:var(--target-cursor-color,#ffffff)]"
       />
       <span
         ref={labelRef}
-        className="absolute top-0 left-0 text-[12px] leading-none font-medium whitespace-nowrap opacity-0 [color:var(--target-cursor-color,#ffffff)] will-change-[transform,opacity]"
+        className="absolute top-0 left-0 text-[12px] leading-none font-medium whitespace-nowrap opacity-0 [color:var(--target-cursor-color,#ffffff)]"
       />
     </div>,
     host,

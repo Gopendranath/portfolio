@@ -6,12 +6,12 @@ import {
   parseColor,
 } from '../../../lib/particle-name'
 
-const SPRITE_SIZE = 24
+const SPRITE_SIZE = 8
 const DRIFT_ANGLE = Math.PI / 6
 const DRIFT_DISTANCE = 2.5
 const SCAN_PERIOD_SECONDS = 7
 const SCAN_BAND = 80
-const DUST_TRAIL_SECONDS = 0.28
+const DUST_TRAIL_SECONDS = 0.5
 
 type SpriteTone = ParticleTone | 'accent'
 
@@ -97,7 +97,6 @@ export function drawFrame(
     particles,
     dust,
     sprites,
-    colors,
     width,
     height,
     elapsed,
@@ -150,29 +149,45 @@ export function drawFrame(
     return
   }
 
+  const trailSteps = 8
+
   for (const mote of dust) {
     const remaining = Math.max(0, mote.life / mote.maxLife)
     const alpha = remaining * 0.8
-    const color = colors[mote.tone]
+    const speed = Math.hypot(mote.vx, mote.vy)
 
-    context.strokeStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${alpha * 0.45})`
-    context.lineWidth = Math.max(0.6, mote.size * 0.8)
-    context.beginPath()
-    context.moveTo(
-      mote.x - mote.vx * DUST_TRAIL_SECONDS,
-      mote.y - mote.vy * DUST_TRAIL_SECONDS,
-    )
-    context.lineTo(mote.x, mote.y)
-    context.stroke()
+    if (speed > 0.001) {
+      const dirX = mote.vx / speed
+      const dirY = mote.vy / speed
+      const length = speed * DUST_TRAIL_SECONDS
 
-    context.globalAlpha = alpha
-    context.drawImage(
-      sprites[mote.tone],
-      mote.x - mote.size,
-      mote.y - mote.size,
-      mote.size * 2,
-      mote.size * 2,
-    )
+      for (let step = trailSteps - 1; step >= 0; step -= 1) {
+        const t = step / (trailSteps - 1)
+        const falloff = (1 - t) ** 2
+        const size = mote.size * (0.5 + 0.5 * (1 - t))
+        const x = mote.x - dirX * length * t
+        const y = mote.y - dirY * length * t
+
+        context.globalAlpha = alpha * falloff
+        context.drawImage(
+          sprites[mote.tone],
+          x - size,
+          y - size,
+          size * 2,
+          size * 2,
+        )
+      }
+    } else {
+      context.globalAlpha = alpha
+      context.drawImage(
+        sprites[mote.tone],
+        mote.x - mote.size,
+        mote.y - mote.size,
+        mote.size * 2,
+        mote.size * 2,
+      )
+    }
+
     context.globalAlpha = 1
   }
 }

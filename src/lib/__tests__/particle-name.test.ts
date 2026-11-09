@@ -28,7 +28,7 @@ describe('parseColor', () => {
 describe('sampleStride', () => {
   it('keeps dense text dense and caps large type', () => {
     expect(sampleStride(48)).toBe(2)
-    expect(sampleStride(104)).toBe(3)
+    expect(sampleStride(104)).toBe(2)
     expect(sampleStride(400)).toBe(5)
   })
 })
@@ -60,8 +60,8 @@ describe('createParticles', () => {
       expect(particle.y).toBeLessThanOrEqual(120)
       expect(particle.delay).toBeGreaterThanOrEqual(0)
       expect(particle.delay).toBeLessThanOrEqual(0.4)
-      expect(particle.size).toBeGreaterThanOrEqual(0.9)
-      expect(particle.size).toBeLessThanOrEqual(2.2)
+      expect(particle.size).toBeGreaterThanOrEqual(0.5)
+      expect(particle.size).toBeLessThanOrEqual(1.2)
       expect(particle.stiffness).toBeGreaterThanOrEqual(90)
       expect(particle.stiffness).toBeLessThanOrEqual(140)
     }

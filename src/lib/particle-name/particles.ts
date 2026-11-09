@@ -17,7 +17,7 @@ export function createParticles(
     vy: 0,
     targetX: target.x,
     targetY: target.y,
-    size: 0.9 + random() * 1.3,
+    size: 0.5 + random() * 0.7,
     phase: random() * Math.PI * 2,
     stiffness: 90 + random() * 50,
     delay: (target.x / bounds.width) * 0.25 + random() * 0.15,
