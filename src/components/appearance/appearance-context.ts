@@ -1,11 +1,18 @@
 import { createContext, useContext } from 'react'
-import type { AccentId, CursorStyleId } from '../../lib/appearance'
+import type {
+  AccentId,
+  CursorStyleId,
+  ParticlePreferenceKey,
+  ParticlePreferences,
+} from '../../lib/appearance'
 
 export interface AppearanceContextValue {
   accent: AccentId
   cursorStyle: CursorStyleId
+  particles: ParticlePreferences
   setAccent: (accent: AccentId) => void
   setCursorStyle: (cursorStyle: CursorStyleId) => void
+  setParticlePreference: (key: ParticlePreferenceKey, value: boolean) => void
   resetAppearance: () => void
 }
 

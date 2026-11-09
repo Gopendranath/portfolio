@@ -20,7 +20,7 @@ const features = [
   },
   {
     title: 'Theme control',
-    body: 'Dark by default, with a light palette that persists locally. Accent colors and cursor styles can be adjusted below.',
+    body: 'Dark by default, with a light palette that persists locally. Accent colors, cursor styles, and the animated hero name can be adjusted below.',
   },
   {
     title: 'Project index',

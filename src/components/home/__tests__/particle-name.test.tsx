@@ -35,6 +35,25 @@ describe('ParticleName', () => {
     expect(container.querySelector('span')).not.toHaveClass('text-transparent')
   })
 
+  it('renders plain text and no canvas when disabled', () => {
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(
+      {} as CanvasRenderingContext2D,
+    )
+
+    const { container } = render(
+      <ParticleName
+        enabled={false}
+        lines={[{ text: 'Gopendranath' }, { text: 'Sasmal', muted: true }]}
+      />,
+    )
+
+    expect(container.querySelector('canvas')).toBeNull()
+    expect(container.querySelector('span')).not.toHaveClass('text-transparent')
+    expect(
+      screen.getByRole('heading', { name: 'Gopendranath Sasmal' }),
+    ).toBeInTheDocument()
+  })
+
   it('stays visible until fonts are ready and the first frame has painted', async () => {
     const { drawImage, resolveFonts } = stubParticleEnvironment()
     const { container } = render(

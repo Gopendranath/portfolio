@@ -1,4 +1,5 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
+import { useAppearance } from '../components/appearance/appearance-context'
 import { ContributionGraph } from '../components/home/contribution-graph'
 import { GithubSnapshot } from '../components/home/github-snapshot'
 import { ParticleName } from '../components/home/particle-name'
@@ -34,6 +35,8 @@ export const Route = createFileRoute('/')({
 })
 
 function HomePage() {
+  const { particles } = useAppearance()
+
   return (
     <div className="space-y-20 sm:space-y-28">
       <section className="max-w-4xl">
@@ -44,6 +47,10 @@ function HomePage() {
         </p>
 
         <ParticleName
+          enabled={particles.cloud}
+          scan={particles.scan}
+          dust={particles.dust}
+          hover={particles.hover}
           className="mt-8 text-[clamp(3rem,8vw,6.5rem)] font-medium leading-[0.9] tracking-[-0.06em] text-ink"
           lines={[
             { text: profile.firstName },

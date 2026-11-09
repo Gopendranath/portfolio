@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { collectTargets, thinTargets } from '../particle-name-sampling'
+import { collectTargets, thinTargets } from '../particle-name'
 
 describe('collectTargets', () => {
   it('keeps pixels above the alpha threshold at stride 1', () => {

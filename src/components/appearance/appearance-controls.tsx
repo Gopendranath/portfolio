@@ -2,6 +2,7 @@ import { useId } from 'react'
 import { accentPalettes, cursorStyles } from '../../lib/appearance'
 import { SectionLabel } from '../ui/section-label'
 import { useAppearance } from './appearance-context'
+import { HeroNameControls } from './hero-name-controls'
 
 export function AppearanceControls() {
   const { accent, cursorStyle, setAccent, setCursorStyle, resetAppearance } =
@@ -155,6 +156,8 @@ export function AppearanceControls() {
             </div>
           </div>
         </div>
+
+        <HeroNameControls />
       </div>
 
       <p className="mt-4 font-mono text-[9px] uppercase tracking-[0.14em] text-muted">

@@ -1,4 +1,4 @@
-import type { ParticleTone, PointTarget } from './particle-name'
+import type { ParticleTone, PointTarget } from './types'
 
 export const MAX_POINTS = 4200
 
@@ -6,6 +6,10 @@ export interface ImageBuffer {
   data: Uint8ClampedArray
   width: number
   height: number
+}
+
+export function sampleStride(fontSize: number): number {
+  return Math.min(5, Math.max(2, Math.round(fontSize / 40)))
 }
 
 export function collectTargets(

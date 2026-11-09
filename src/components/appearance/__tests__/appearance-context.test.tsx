@@ -1,7 +1,12 @@
 import { act, renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, expect, it } from 'vitest'
-import { ACCENT_STORAGE_KEY, CURSOR_STORAGE_KEY } from '../../../lib/appearance'
+import {
+  ACCENT_STORAGE_KEY,
+  CURSOR_STORAGE_KEY,
+  DEFAULT_PARTICLE_PREFERENCES,
+  PARTICLE_STORAGE_KEYS,
+} from '../../../lib/appearance'
 import { ThemeProvider } from '../../theme/theme-provider'
 import { useAppearance } from '../appearance-context'
 import { AppearanceProvider } from '../appearance-provider'
@@ -37,6 +42,51 @@ it('defaults to the target cursor and lime accent', () => {
   expect(localStorage.getItem(CURSOR_STORAGE_KEY)).toBe('target')
 })
 
+it('defaults the particle cloud on with hover off', () => {
+  const { result } = renderHook(() => useAppearance(), { wrapper: Wrapper })
+
+  expect(result.current.particles).toEqual(DEFAULT_PARTICLE_PREFERENCES)
+  expect(result.current.particles).toEqual({
+    cloud: true,
+    scan: true,
+    dust: true,
+    hover: false,
+  })
+
+  for (const [key, storageKey] of Object.entries(PARTICLE_STORAGE_KEYS)) {
+    const expected = String(
+      DEFAULT_PARTICLE_PREFERENCES[
+        key as keyof typeof DEFAULT_PARTICLE_PREFERENCES
+      ],
+    )
+    expect(localStorage.getItem(storageKey)).toBe(expected)
+  }
+})
+
+it('persists individual particle preferences', () => {
+  const { result } = renderHook(() => useAppearance(), { wrapper: Wrapper })
+
+  act(() => result.current.setParticlePreference('hover', true))
+  act(() => result.current.setParticlePreference('cloud', false))
+
+  expect(result.current.particles.hover).toBe(true)
+  expect(result.current.particles.cloud).toBe(false)
+  expect(localStorage.getItem(PARTICLE_STORAGE_KEYS.hover)).toBe('true')
+  expect(localStorage.getItem(PARTICLE_STORAGE_KEYS.cloud)).toBe('false')
+})
+
+it('resets particle preferences to the defaults', () => {
+  const { result } = renderHook(() => useAppearance(), { wrapper: Wrapper })
+
+  act(() => result.current.setParticlePreference('scan', false))
+  act(() => result.current.setParticlePreference('hover', true))
+  act(() => result.current.resetAppearance())
+
+  expect(result.current.particles).toEqual(DEFAULT_PARTICLE_PREFERENCES)
+  expect(localStorage.getItem(PARTICLE_STORAGE_KEYS.scan)).toBe('true')
+  expect(localStorage.getItem(PARTICLE_STORAGE_KEYS.hover)).toBe('false')
+})
+
 it('applies and persists accent and cursor changes', () => {
   const { result } = renderHook(() => useAppearance(), { wrapper: Wrapper })
 
@@ -70,14 +120,23 @@ it('applies the light variant of the selected accent', () => {
 it('reads stored preferences and ignores invalid values', () => {
   localStorage.setItem(ACCENT_STORAGE_KEY, 'violet')
   localStorage.setItem(CURSOR_STORAGE_KEY, 'nonsense')
+  localStorage.setItem(PARTICLE_STORAGE_KEYS.cloud, 'false')
+  localStorage.setItem(PARTICLE_STORAGE_KEYS.hover, 'true')
+  localStorage.setItem(PARTICLE_STORAGE_KEYS.scan, 'nonsense')
 
   const { result } = renderHook(() => useAppearance(), { wrapper: Wrapper })
 
   expect(result.current.accent).toBe('violet')
   expect(result.current.cursorStyle).toBe('target')
+  expect(result.current.particles).toEqual({
+    cloud: false,
+    scan: true,
+    dust: true,
+    hover: true,
+  })
 })
 
-it('resets both preferences', () => {
+it('resets appearance preferences', () => {
   const { result } = renderHook(() => useAppearance(), { wrapper: Wrapper })
 
   act(() => result.current.setAccent('rose'))

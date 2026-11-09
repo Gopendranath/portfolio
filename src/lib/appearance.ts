@@ -22,11 +22,40 @@ export interface CursorStyleOption {
   description: string
 }
 
+export type ParticlePreferenceKey = 'cloud' | 'scan' | 'dust' | 'hover'
+
+export interface ParticlePreferences {
+  cloud: boolean
+  scan: boolean
+  dust: boolean
+  hover: boolean
+}
+
 export const DEFAULT_ACCENT: AccentId = 'lime'
 export const DEFAULT_CURSOR_STYLE: CursorStyleId = 'target'
+export const DEFAULT_PARTICLE_PREFERENCES: ParticlePreferences = {
+  cloud: true,
+  scan: true,
+  dust: true,
+  hover: false,
+}
 
 export const ACCENT_STORAGE_KEY = 'appearance-accent'
 export const CURSOR_STORAGE_KEY = 'appearance-cursor'
+
+export const PARTICLE_PREFERENCE_KEYS: readonly ParticlePreferenceKey[] = [
+  'cloud',
+  'scan',
+  'dust',
+  'hover',
+]
+
+export const PARTICLE_STORAGE_KEYS: Record<ParticlePreferenceKey, string> = {
+  cloud: 'appearance-particle-cloud',
+  scan: 'appearance-particle-scan',
+  dust: 'appearance-particle-dust',
+  hover: 'appearance-particle-hover',
+}
 
 export const accentPalettes: readonly AccentPalette[] = [
   {
