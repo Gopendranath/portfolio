@@ -1,14 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
 import {
+  type DustParticle,
   type Particle,
   type ParticleTone,
   type PointTarget,
   type PointerForce,
   type RgbColor,
+  createDust,
   createParticles,
   parseColor,
   retargetParticles,
   sampleStride,
+  stepDust,
   stepParticles,
 } from '../../lib/particle-name'
 import {
@@ -25,6 +28,9 @@ const SCAN_PERIOD_SECONDS = 7
 const SCAN_BAND = 80
 const POINTER_RADIUS = 90
 const POINTER_STRENGTH = 3200
+const DUST_RATIO = 0.1
+const MAX_DUST = 480
+const DUST_TRAIL_SECONDS = 0.28
 
 type SpriteTone = ParticleTone | 'accent'
 
@@ -149,6 +155,8 @@ export function ParticleName({ lines, className }: ParticleNameProps) {
     const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
     let reduced = motionQuery.matches
     let particles: Particle[] = []
+    let dust: DustParticle[] = []
+    let dustTargets: PointTarget[] = []
     let colors = readColors()
     let sprites = buildSprites(colors)
     let width = 1
@@ -261,6 +269,67 @@ export function ParticleName({ lines, className }: ParticleNameProps) {
       }
     }
 
+    function spawnDust(pointCount: number) {
+      if (reduced || dustTargets.length === 0) {
+        return
+      }
+
+      const total = Math.min(
+        MAX_DUST,
+        Math.max(1, Math.round(pointCount * DUST_RATIO)),
+      )
+
+      dust = Array.from({ length: total }, () =>
+        createDust(dustTargets[Math.floor(Math.random() * dustTargets.length)]),
+      )
+    }
+
+    function recycleDust() {
+      if (dustTargets.length === 0) {
+        return
+      }
+
+      for (let index = 0; index < dust.length; index += 1) {
+        if (dust[index].life <= 0) {
+          dust[index] = createDust(
+            dustTargets[Math.floor(Math.random() * dustTargets.length)],
+          )
+        }
+      }
+    }
+
+    function drawDust() {
+      if (reduced) {
+        return
+      }
+
+      for (const mote of dust) {
+        const remaining = Math.max(0, mote.life / mote.maxLife)
+        const alpha = remaining * 0.8
+        const color = colors[mote.tone]
+
+        ctx.strokeStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${alpha * 0.45})`
+        ctx.lineWidth = Math.max(0.6, mote.size * 0.8)
+        ctx.beginPath()
+        ctx.moveTo(
+          mote.x - mote.vx * DUST_TRAIL_SECONDS,
+          mote.y - mote.vy * DUST_TRAIL_SECONDS,
+        )
+        ctx.lineTo(mote.x, mote.y)
+        ctx.stroke()
+
+        ctx.globalAlpha = alpha
+        ctx.drawImage(
+          sprites[mote.tone],
+          mote.x - mote.size,
+          mote.y - mote.size,
+          mote.size * 2,
+          mote.size * 2,
+        )
+        ctx.globalAlpha = 1
+      }
+    }
+
     function drawParticles() {
       ctx.clearRect(0, 0, width, height)
 
@@ -300,6 +369,8 @@ export function ParticleName({ lines, className }: ParticleNameProps) {
           ctx.globalAlpha = 1
         }
       }
+
+      drawDust()
     }
 
     function activate() {
@@ -324,6 +395,8 @@ export function ParticleName({ lines, className }: ParticleNameProps) {
       lastTime = now
       elapsed += delta
       stepParticles(particles, delta, elapsed, pointer ?? undefined)
+      stepDust(dust, delta)
+      recycleDust()
       drawParticles()
       activate()
       animationFrame = window.requestAnimationFrame(frame)
@@ -380,6 +453,12 @@ export function ParticleName({ lines, className }: ParticleNameProps) {
         })
       } else {
         retargetParticles(particles, targets)
+      }
+
+      dustTargets = targets
+
+      if (dust.length === 0) {
+        spawnDust(particles.length)
       }
 
       if (reduced) {
