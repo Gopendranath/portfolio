@@ -18,7 +18,6 @@ import {
 
 const SPRITE_SIZE = 24
 const SPAWN_PADDING = 24
-const INTRO_SECONDS = 0.4
 const IDLE_AMPLITUDE = 0.5
 
 interface ParticleNameLine {
@@ -152,6 +151,8 @@ export function ParticleName({ lines, className }: ParticleNameProps) {
     let onScreen = true
     let documentVisible = !document.hidden
     let cancelled = false
+    let fontsReady = false
+    let activated = false
     let dprQuery: MediaQueryList | null = null
 
     function sampleTargets(): PointTarget[] {
@@ -250,7 +251,6 @@ export function ParticleName({ lines, className }: ParticleNameProps) {
 
     function drawParticles() {
       ctx.clearRect(0, 0, width, height)
-      ctx.globalAlpha = reduced ? 1 : Math.min(1, elapsed / INTRO_SECONDS)
 
       for (const particle of particles) {
         const drift = reduced ? 0 : IDLE_AMPLITUDE
@@ -266,8 +266,19 @@ export function ParticleName({ lines, className }: ParticleNameProps) {
           size * 2,
         )
       }
+    }
 
-      ctx.globalAlpha = 1
+    function activate() {
+      if (!activated) {
+        activated = true
+        setActive(true)
+      }
+    }
+
+    function paintStatic() {
+      settleParticles()
+      drawParticles()
+      activate()
     }
 
     function frame(now: number) {
@@ -280,6 +291,7 @@ export function ParticleName({ lines, className }: ParticleNameProps) {
       elapsed += delta
       stepParticles(particles, delta, elapsed)
       drawParticles()
+      activate()
       animationFrame = window.requestAnimationFrame(frame)
     }
 
@@ -314,7 +326,7 @@ export function ParticleName({ lines, className }: ParticleNameProps) {
     }
 
     function resample() {
-      if (cancelled) {
+      if (cancelled || !fontsReady) {
         return
       }
 
@@ -322,6 +334,7 @@ export function ParticleName({ lines, className }: ParticleNameProps) {
       const targets = sampleTargets()
 
       if (targets.length === 0) {
+        setActive(false)
         return
       }
 
@@ -331,14 +344,12 @@ export function ParticleName({ lines, className }: ParticleNameProps) {
           height,
           padding: SPAWN_PADDING,
         })
-        setActive(true)
       } else {
         retargetParticles(particles, targets)
       }
 
       if (reduced) {
-        settleParticles()
-        drawParticles()
+        paintStatic()
       }
     }
 
@@ -353,11 +364,11 @@ export function ParticleName({ lines, className }: ParticleNameProps) {
         return
       }
 
+      fontsReady = true
       resample()
 
       if (reduced) {
-        settleParticles()
-        drawParticles()
+        paintStatic()
         return
       }
 
