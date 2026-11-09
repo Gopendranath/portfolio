@@ -1,6 +1,7 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { ContributionGraph } from '../components/home/contribution-graph'
 import { GithubSnapshot } from '../components/home/github-snapshot'
+import { ParticleName } from '../components/home/particle-name'
 import { ProjectCard } from '../components/projects/project-card'
 import { ArrowRightIcon } from '../components/ui/icons'
 import { ScrambleText } from '../components/ui/scramble-text'
@@ -42,12 +43,13 @@ function HomePage() {
           <span> · Bengaluru, India</span>
         </p>
 
-        <h1 className="mt-8 text-balance text-[clamp(3rem,8vw,6.5rem)] font-medium leading-[0.9] tracking-[-0.06em] text-ink">
-          <span translate="no">{profile.firstName}</span>
-          <span className="block text-muted" translate="no">
-            {profile.lastName}
-          </span>
-        </h1>
+        <ParticleName
+          className="mt-8 text-[clamp(3rem,8vw,6.5rem)] font-medium leading-[0.9] tracking-[-0.06em] text-ink"
+          lines={[
+            { text: profile.firstName },
+            { text: profile.lastName, muted: true },
+          ]}
+        />
 
         <p className="mt-8 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
           {profile.bio}
