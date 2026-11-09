@@ -115,13 +115,18 @@ function stubParticleEnvironment({
   const context = {
     beginPath: vi.fn(),
     clearRect: vi.fn(),
+    createLinearGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
     createRadialGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
     drawImage: vi.fn(),
     fillRect: vi.fn(),
     fillText: vi.fn(),
     lineTo: vi.fn(),
     moveTo: vi.fn(),
+    restore: vi.fn(),
+    rotate: vi.fn(),
+    save: vi.fn(),
     stroke: vi.fn(),
+    translate: vi.fn(),
     getImageData: vi.fn(
       (_x: number, _y: number, width: number, height: number) => ({
         data: new Uint8ClampedArray(width * height * 4).fill(255),

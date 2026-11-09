@@ -19,8 +19,6 @@ export function createDust(
   return {
     x: target.x,
     y: target.y,
-    previousX: target.x,
-    previousY: target.y,
     vx: Math.cos(angle) * speed,
     vy: -Math.sin(angle) * speed,
     life,
@@ -34,8 +32,6 @@ export function stepDust(dust: DustParticle[], deltaSeconds: number): void {
   const dt = Math.min(deltaSeconds, MAX_STEP_SECONDS)
 
   for (const mote of dust) {
-    mote.previousX = mote.x
-    mote.previousY = mote.y
     mote.x += mote.vx * dt
     mote.y += mote.vy * dt
     mote.life -= dt

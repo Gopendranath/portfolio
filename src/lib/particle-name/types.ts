@@ -20,7 +20,6 @@ export interface Particle {
   targetX: number
   targetY: number
   size: number
-  phase: number
   stiffness: number
   delay: number
   tone: ParticleTone
@@ -35,8 +34,6 @@ export interface RgbColor {
 export interface DustParticle {
   x: number
   y: number
-  previousX: number
-  previousY: number
   vx: number
   vy: number
   life: number

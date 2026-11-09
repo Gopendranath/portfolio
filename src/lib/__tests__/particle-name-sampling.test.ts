@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { collectTargets, thinTargets } from '../particle-name'
+import {
+  MAX_PARTICLES,
+  MIN_PARTICLES,
+  collectTargets,
+  particleBudget,
+  thinTargets,
+} from '../particle-name'
 
 describe('collectTargets', () => {
   it('keeps pixels above the alpha threshold at stride 1', () => {
@@ -33,6 +39,30 @@ describe('collectTargets', () => {
   })
 })
 
+describe('particleBudget', () => {
+  it('grows with canvas area', () => {
+    const phone = particleBudget(320, 120, 1)
+    const desktop = particleBudget(1000, 240, 1)
+
+    expect(desktop).toBeGreaterThan(phone)
+  })
+
+  it('stays inside the usable range', () => {
+    expect(particleBudget(1, 1, 1)).toBe(MIN_PARTICLES)
+    expect(particleBudget(10_000, 10_000, 1)).toBe(MAX_PARTICLES)
+  })
+
+  it('lowers the budget on denser displays', () => {
+    expect(particleBudget(900, 190, 2)).toBeLessThan(
+      particleBudget(900, 190, 1),
+    )
+  })
+
+  it('returns whole particles', () => {
+    expect(Number.isInteger(particleBudget(900, 190, 1.5))).toBe(true)
+  })
+})
+
 describe('thinTargets', () => {
   it('returns the input when already under the cap', () => {
     const targets = [
@@ -56,5 +86,16 @@ describe('thinTargets', () => {
     expect(thinned[0].x).toBe(0)
     expect(thinned[3].x).toBe(9)
     expect(thinned.every((point) => point.tone === 'ink')).toBe(true)
+  })
+
+  it('keeps one point for a budget of one and none for zero', () => {
+    const targets = Array.from({ length: 5 }, (_, index) => ({
+      x: index,
+      y: index,
+      tone: 'ink' as const,
+    }))
+
+    expect(thinTargets(targets, 1)).toEqual([{ x: 2, y: 2, tone: 'ink' }])
+    expect(thinTargets(targets, 0)).toEqual([])
   })
 })

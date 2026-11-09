@@ -1,4 +1,4 @@
-import { useEffect, type RefObject } from 'react'
+import { useEffect, useRef, type RefObject } from 'react'
 import {
   type DustParticle,
   type Particle,
@@ -6,13 +6,18 @@ import {
   type PointerForce,
   createDust,
   createParticles,
-  retargetParticles,
+  fitParticles,
+  particleBudget,
+  particlesSettled,
   stepDust,
   stepParticles,
 } from '../../../lib/particle-name'
 import {
+  type FrameScene,
   type ParticleSprites,
+  type ParticleStreaks,
   buildSprites,
+  buildStreaks,
   drawFrame,
   readParticleColors,
 } from './draw'
@@ -21,8 +26,15 @@ import { sampleTextTargets } from './sample'
 const SPAWN_PADDING = 24
 const POINTER_RADIUS = 90
 const POINTER_STRENGTH = 4600
-const DUST_RATIO = 0.2
-const MAX_DUST = 480
+const DUST_RATIO = 0.15
+const MAX_DUST = 420
+const DUST_REFERENCE_WIDTH = 900
+const DUST_MIN_WIDTH_FACTOR = 0.45
+const INTERACTIVE_WINDOW_SECONDS = 1.6
+const INTERACTIVE_FRAME_MS = 1000 / 60
+const AMBIENT_FRAME_MS = 1000 / 30
+const RESIZE_DEBOUNCE_MS = 120
+const MAX_DPR = 3
 
 interface UseParticleCanvasOptions {
   headingRef: RefObject<HTMLHeadingElement | null>
@@ -36,8 +48,14 @@ interface UseParticleCanvasOptions {
   onActiveChange: (active: boolean) => void
 }
 
+interface BehaviorOptions {
+  scan: boolean
+  dust: boolean
+  hover: boolean
+}
+
 function currentDpr(): number {
-  return Math.min(window.devicePixelRatio || 1, 2)
+  return Math.min(window.devicePixelRatio || 1, MAX_DPR)
 }
 
 export function useParticleCanvas({
@@ -51,12 +69,28 @@ export function useParticleCanvas({
   lineKey,
   onActiveChange,
 }: UseParticleCanvasOptions): void {
+  const behaviorRef = useRef<BehaviorOptions>({
+    scan,
+    dust: dustEnabled,
+    hover,
+  })
+  const onActiveChangeRef = useRef(onActiveChange)
+
+  useEffect(() => {
+    behaviorRef.current = { scan, dust: dustEnabled, hover }
+  }, [scan, dustEnabled, hover])
+
+  useEffect(() => {
+    onActiveChangeRef.current = onActiveChange
+  }, [onActiveChange])
+
   useEffect(() => {
     if (!supported || !enabled || lineKey.length === 0) {
+      onActiveChangeRef.current(false)
       return undefined
     }
 
-    onActiveChange(false)
+    onActiveChangeRef.current(false)
 
     const heading = headingRef.current
     const canvas = canvasRef.current
@@ -76,13 +110,21 @@ export function useParticleCanvas({
     let dustTargets: PointTarget[] = []
     let colors = readParticleColors()
     let sprites: ParticleSprites = buildSprites(colors)
+    let streaks: ParticleStreaks = buildStreaks(colors)
+    let particleScale = 1
     let width = 1
     let height = 1
+    let sampledWidth = 0
+    let sampledHeight = 0
+    let sampledDpr = 0
+    let sampledScale = 0
     let dpr = currentDpr()
     let elapsed = 0
-    let lastTime = 0
+    let interactiveUntil = 0
+    let settling = false
+    let lastRender = 0
     let animationFrame = 0
-    let resizeFrame = 0
+    let resizeTimer: ReturnType<typeof setTimeout> | undefined
     let running = false
     let onScreen = true
     let documentVisible = !document.hidden
@@ -91,14 +133,61 @@ export function useParticleCanvas({
     let activated = false
     let pointer: PointerForce | null = null
     let pointerClient: { x: number; y: number } | null = null
+    let touchPointerId: number | null = null
     let dprQuery: MediaQueryList | null = null
 
-    function sizeCanvas() {
+    const scene: FrameScene = {
+      particles,
+      dust,
+      sprites,
+      streaks,
+      width,
+      height,
+      elapsed,
+      reduced,
+      scan: behaviorRef.current.scan,
+      dustTrails: behaviorRef.current.dust,
+      particleScale,
+    }
+
+    function notifyActive(active: boolean) {
+      onActiveChangeRef.current(active)
+    }
+
+    function deactivate() {
+      activated = false
+      notifyActive(false)
+    }
+
+    function measureHeading() {
       const rect = headingElement.getBoundingClientRect()
       width = Math.max(1, rect.width)
       height = Math.max(1, rect.height)
-      canvasElement.width = Math.max(1, Math.round(width * dpr))
-      canvasElement.height = Math.max(1, Math.round(height * dpr))
+    }
+
+    function measureParticleScale() {
+      const span = headingElement.querySelector<HTMLElement>(
+        '[data-particle-line]',
+      )
+      const fontSize = span
+        ? Number.parseFloat(window.getComputedStyle(span).fontSize) || 16
+        : 16
+
+      return Math.max(0.9, Math.min(1, fontSize / 96))
+    }
+
+    function sizeCanvas() {
+      const nextWidth = Math.max(1, Math.round(width * dpr))
+      const nextHeight = Math.max(1, Math.round(height * dpr))
+
+      if (
+        canvasElement.width !== nextWidth ||
+        canvasElement.height !== nextHeight
+      ) {
+        canvasElement.width = nextWidth
+        canvasElement.height = nextHeight
+      }
+
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
     }
 
@@ -111,19 +200,44 @@ export function useParticleCanvas({
       }
     }
 
-    function spawnDust(pointCount: number) {
-      if (reduced || !dustEnabled || dustTargets.length === 0) {
+    function randomDust(): DustParticle {
+      return createDust(
+        dustTargets[Math.floor(Math.random() * dustTargets.length)],
+      )
+    }
+
+    function dustTotal(): number {
+      const widthFactor = Math.min(
+        1,
+        Math.max(DUST_MIN_WIDTH_FACTOR, width / DUST_REFERENCE_WIDTH),
+      )
+
+      return Math.min(
+        MAX_DUST,
+        Math.max(
+          1,
+          Math.round(
+            particles.length * DUST_RATIO * particleScale * widthFactor,
+          ),
+        ),
+      )
+    }
+
+    function syncDust() {
+      if (reduced || !behaviorRef.current.dust || dustTargets.length === 0) {
+        dust = []
         return
       }
 
-      const total = Math.min(
-        MAX_DUST,
-        Math.max(1, Math.round(pointCount * DUST_RATIO)),
-      )
+      const total = dustTotal()
 
-      dust = Array.from({ length: total }, () =>
-        createDust(dustTargets[Math.floor(Math.random() * dustTargets.length)]),
-      )
+      if (dust.length > total) {
+        dust.length = total
+      }
+
+      while (dust.length < total) {
+        dust.push(randomDust())
+      }
     }
 
     function recycleDust() {
@@ -133,37 +247,36 @@ export function useParticleCanvas({
 
       for (let index = 0; index < dust.length; index += 1) {
         if (dust[index].life <= 0) {
-          dust[index] = createDust(
-            dustTargets[Math.floor(Math.random() * dustTargets.length)],
-          )
+          dust[index] = randomDust()
         }
       }
     }
 
     function draw() {
-      drawFrame(ctx, {
-        particles,
-        dust,
-        sprites,
-        colors,
-        width,
-        height,
-        elapsed,
-        reduced,
-        scan,
-        dustTrails: dustEnabled,
-      })
+      scene.particles = particles
+      scene.dust = dust
+      scene.sprites = sprites
+      scene.streaks = streaks
+      scene.width = width
+      scene.height = height
+      scene.elapsed = elapsed
+      scene.reduced = reduced
+      scene.scan = behaviorRef.current.scan
+      scene.dustTrails = behaviorRef.current.dust
+      scene.particleScale = particleScale
+      drawFrame(ctx, scene)
     }
 
     function activate() {
       if (!activated) {
         activated = true
-        onActiveChange(true)
+        notifyActive(true)
       }
     }
 
     function paintStatic() {
       settleParticles()
+      settling = false
       draw()
       activate()
     }
@@ -173,11 +286,32 @@ export function useParticleCanvas({
         return
       }
 
-      const delta = lastTime === 0 ? 0 : (now - lastTime) / 1000
-      lastTime = now
+      const behavior = behaviorRef.current
+      const interacting =
+        pointerClient !== null ||
+        pointer !== null ||
+        settling ||
+        elapsed < interactiveUntil
+      const interval = interacting ? INTERACTIVE_FRAME_MS : AMBIENT_FRAME_MS
+
+      if (lastRender !== 0 && now - lastRender < interval - 0.5) {
+        animationFrame = window.requestAnimationFrame(frame)
+        return
+      }
+
+      const delta = lastRender === 0 ? 0 : (now - lastRender) / 1000
+      lastRender = now
       elapsed += delta
 
-      if (hover && pointerClient) {
+      if (!behavior.hover && (pointer !== null || pointerClient !== null)) {
+        pointer = null
+        pointerClient = null
+        settling = true
+      }
+
+      if (behavior.hover && pointerClient) {
+        // Read the live rect so layout shifts above the heading (images, fonts,
+        // banners) do not leave the repulsion field offset.
         const rect = headingElement.getBoundingClientRect()
         pointer = {
           x: pointerClient.x - rect.left,
@@ -187,14 +321,28 @@ export function useParticleCanvas({
         }
       }
 
-      stepParticles(
-        particles,
-        delta,
-        elapsed,
-        hover ? (pointer ?? undefined) : undefined,
-      )
+      if (settling || pointer || elapsed < interactiveUntil) {
+        stepParticles(
+          particles,
+          delta,
+          elapsed,
+          behavior.hover ? (pointer ?? undefined) : undefined,
+        )
 
-      if (dustEnabled) {
+        // The simulation stops when the formation has actually converged, not
+        // when a timer runs out. A dropped frame therefore delays the finish
+        // instead of freezing particles halfway to their targets.
+        if (settling && !pointer && particlesSettled(particles)) {
+          settleParticles()
+          settling = false
+        }
+      }
+
+      if (behavior.dust && !reduced) {
+        if (dust.length === 0) {
+          syncDust()
+        }
+
         stepDust(dust, delta)
         recycleDust()
       }
@@ -216,7 +364,7 @@ export function useParticleCanvas({
       }
 
       running = true
-      lastTime = 0
+      lastRender = 0
       animationFrame = window.requestAnimationFrame(frame)
     }
 
@@ -234,16 +382,38 @@ export function useParticleCanvas({
       start()
     }
 
-    function resample() {
+    function resample(force = false) {
       if (cancelled || !fontsReady) {
         return
       }
 
+      measureHeading()
+      particleScale = measureParticleScale()
+
+      if (
+        !force &&
+        particles.length > 0 &&
+        width === sampledWidth &&
+        height === sampledHeight &&
+        dpr === sampledDpr &&
+        particleScale === sampledScale
+      ) {
+        return
+      }
+
+      sampledWidth = width
+      sampledHeight = height
+      sampledDpr = dpr
+      sampledScale = particleScale
       sizeCanvas()
-      const targets = sampleTextTargets(headingElement)
+
+      const targets = sampleTextTargets(
+        headingElement,
+        particleBudget(width, height, dpr),
+      )
 
       if (targets.length === 0) {
-        onActiveChange(false)
+        deactivate()
         return
       }
 
@@ -254,18 +424,25 @@ export function useParticleCanvas({
           padding: SPAWN_PADDING,
         })
       } else {
-        retargetParticles(particles, targets)
+        particles = fitParticles(particles, targets, {
+          width,
+          height,
+          padding: SPAWN_PADDING,
+        })
       }
 
       dustTargets = targets
+      syncDust()
 
-      if (dust.length === 0) {
-        spawnDust(particles.length)
-      }
+      interactiveUntil = elapsed + INTERACTIVE_WINDOW_SECONDS
+      settling = true
 
       if (reduced) {
         paintStatic()
+        return
       }
+
+      syncRunning()
     }
 
     async function setup() {
@@ -280,28 +457,19 @@ export function useParticleCanvas({
       }
 
       fontsReady = true
-      resample()
-
-      if (reduced) {
-        paintStatic()
-        return
-      }
-
-      start()
+      resample(true)
     }
 
     function updateColors() {
       colors = readParticleColors()
       sprites = buildSprites(colors)
-
-      if (reduced) {
-        draw()
-      }
+      streaks = buildStreaks(colors)
+      draw()
     }
 
     const onDprChange = () => {
       dpr = currentDpr()
-      resample()
+      resample(true)
       watchDpr()
     }
 
@@ -318,10 +486,12 @@ export function useParticleCanvas({
 
       if (reduced) {
         stop()
+        dust = []
         paintStatic()
         return
       }
 
+      syncDust()
       syncRunning()
     }
 
@@ -330,33 +500,62 @@ export function useParticleCanvas({
       syncRunning()
     }
 
-    const onPointerMove = (event: PointerEvent) => {
-      if (
-        !hover ||
-        (event.pointerType !== 'mouse' && event.pointerType !== 'pen')
-      ) {
+    const onPointerDown = (event: PointerEvent) => {
+      if (!behaviorRef.current.hover || event.pointerType !== 'touch') {
         return
       }
 
+      touchPointerId = event.pointerId
       pointerClient = { x: event.clientX, y: event.clientY }
     }
 
-    const onPointerLeave = () => {
+    const onPointerMove = (event: PointerEvent) => {
+      if (!behaviorRef.current.hover) {
+        return
+      }
+
+      if (event.pointerType === 'mouse' || event.pointerType === 'pen') {
+        pointerClient = { x: event.clientX, y: event.clientY }
+        return
+      }
+
+      if (event.pointerType === 'touch' && event.pointerId === touchPointerId) {
+        pointerClient = { x: event.clientX, y: event.clientY }
+      }
+    }
+
+    const endTouch = (event: PointerEvent) => {
+      if (event.pointerType !== 'touch' || event.pointerId !== touchPointerId) {
+        return
+      }
+
+      touchPointerId = null
       pointerClient = null
       pointer = null
+      settling = true
+    }
+
+    const onPointerLeave = (event: PointerEvent) => {
+      if (event.pointerType === 'touch') {
+        return
+      }
+
+      pointerClient = null
+      pointer = null
+      settling = true
     }
 
     const themeObserver = new MutationObserver(updateColors)
     themeObserver.observe(document.documentElement, {
       attributes: true,
-      attributeFilter: ['data-theme'],
+      attributeFilter: ['data-theme', 'data-accent'],
     })
 
     const resizeObserver = new ResizeObserver(() => {
-      window.cancelAnimationFrame(resizeFrame)
-      resizeFrame = window.requestAnimationFrame(() => {
+      clearTimeout(resizeTimer)
+      resizeTimer = setTimeout(() => {
         resample()
-      })
+      }, RESIZE_DEBOUNCE_MS)
     })
     resizeObserver.observe(headingElement)
 
@@ -370,9 +569,14 @@ export function useParticleCanvas({
 
     motionQuery.addEventListener('change', onMotionChange)
     document.addEventListener('visibilitychange', onVisibilityChange)
+    headingElement.addEventListener('pointerdown', onPointerDown, {
+      passive: true,
+    })
     headingElement.addEventListener('pointermove', onPointerMove, {
       passive: true,
     })
+    headingElement.addEventListener('pointerup', endTouch)
+    headingElement.addEventListener('pointercancel', endTouch)
     headingElement.addEventListener('pointerleave', onPointerLeave)
     watchDpr()
     void setup()
@@ -381,26 +585,20 @@ export function useParticleCanvas({
       cancelled = true
       running = false
       window.cancelAnimationFrame(animationFrame)
-      window.cancelAnimationFrame(resizeFrame)
+      clearTimeout(resizeTimer)
       themeObserver.disconnect()
       resizeObserver.disconnect()
       intersectionObserver.disconnect()
       dprQuery?.removeEventListener('change', onDprChange)
       motionQuery.removeEventListener('change', onMotionChange)
       document.removeEventListener('visibilitychange', onVisibilityChange)
+      headingElement.removeEventListener('pointerdown', onPointerDown)
       headingElement.removeEventListener('pointermove', onPointerMove)
+      headingElement.removeEventListener('pointerup', endTouch)
+      headingElement.removeEventListener('pointercancel', endTouch)
       headingElement.removeEventListener('pointerleave', onPointerLeave)
+      ctx.setTransform(1, 0, 0, 1, 0, 0)
       ctx.clearRect(0, 0, canvasElement.width, canvasElement.height)
     }
-  }, [
-    canvasRef,
-    dustEnabled,
-    enabled,
-    headingRef,
-    hover,
-    lineKey,
-    onActiveChange,
-    scan,
-    supported,
-  ])
+  }, [canvasRef, enabled, headingRef, lineKey, supported])
 }

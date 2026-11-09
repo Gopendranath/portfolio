@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 import {
   createDust,
   createParticles,
+  fitParticles,
   parseColor,
+  particlesSettled,
   retargetParticles,
   sampleStride,
   stepDust,
@@ -80,6 +82,35 @@ describe('stepParticles', () => {
     expect(Math.abs(particle.y - 100)).toBeLessThan(1)
   })
 
+  it('converges in the same simulated time at 30 fps as at 60 fps', () => {
+    const fast = seedParticle({ targetX: 320, targetY: 120, stiffness: 95 })
+    const slow = seedParticle({ targetX: 320, targetY: 120, stiffness: 95 })
+
+    for (let frame = 0; frame < 180; frame += 1) {
+      stepParticles([fast], 1 / 60, frame / 60)
+    }
+
+    for (let frame = 0; frame < 90; frame += 1) {
+      stepParticles([slow], 1 / 30, frame / 30)
+    }
+
+    expect(Math.abs(fast.x - slow.x)).toBeLessThan(1.5)
+    expect(Math.abs(slow.x - 320)).toBeLessThan(5)
+  })
+
+  it('reports settled only once particles reach their targets', () => {
+    const particle = seedParticle({ targetX: 100, targetY: 100 })
+
+    expect(particlesSettled([particle])).toBe(false)
+
+    particle.x = 100.2
+    particle.y = 99.8
+    expect(particlesSettled([particle])).toBe(true)
+
+    particle.x = 120
+    expect(particlesSettled([particle])).toBe(false)
+  })
+
   it('clamps a huge delta so a resume does not fling particles', () => {
     const particle = seedParticle({ targetX: 100, targetY: 100 })
 
@@ -111,8 +142,6 @@ describe('createDust', () => {
     expect(dust).toMatchObject({
       x: 10,
       y: 20,
-      previousX: 10,
-      previousY: 20,
       tone: 'ink',
     })
     expect(dust.vx).toBeGreaterThan(0)
@@ -130,8 +159,6 @@ describe('stepDust', () => {
 
     expect(dust.x).toBeGreaterThan(10)
     expect(dust.y).toBeLessThan(20)
-    expect(dust.previousX).toBe(10)
-    expect(dust.previousY).toBe(20)
     expect(dust.life).toBeLessThan(dust.maxLife)
   })
 
@@ -204,6 +231,85 @@ describe('retargetParticles', () => {
       targetY: 8,
       tone: 'ink',
     })
+  })
+})
+
+describe('fitParticles', () => {
+  const bounds = { width: 100, height: 100, padding: 0 }
+
+  it('trims particles when the target count shrinks', () => {
+    const particles = createParticles(
+      [
+        { x: 10, y: 10, tone: 'ink' as const },
+        { x: 20, y: 20, tone: 'ink' as const },
+        { x: 30, y: 30, tone: 'ink' as const },
+      ],
+      bounds,
+      () => 0.5,
+    )
+
+    const fitted = fitParticles(
+      particles,
+      [
+        { x: 5, y: 6, tone: 'muted' },
+        { x: 7, y: 8, tone: 'ink' },
+      ],
+      bounds,
+      () => 0.5,
+    )
+
+    expect(fitted).toHaveLength(2)
+    expect(fitted[0]).toMatchObject({ targetX: 5, targetY: 6, tone: 'muted' })
+    expect(fitted[1]).toMatchObject({ targetX: 7, targetY: 8, tone: 'ink' })
+  })
+
+  it('adds particles when the target count grows', () => {
+    const particles = createParticles(
+      [
+        { x: 10, y: 10, tone: 'ink' as const },
+        { x: 20, y: 20, tone: 'ink' as const },
+      ],
+      bounds,
+      () => 0.5,
+    )
+
+    const fitted = fitParticles(
+      particles,
+      [
+        { x: 5, y: 6, tone: 'muted' },
+        { x: 7, y: 8, tone: 'ink' },
+        { x: 9, y: 10, tone: 'ink' },
+      ],
+      bounds,
+      () => 0.5,
+    )
+
+    expect(fitted).toHaveLength(3)
+    expect(fitted[2]).toMatchObject({ targetX: 9, targetY: 10, tone: 'ink' })
+  })
+
+  it('keeps the particle count when the counts already match', () => {
+    const particles = createParticles(
+      [
+        { x: 10, y: 10, tone: 'ink' as const },
+        { x: 20, y: 20, tone: 'ink' as const },
+      ],
+      bounds,
+      () => 0.5,
+    )
+
+    const fitted = fitParticles(
+      particles,
+      [
+        { x: 5, y: 6, tone: 'muted' },
+        { x: 7, y: 8, tone: 'ink' },
+      ],
+      bounds,
+      () => 0.5,
+    )
+
+    expect(fitted).toBe(particles)
+    expect(fitted).toHaveLength(2)
   })
 })
 

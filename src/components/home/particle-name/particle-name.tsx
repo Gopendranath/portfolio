@@ -35,6 +35,24 @@ function lineClassName(active: boolean, muted: boolean): string {
   return muted ? 'block text-muted' : 'block'
 }
 
+function lineSignature(lines: readonly ParticleNameLine[]): string {
+  return lines
+    .map((line) => `${line.muted ? 'muted' : 'ink'}\u0000${line.text}`)
+    .join('\u0001')
+}
+
+function lineKeys(lines: readonly ParticleNameLine[]): string[] {
+  const occurrences = new Map<string, number>()
+
+  return lines.map((line) => {
+    const signature = `${line.muted ? 'muted' : 'ink'}\u0000${line.text}`
+    const count = occurrences.get(signature) ?? 0
+    occurrences.set(signature, count + 1)
+
+    return `${signature}\u0002${count}`
+  })
+}
+
 export function ParticleName({
   lines,
   className,
@@ -48,7 +66,14 @@ export function ParticleName({
   const [supported] = useState(isCanvasSupported)
   const [active, setActive] = useState(false)
   const particleActive = enabled && active
-  const lineKey = lines.map((line) => line.text).join('|')
+  const lineKey = lineSignature(lines)
+  const keys = lineKeys(lines)
+
+  // Adjust state during render so re-enabling the cloud cannot paint one frame
+  // with transparent text over an empty canvas.
+  if (!enabled && active) {
+    setActive(false)
+  }
 
   useParticleCanvas({
     headingRef,
@@ -69,9 +94,10 @@ export function ParticleName({
       translate="no"
       className={`relative ${className ?? ''}`.trim()}
     >
-      {lines.map((line) => (
+      {lines.map((line, index) => (
         <span
-          key={line.text}
+          key={keys[index]}
+          aria-hidden="true"
           data-particle-line
           data-tone={line.muted ? 'muted' : 'ink'}
           className={lineClassName(particleActive, line.muted ?? false)}
@@ -80,12 +106,12 @@ export function ParticleName({
         </span>
       ))}
       {supported && enabled ? (
-        <div
+        <span
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0"
+          className="pointer-events-none absolute inset-0 block"
         >
           <canvas ref={canvasRef} className="h-full w-full" />
-        </div>
+        </span>
       ) : null}
     </h1>
   )
