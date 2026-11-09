@@ -3,10 +3,10 @@ import type { DustParticle, PointTarget } from './types'
 
 const DUST_ANGLE = Math.PI / 6
 const DUST_ANGLE_JITTER = 0.09
-const DUST_MIN_SPEED = 26
-const DUST_MAX_SPEED = 46
-const DUST_MIN_LIFE = 0.8
-const DUST_MAX_LIFE = 1.5
+const DUST_MIN_SPEED = 15
+const DUST_MAX_SPEED = 35
+const DUST_MIN_LIFE = 2.25
+const DUST_MAX_LIFE = 4.5
 
 export function createDust(
   target: PointTarget,

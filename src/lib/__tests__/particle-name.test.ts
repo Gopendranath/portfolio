@@ -117,8 +117,8 @@ describe('createDust', () => {
     })
     expect(dust.vx).toBeGreaterThan(0)
     expect(dust.vy).toBeLessThan(0)
-    expect(dust.maxLife).toBeGreaterThanOrEqual(0.8)
-    expect(dust.maxLife).toBeLessThanOrEqual(1.5)
+    expect(dust.maxLife).toBeGreaterThanOrEqual(2.25)
+    expect(dust.maxLife).toBeLessThanOrEqual(4.5)
   })
 })
 
@@ -138,7 +138,7 @@ describe('stepDust', () => {
   it('expires after its lifetime', () => {
     const dust = createDust({ x: 10, y: 20, tone: 'ink' }, () => 0.5)
 
-    for (let frame = 0; frame < 200; frame += 1) {
+    for (let frame = 0; frame < 300; frame += 1) {
       stepDust([dust], 1 / 60)
     }
 
