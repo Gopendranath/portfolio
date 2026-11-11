@@ -48,7 +48,7 @@ src/
   components/
     chat/        assistant and owner chat preview
     home/        GitHub snapshot and contribution graph
-    layout/      sidebar, mobile drawer, shell, context
+    layout/      sidebar, mobile header and dock, shell
     projects/    project card
     ui/          headers, labels, icons, links, status
   data/          profile, navigation, projects, shared types
@@ -92,7 +92,7 @@ The public GitHub API is unauthenticated at runtime, so it can be rate-limited. 
 
 ## Theme
 
-Dark is the default. The sidebar and mobile drawer include a pill-style theme toggle; press `T` outside a form field to toggle from the keyboard. The choice is stored in `localStorage` under `theme` and applied before React mounts by a small inline script in `index.html` to avoid a flash.
+Dark is the default. The sidebar and mobile header include a pill-style theme toggle; press `T` outside a form field to toggle from the keyboard. The choice is stored in `localStorage` under `theme` and applied before React mounts by a small inline script in `index.html` to avoid a flash.
 
 Theme tokens live in `src/index.css`. `html[data-theme="light"]` overrides the dark palette, including the dot-grid color and browser `color-scheme`. The toggle also updates the `theme-color` meta tag.
 

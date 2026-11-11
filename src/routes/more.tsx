@@ -16,7 +16,7 @@ const siteFacts = [
 const features = [
   {
     title: 'Persistent navigation',
-    body: 'A fixed sidebar on desktop and an accessible dialog drawer on small screens, with the current route marked.',
+    body: 'A fixed sidebar on desktop and a floating bottom dock on small screens, with the current route marked.',
   },
   {
     title: 'Theme control',
