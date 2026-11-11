@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import type { AnchorHTMLAttributes, ReactNode } from 'react'
 import { expect, it, vi } from 'vitest'
 import { profile } from '../../../data/profile'
@@ -39,4 +39,24 @@ it('shows identity and theme control without a drawer trigger', () => {
   expect(
     screen.queryByRole('button', { name: /open navigation/i }),
   ).not.toBeInTheDocument()
+})
+
+it('drops the bottom border once the page scrolls', () => {
+  render(
+    <ThemeProvider>
+      <MobileHeader />
+    </ThemeProvider>,
+  )
+
+  const header = screen.getByRole('banner')
+  expect(header).toHaveClass('border-line')
+
+  Object.defineProperty(window, 'scrollY', {
+    value: 120,
+    configurable: true,
+  })
+  fireEvent.scroll(window)
+
+  expect(header).toHaveClass('border-transparent')
+  expect(header).not.toHaveClass('border-line')
 })

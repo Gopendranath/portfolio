@@ -29,14 +29,15 @@ export function RootLayout() {
         <Analytics route={pathname} path={pathname} />
         <SkipLink />
         <AppSidebar />
-        <MobileHeader />
+        {/* Remount on navigation so scroll-edge state resets before the scroll event fires. */}
+        <MobileHeader key={`header-${pathname}`} />
         <MobileDock />
-        <ScrollBlur key={pathname} />
+        <ScrollBlur key={`scroll-${pathname}`} />
 
         <div
           className={
             isChat
-              ? 'flex h-[calc(100dvh_-_4rem_-_var(--mobile-dock-space))] flex-col overflow-hidden lg:h-dvh lg:pl-[280px]'
+              ? 'flex h-[calc(100dvh_-_4rem_-_var(--mobile-dock-space)_+_0.75rem)] flex-col overflow-hidden lg:h-dvh lg:pl-[280px]'
               : 'flex min-h-dvh flex-col pb-[var(--mobile-dock-space)] lg:pb-0 lg:pl-[280px]'
           }
         >
