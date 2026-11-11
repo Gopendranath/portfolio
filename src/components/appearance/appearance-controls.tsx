@@ -1,6 +1,7 @@
 import { useId } from 'react'
 import { accentPalettes, cursorStyles } from '../../lib/appearance'
 import { SectionLabel } from '../ui/section-label'
+import { AppearanceRadio } from './appearance-radio'
 import { useAppearance } from './appearance-context'
 import { HeroNameControls } from './hero-name-controls'
 
@@ -48,22 +49,14 @@ export function AppearanceControls() {
               const active = style.id === cursorStyle
 
               return (
-                <label
+                <AppearanceRadio
                   key={style.id}
-                  className={`cursor-target flex cursor-pointer items-start gap-3 border px-3 py-3 transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent ${
-                    active
-                      ? 'border-accent bg-accent/5'
-                      : 'border-line hover:border-muted/60'
-                  }`}
+                  name="cursor-style"
+                  value={style.id}
+                  checked={active}
+                  onChange={() => setCursorStyle(style.id)}
+                  className="items-start gap-3 px-3 py-3"
                 >
-                  <input
-                    type="radio"
-                    name="cursor-style"
-                    value={style.id}
-                    checked={active}
-                    onChange={() => setCursorStyle(style.id)}
-                    className="sr-only"
-                  />
                   <span
                     aria-hidden="true"
                     className={`mt-0.5 grid size-4 shrink-0 place-items-center border ${
@@ -82,7 +75,7 @@ export function AppearanceControls() {
                       {style.description}
                     </span>
                   </span>
-                </label>
+                </AppearanceRadio>
               )
             })}
           </div>
@@ -108,22 +101,16 @@ export function AppearanceControls() {
               const active = palette.id === accent
 
               return (
-                <label
+                <AppearanceRadio
                   key={palette.id}
-                  className={`cursor-target flex cursor-pointer items-center gap-2 border px-2.5 py-2 transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent ${
-                    active
-                      ? 'border-accent bg-accent/5 text-ink'
-                      : 'border-line text-muted hover:border-muted/60'
+                  name="accent"
+                  value={palette.id}
+                  checked={active}
+                  onChange={() => setAccent(palette.id)}
+                  className={`items-center gap-2 px-2.5 py-2 ${
+                    active ? 'text-ink' : 'text-muted'
                   }`}
                 >
-                  <input
-                    type="radio"
-                    name="accent"
-                    value={palette.id}
-                    checked={active}
-                    onChange={() => setAccent(palette.id)}
-                    className="sr-only"
-                  />
                   <span
                     aria-hidden="true"
                     className="size-4 shrink-0 rounded-full border border-line"
@@ -132,7 +119,7 @@ export function AppearanceControls() {
                   <span className="font-mono text-[9px] uppercase tracking-[0.12em]">
                     {palette.label}
                   </span>
-                </label>
+                </AppearanceRadio>
               )
             })}
           </div>
