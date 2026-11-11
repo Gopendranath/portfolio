@@ -1,6 +1,7 @@
 import { Link, useRouterState } from '@tanstack/react-router'
 import { useLayoutEffect, useRef, useState } from 'react'
 import { navItems } from '../../data/navigation'
+import { isNavItemActive } from '../../lib/navigation'
 
 interface PrimaryNavProps {
   className?: string
@@ -12,12 +13,6 @@ interface IndicatorPosition {
   height: number
 }
 
-function isItemActive(pathname: string, to: string) {
-  return to === '/'
-    ? pathname === '/'
-    : pathname === to || pathname.startsWith(`${to}/`)
-}
-
 export function PrimaryNav({ className = '', onNavigate }: PrimaryNavProps) {
   const navRef = useRef<HTMLElement>(null)
   const itemRefs = useRef<Array<HTMLLIElement | null>>([])
@@ -26,7 +21,7 @@ export function PrimaryNav({ className = '', onNavigate }: PrimaryNavProps) {
     select: (state) => state.location.pathname,
   })
   const activeIndex = navItems.findIndex((item) =>
-    isItemActive(pathname, item.to),
+    isNavItemActive(pathname, item.to),
   )
 
   useLayoutEffect(() => {
