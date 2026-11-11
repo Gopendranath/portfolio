@@ -34,13 +34,13 @@ export function MobileDock() {
       aria-label="Primary"
       className="fixed inset-x-0 bottom-0 z-40 flex justify-center px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:hidden"
     >
-      <div className="w-full max-w-[22rem] rounded-2xl border border-line bg-canvas/90 p-1.5 shadow-[0_16px_40px_-12px_rgb(0_0_0/0.7),0_4px_12px_rgb(0_0_0/0.35),inset_0_1px_0_rgb(255_255_255/0.04)] backdrop-blur-md">
+      <div className="w-full max-w-[22rem] rounded-2xl border border-line bg-canvas/90 p-1.5 shadow-[0_10px_30px_-14px_rgb(0_0_0/0.45),0_2px_8px_rgb(0_0_0/0.2),inset_0_1px_0_rgb(255_255_255/0.03)] backdrop-blur-md">
         <ul className="relative flex items-stretch">
           {activeIndex >= 0 ? (
             <span
               aria-hidden="true"
               data-dock-indicator=""
-              className="pointer-events-none absolute inset-y-0 left-0 w-1/6 rounded-xl bg-accent/10 ring-1 ring-accent/10 ring-inset transition-transform duration-300 ease-spring motion-reduce:transition-none"
+              className="pointer-events-none absolute inset-y-0 left-0 w-1/6 rounded-xl bg-accent transition-transform duration-300 ease-spring motion-reduce:transition-none"
               style={{ transform: `translateX(${activeIndex * 100}%)` }}
             />
           ) : null}
@@ -54,7 +54,7 @@ export function MobileDock() {
                   to={item.to}
                   aria-current={isActive ? 'page' : undefined}
                   className={`mobile-dock-link relative flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl px-0.5 py-1.5 transition-colors ${
-                    isActive ? 'text-accent' : 'text-muted hover:text-ink'
+                    isActive ? 'text-accent-ink' : 'text-muted hover:text-ink'
                   }`}
                 >
                   <Icon className="dock-icon size-[18px]" />
