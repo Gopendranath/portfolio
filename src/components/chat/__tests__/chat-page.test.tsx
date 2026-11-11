@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react'
 import { expect, it } from 'vitest'
-import { ChatPage } from '../../../routes/chat'
+import { ChatPage } from '../chat-page'
 
 it('defers the chat height to the layout shell', () => {
   const { container } = render(<ChatPage />)
