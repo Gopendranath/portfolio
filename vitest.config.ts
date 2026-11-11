@@ -15,5 +15,6 @@ export default defineConfig({
     restoreMocks: true,
     css: false,
     isolate: true,
+    pool: 'vmThreads',
   },
 })
