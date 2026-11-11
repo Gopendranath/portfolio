@@ -36,8 +36,8 @@ export function RootLayout() {
         <div
           className={
             isChat
-              ? 'flex h-[calc(100dvh-4rem)] flex-col overflow-hidden lg:h-dvh lg:pl-[280px]'
-              : 'flex min-h-dvh flex-col lg:pl-[280px]'
+              ? 'flex h-[calc(100dvh_-_4rem_-_var(--mobile-dock-space))] flex-col overflow-hidden lg:h-dvh lg:pl-[280px]'
+              : 'flex min-h-dvh flex-col pb-[var(--mobile-dock-space)] lg:pb-0 lg:pl-[280px]'
           }
         >
           <main
