@@ -96,7 +96,7 @@ export function ChatShell() {
         aria-labelledby="chat-thread-title"
         className="flex min-h-0 flex-1 flex-col overflow-hidden"
       >
-        <header className="chat-thread-header flex shrink-0 items-center gap-3 border-b border-line p-4">
+        <header className="chat-thread-header hidden shrink-0 items-center gap-3 border-b border-line p-4 md:flex">
           <ChatAvatar profile={activeProfile} />
           <div className="min-w-0">
             <h2
