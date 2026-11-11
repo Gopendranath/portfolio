@@ -37,7 +37,7 @@ export const DEFAULT_PARTICLE_PREFERENCES: ParticlePreferences = {
   cloud: true,
   scan: true,
   dust: true,
-  hover: false,
+  hover: true,
 }
 
 export const ACCENT_STORAGE_KEY = 'appearance-accent'
@@ -54,7 +54,10 @@ export const PARTICLE_STORAGE_KEYS: Record<ParticlePreferenceKey, string> = {
   cloud: 'appearance-particle-cloud',
   scan: 'appearance-particle-scan',
   dust: 'appearance-particle-dust',
-  hover: 'appearance-particle-hover',
+  // Re-baselined when pointer interaction became the default. The old key was
+  // written automatically on first visit, so a stored "false" there is not a
+  // deliberate opt-out and would otherwise mask the new default forever.
+  hover: 'appearance-particle-hover-2',
 }
 
 export const accentPalettes: readonly AccentPalette[] = [

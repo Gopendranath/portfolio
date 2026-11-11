@@ -42,7 +42,7 @@ it('defaults to the target cursor and lime accent', () => {
   expect(localStorage.getItem(CURSOR_STORAGE_KEY)).toBe('target')
 })
 
-it('defaults the particle cloud on with hover off', () => {
+it('defaults the particle cloud on with hover on', () => {
   const { result } = renderHook(() => useAppearance(), { wrapper: Wrapper })
 
   expect(result.current.particles).toEqual(DEFAULT_PARTICLE_PREFERENCES)
@@ -50,7 +50,7 @@ it('defaults the particle cloud on with hover off', () => {
     cloud: true,
     scan: true,
     dust: true,
-    hover: false,
+    hover: true,
   })
 
   for (const [key, storageKey] of Object.entries(PARTICLE_STORAGE_KEYS)) {
@@ -84,7 +84,7 @@ it('resets particle preferences to the defaults', () => {
 
   expect(result.current.particles).toEqual(DEFAULT_PARTICLE_PREFERENCES)
   expect(localStorage.getItem(PARTICLE_STORAGE_KEYS.scan)).toBe('true')
-  expect(localStorage.getItem(PARTICLE_STORAGE_KEYS.hover)).toBe('false')
+  expect(localStorage.getItem(PARTICLE_STORAGE_KEYS.hover)).toBe('true')
 })
 
 it('applies and persists accent and cursor changes', () => {
