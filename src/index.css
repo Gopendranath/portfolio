@@ -284,6 +284,10 @@
   -webkit-mask-image: linear-gradient(to top, black, transparent);
 }
 
+.mobile-dock-link {
+  -webkit-tap-highlight-color: transparent;
+}
+
 @media (max-height: 520px) {
   .chat-profile-panel {
     padding: 0.5rem 0.75rem;

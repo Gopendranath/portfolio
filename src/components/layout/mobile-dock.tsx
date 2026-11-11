@@ -25,14 +25,25 @@ export function MobileDock() {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   })
+  const activeIndex = navItems.findIndex((item) =>
+    isNavItemActive(pathname, item.to),
+  )
 
   return (
     <nav
       aria-label="Primary"
       className="fixed inset-x-0 bottom-0 z-40 flex justify-center px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:hidden"
     >
-      <div className="w-full max-w-[22rem] rounded-2xl border border-line bg-canvas/90 p-1.5 shadow-[0_10px_30px_rgb(0_0_0/0.35)] backdrop-blur-md">
-        <ul className="flex items-stretch">
+      <div className="w-full max-w-[22rem] rounded-2xl border border-line bg-canvas/90 p-1.5 shadow-[0_16px_40px_-12px_rgb(0_0_0/0.7),0_4px_12px_rgb(0_0_0/0.35),inset_0_1px_0_rgb(255_255_255/0.04)] backdrop-blur-md">
+        <ul className="relative flex items-stretch">
+          {activeIndex >= 0 ? (
+            <span
+              aria-hidden="true"
+              data-dock-indicator=""
+              className="pointer-events-none absolute inset-y-0 left-0 w-1/6 rounded-xl bg-accent/10 shadow-[0_6px_18px_-6px_rgb(0_0_0/0.55),inset_0_1px_0_rgb(255_255_255/0.06)] ring-1 ring-accent/10 ring-inset transition-transform duration-300 ease-spring motion-reduce:transition-none"
+              style={{ transform: `translateX(${activeIndex * 100}%)` }}
+            />
+          ) : null}
           {navItems.map((item) => {
             const isActive = isNavItemActive(pathname, item.to)
             const Icon = dockIcons[item.to]
@@ -42,18 +53,10 @@ export function MobileDock() {
                 <Link
                   to={item.to}
                   aria-current={isActive ? 'page' : undefined}
-                  className={`relative flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl px-0.5 py-1.5 transition-colors ${
-                    isActive
-                      ? 'bg-accent/10 text-accent'
-                      : 'text-muted hover:text-ink'
+                  className={`mobile-dock-link relative flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl px-0.5 py-1.5 transition-colors ${
+                    isActive ? 'text-accent' : 'text-muted hover:text-ink'
                   }`}
                 >
-                  {isActive ? (
-                    <span
-                      aria-hidden="true"
-                      className="absolute inset-x-3 top-0 h-0.5 rounded-full bg-accent"
-                    />
-                  ) : null}
                   <Icon className="size-[18px]" />
                   <span className="max-w-full truncate font-mono text-[8px] uppercase">
                     {item.label}

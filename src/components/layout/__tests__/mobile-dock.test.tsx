@@ -45,4 +45,8 @@ it('renders every destination and marks the active route', () => {
   expect(screen.getByRole('link', { name: 'Home' })).not.toHaveAttribute(
     'aria-current',
   )
+
+  const indicator = nav.querySelector('[data-dock-indicator]')
+  expect(indicator).not.toBeNull()
+  expect(indicator).toHaveStyle({ transform: 'translateX(100%)' })
 })
