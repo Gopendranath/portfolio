@@ -47,6 +47,8 @@ Cloud and DevOps: AWS, Docker, Vercel, Netlify, Git, Linux.
 
 In supported browsers, this site exposes five read-only WebMCP tools for agent Q&A: `get-profile`, `list-projects`, `get-project`, `check-availability`, and `get-contact`. Each returns structured data from the same source as the pages above.
 
+The chat composer on [/chat](/chat) is also annotated as a declarative WebMCP tool (`send-chat-message`), so an agent can fill the message field. Nothing is submitted to a backend and the user still presses Send.
+
 ## Optional
 
 - [GitHub profile stats](https://github.com/Gopendranath) : Public repos, followers, and stars shown on the home page via the GitHub API

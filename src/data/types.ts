@@ -26,20 +26,6 @@ export interface Project {
   featured?: boolean
 }
 
-export type RoutePath =
-  | '/'
-  | '/projects'
-  | '/about'
-  | '/contact'
-  | '/chat'
-  | '/more'
-
-export interface NavItem {
-  index: string
-  label: string
-  to: RoutePath
-}
-
 export interface Profile {
   name: string
   firstName: string

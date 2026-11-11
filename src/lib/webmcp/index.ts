@@ -1,33 +1,33 @@
-export {
-  createCheckAvailabilityTool,
-  createGetContactTool,
-  createGetProfileTool,
-} from './profile-tools'
 export type {
   AvailabilityResult,
   ContactResult,
   ProfileResult,
-} from './profile-tools'
+} from './profile-tools.ts'
 export {
-  createGetProjectTool,
-  createListProjectsTool,
-} from './project-tools'
+  createCheckAvailabilityTool,
+  createGetContactTool,
+  createGetProfileTool,
+} from './profile-tools.ts'
 export type {
   GetProjectInput,
   GetProjectResult,
   ListProjectsInput,
   ListProjectsResult,
-} from './project-tools'
+} from './project-tools.ts'
+export {
+  createGetProjectTool,
+  createListProjectsTool,
+} from './project-tools.ts'
 export type {
   ProjectResult,
   SocialResult,
   ToolError,
   WebMcpExecuteOptions,
   WebMcpTool,
-} from './tool'
-export { useWebMCP } from './use-webmcp'
+} from './tool.ts'
 export type {
   WebMcpToolOptions,
   WebMcpToolResponse,
   WebMcpToolState,
-} from './use-webmcp'
+} from './use-webmcp.ts'
+export { useWebMCP } from './use-webmcp.ts'

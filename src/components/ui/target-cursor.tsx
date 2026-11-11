@@ -6,11 +6,11 @@
  * See https://github.com/DavidHDev/react-bits/blob/main/LICENSE.md
  */
 import {
+  type CSSProperties,
+  type RefObject,
   useEffect,
   useRef,
   useState,
-  type CSSProperties,
-  type RefObject,
 } from 'react'
 import { createPortal } from 'react-dom'
 import { spring } from './target-cursor-spring'
@@ -249,7 +249,7 @@ const TargetCursor = ({
       const sin = Math.sin(turn.x)
       const w = Math.max(0, halfW.x) * squeeze
       const h = Math.max(0, halfH.x) * squeeze
-      const local = [
+      const local: ReadonlyArray<readonly [number, number]> = [
         [-w, -h],
         [w, -h],
         [w, h],
@@ -260,13 +260,15 @@ const TargetCursor = ({
       let left = Number.POSITIVE_INFINITY
       let top = Number.POSITIVE_INFINITY
       cornerRefs.current.forEach((corner, i) => {
-        if (!corner) return
-        const [lx, ly] = local[i]
+        const position = local[i]
+        const angle = CORNER_ANGLES[i]
+        if (!corner || !position || angle === undefined) return
+        const [lx, ly] = position
         const x = centerX.x + lx * cos - ly * sin
         const y = centerY.x + lx * sin + ly * cos
         left = Math.min(left, x)
         top = Math.min(top, y)
-        corner.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0) rotate(${(CORNER_ANGLES[i] + degrees).toFixed(2)}deg)`
+        corner.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0) rotate(${(angle + degrees).toFixed(2)}deg)`
         corner.style.width = `${s.cornerSize}px`
         corner.style.height = `${s.cornerSize}px`
         corner.style.borderWidth = `${s.thickness}px 0 0 ${s.thickness}px`

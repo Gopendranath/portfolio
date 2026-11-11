@@ -1,61 +1,21 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
-import { AppearanceControls } from '../components/appearance/appearance-controls'
-import { ArrowRightIcon } from '../components/ui/icons'
-import { ExternalLink } from '../components/ui/external-link'
-import { PageHeader } from '../components/ui/page-header'
-import { SectionLabel } from '../components/ui/section-label'
-import { pageHead } from '../lib/seo'
-
-const siteFacts = [
-  { label: 'Type', value: 'Static single-page app' },
-  { label: 'Rendering', value: 'Client-side React' },
-  { label: 'Hosting', value: 'Vercel' },
-  { label: 'Tracking', value: 'None' },
-] as const
-
-const features = [
-  {
-    title: 'Persistent navigation',
-    body: 'A fixed sidebar on desktop and a floating bottom dock on small screens, with the current route marked.',
-  },
-  {
-    title: 'Theme control',
-    body: 'Dark by default, with a light palette that persists locally. Accent colors, cursor styles, and the animated hero name can be adjusted below.',
-  },
-  {
-    title: 'Project index',
-    body: 'Six curated projects with summaries, stack tags, and direct links to live demos or source code.',
-  },
-  {
-    title: 'GitHub snapshot',
-    body: 'Public profile statistics fetched at runtime, with a verified static fallback when the API is unavailable.',
-  },
-  {
-    title: 'WebMCP tools',
-    body: 'Five read-only tools expose profile, project, availability, and contact data to browser agents in supported Chromium builds.',
-  },
-  {
-    title: 'Agent-readable summary',
-    body: 'A plain-text llms.txt file mirrors the site content for agents that cannot execute JavaScript.',
-  },
-] as const
-
-const stack = [
-  'React 19',
-  'TypeScript',
-  'Vite 8',
-  'TanStack Router',
-  'TanStack Query',
-  'Tailwind CSS 4',
-  'Vitest',
-  'Vercel',
-] as const
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { AppearanceControls } from '@/components/appearance/appearance-controls'
+import { ExternalLink } from '@/components/ui/external-link'
+import { FactList } from '@/components/ui/fact-list'
+import { ArrowRightIcon } from '@/components/ui/icons'
+import { PageHeader } from '@/components/ui/page-header'
+import { PageSection } from '@/components/ui/page-section'
+import { StackTags } from '@/components/ui/stack-tags'
+import { pageMeta } from '@/data/pages'
+import { siteFacts, siteFeatures, siteStack } from '@/data/site'
+import { pageHead } from '@/lib/seo'
 
 export const Route = createFileRoute('/more')({
   head: () =>
     pageHead(
-      'More — Gopendranath Sasmal',
-      'How this portfolio is built, the features it ships, and the planned SSH access to its chat backend.',
+      pageMeta.more.title,
+      pageMeta.more.description,
+      pageMeta.more.path,
     ),
   component: MorePage,
 })
@@ -86,28 +46,12 @@ function MorePage() {
           </p>
         </div>
 
-        <dl className="divide-y divide-line border-y border-line">
-          {siteFacts.map((fact) => (
-            <div
-              key={fact.label}
-              className="flex items-start justify-between gap-6 py-3"
-            >
-              <dt className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted">
-                {fact.label}
-              </dt>
-              <dd className="text-right text-sm text-ink">{fact.value}</dd>
-            </div>
-          ))}
-        </dl>
+        <FactList items={siteFacts} />
       </section>
 
-      <section
-        aria-label="Site features"
-        className="mt-20 border-t border-line pt-10"
-      >
-        <SectionLabel>Features</SectionLabel>
+      <PageSection label="Features" ariaLabel="Site features">
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map((feature, index) => (
+          {siteFeatures.map((feature, index) => (
             <article
               key={feature.title}
               className="border border-line bg-surface/40 p-5"
@@ -124,15 +68,11 @@ function MorePage() {
             </article>
           ))}
         </div>
-      </section>
+      </PageSection>
 
       <AppearanceControls />
 
-      <section
-        aria-label="SSH access"
-        className="mt-20 border-t border-line pt-10"
-      >
-        <SectionLabel>SSH access</SectionLabel>
+      <PageSection label="SSH access">
         <div className="mt-6 border border-line bg-surface/40 p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-lg font-medium text-ink">
@@ -154,24 +94,10 @@ function MorePage() {
             invent one.
           </p>
         </div>
-      </section>
+      </PageSection>
 
-      <section
-        aria-label="Colophon"
-        className="mt-20 border-t border-line pt-10"
-      >
-        <SectionLabel>Colophon</SectionLabel>
-        <ul className="mt-6 flex flex-wrap gap-1.5">
-          {stack.map((item) => (
-            <li
-              key={item}
-              translate="no"
-              className="border border-line bg-surface/60 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.1em] text-muted"
-            >
-              {item}
-            </li>
-          ))}
-        </ul>
+      <PageSection label="Colophon">
+        <StackTags items={siteStack} className="mt-6" />
         <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-muted">
           <ExternalLink
             href="https://github.com/Gopendranath"
@@ -187,7 +113,7 @@ function MorePage() {
             <ArrowRightIcon className="size-3.5 transition-transform duration-150 ease-out group-hover:translate-x-1" />
           </Link>
         </div>
-      </section>
+      </PageSection>
     </div>
   )
 }

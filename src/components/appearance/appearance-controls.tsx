@@ -1,8 +1,8 @@
 import { useId } from 'react'
-import { accentPalettes, cursorStyles } from '../../lib/appearance'
-import { SectionLabel } from '../ui/section-label'
-import { AppearanceRadio } from './appearance-radio'
+import { SectionLabel } from '@/components/ui/section-label'
+import { accentPalettes, cursorStyles } from '@/lib/appearance'
 import { useAppearance } from './appearance-context'
+import { AppearanceRadio } from './appearance-radio'
 import { HeroNameControls } from './hero-name-controls'
 
 export function AppearanceControls() {

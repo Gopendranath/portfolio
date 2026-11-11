@@ -1,6 +1,6 @@
-import avatar160 from '../../assets/avatar/avatar-160.webp'
-import avatar320 from '../../assets/avatar/avatar-320.webp'
-import avatar460 from '../../assets/avatar/avatar-460.webp'
+import avatar160 from '@/assets/avatar/avatar-160.webp'
+import avatar320 from '@/assets/avatar/avatar-320.webp'
+import avatar460 from '@/assets/avatar/avatar-460.webp'
 
 interface AvatarProps {
   alt?: string

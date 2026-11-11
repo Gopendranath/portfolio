@@ -1,10 +1,26 @@
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, expect, it, vi } from 'vitest'
-import { ChatShell } from '../chat-shell'
+import { ChatShell } from '@/components/chat/chat-shell'
 
 afterEach(() => {
   Reflect.deleteProperty(navigator, 'clipboard')
+})
+
+it('exposes the composer as a declarative WebMCP tool', () => {
+  render(<ChatShell />)
+
+  const composer = screen.getByRole('textbox', {
+    name: 'Message Portfolio assistant',
+  })
+  const form = composer.closest('form')
+
+  expect(form).toHaveAttribute('toolname', 'send-chat-message')
+  expect(form?.getAttribute('tooldescription')).toMatch(
+    /not sent to any backend/,
+  )
+  expect(form).not.toHaveAttribute('toolautosubmit')
+  expect(composer).toHaveAttribute('toolparamdescription')
 })
 
 it('renders two profiles and defaults to the assistant thread', () => {
@@ -178,9 +194,9 @@ it('copies an incoming message from its hover actions', async () => {
   })
   render(<ChatShell />)
 
-  const message = screen.getByRole('article', {
-    name: /Portfolio assistant: Hi/,
-  })
+  const message = screen
+    .getByText(/Hi — I’m the portfolio assistant/)
+    .closest('article') as HTMLElement
 
   expect(
     within(message).queryByRole('button', { name: 'Edit message' }),
@@ -201,9 +217,9 @@ it('edits an own message and replaces the sent time with the edit time', async (
   const user = userEvent.setup()
   render(<ChatShell />)
 
-  const ownMessage = screen.getByRole('article', {
-    name: /You: What is terminal-web-vm/,
-  })
+  const ownMessage = screen
+    .getByText('What is terminal-web-vm?')
+    .closest('article') as HTMLElement
   const sentTime = within(ownMessage).getByText(/^\d{2}:\d{2}$/).textContent
 
   expect(
@@ -218,9 +234,9 @@ it('edits an own message and replaces the sent time with the edit time', async (
   await user.type(editor, 'What is CheerpX?')
   await user.click(screen.getByRole('button', { name: 'Save edit' }))
 
-  const editedMessage = screen.getByRole('article', {
-    name: /You: What is CheerpX/,
-  })
+  const editedMessage = screen
+    .getByText('What is CheerpX?')
+    .closest('article') as HTMLElement
   const editedMeta = within(editedMessage).getByText(/edited/i)
 
   expect(editedMeta).toHaveTextContent(/^edited\s+\d{2}:\d{2}$/)

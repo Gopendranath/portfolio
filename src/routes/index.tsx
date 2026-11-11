@@ -1,36 +1,25 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
-import { useAppearance } from '../components/appearance/appearance-context'
-import { ContributionGraph } from '../components/home/contribution-graph'
-import { GithubSnapshot } from '../components/home/github-snapshot'
-import { ParticleName } from '../components/home/particle-name'
-import { ProjectCard } from '../components/projects/project-card'
-import { ArrowRightIcon } from '../components/ui/icons'
-import { ScrambleText } from '../components/ui/scramble-text'
-import { SectionLabel } from '../components/ui/section-label'
-import { StatusBadge } from '../components/ui/status-badge'
-import { profile } from '../data/profile'
-import { projects } from '../data/projects'
-import { SITE_DESCRIPTION, SITE_TITLE, pageHead } from '../lib/seo'
-
-const featuredProjects = projects.filter((project) => project.featured)
-
-const coreStack = [
-  'React',
-  'TypeScript',
-  'Next.js',
-  'Node.js',
-  'Java',
-  'Spring Boot',
-  'Spring AI',
-  'Tailwind CSS',
-  'PostgreSQL',
-  'Redis',
-  'LangChain',
-  'Docker',
-]
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { useAppearance } from '@/components/appearance/appearance-context'
+import { ContributionGraph } from '@/components/home/contribution-graph'
+import { GithubSnapshot } from '@/components/home/github-snapshot'
+import { ProjectCard } from '@/components/projects/project-card'
+import { ArrowRightIcon } from '@/components/ui/icons'
+import { ScrambleText } from '@/components/ui/scramble-text'
+import { SectionLabel } from '@/components/ui/section-label'
+import { StatusBadge } from '@/components/ui/status-badge'
+import { pageMeta } from '@/data/pages'
+import { coreStack, profile } from '@/data/profile'
+import { featuredProjects } from '@/data/projects'
+import { ParticleName } from '@/features/particle-name'
+import { pageHead } from '@/lib/seo'
 
 export const Route = createFileRoute('/')({
-  head: () => pageHead(SITE_TITLE, SITE_DESCRIPTION),
+  head: () =>
+    pageHead(
+      pageMeta.home.title,
+      pageMeta.home.description,
+      pageMeta.home.path,
+    ),
   component: HomePage,
 })
 

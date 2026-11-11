@@ -1,13 +1,13 @@
 import type { ComponentType, SVGProps } from 'react'
-import { profile } from '../../data/profile'
-import type { SocialId } from '../../data/types'
 import {
   GitHubIcon,
   GlobeIcon,
   LinkedInIcon,
   MailIcon,
   XIcon,
-} from '../ui/icons'
+} from '@/components/ui/icons'
+import { profile } from '@/data/profile'
+import type { SocialId } from '@/data/types'
 import { Tooltip, TooltipLink } from './tooltip'
 
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>

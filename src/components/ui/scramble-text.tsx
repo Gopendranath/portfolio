@@ -1,10 +1,10 @@
 import {
+  type PointerEventHandler,
   useEffect,
   useState,
   useSyncExternalStore,
-  type PointerEventHandler,
 } from 'react'
-import { buildScrambledText, initialScramble } from '../../lib/scramble'
+import { buildScrambledText, initialScramble } from '@/lib/text/scramble'
 
 const FRAME_MS = 28
 

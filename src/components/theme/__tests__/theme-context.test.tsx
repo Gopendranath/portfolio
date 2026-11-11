@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react'
 import { beforeEach, expect, it, vi } from 'vitest'
-import { ThemeProvider } from '../theme-provider'
-import { useTheme } from '../theme-context'
+import { useTheme } from '@/components/theme/theme-context'
+import { ThemeProvider } from '@/components/theme/theme-provider'
 
 beforeEach(() => {
   localStorage.clear()
@@ -112,7 +112,7 @@ it('animates the t shortcut from the viewport center', async () => {
     Array<Record<string, string>>,
     Record<string, unknown>,
   ]
-  expect(keyframes[0].clipPath).toContain('circle(0px at 500px 400px)')
+  expect(keyframes[0]?.clipPath).toContain('circle(0px at 500px 400px)')
 
   delete (document as unknown as Record<string, unknown>).startViewTransition
   delete (document.documentElement as unknown as Record<string, unknown>)
@@ -181,9 +181,9 @@ it('reveals the new theme with a circular clip from the toggle origin', async ()
     Array<Record<string, string>>,
     Record<string, unknown>,
   ]
-  expect(keyframes[0].clipPath).toContain('circle(0px at 10px 20px)')
-  expect(keyframes[1].clipPath).toContain('circle(')
-  expect(keyframes[1].clipPath).toContain('at 10px 20px')
+  expect(keyframes[0]?.clipPath).toContain('circle(0px at 10px 20px)')
+  expect(keyframes[1]?.clipPath).toContain('circle(')
+  expect(keyframes[1]?.clipPath).toContain('at 10px 20px')
   expect(options).toMatchObject({
     pseudoElement: '::view-transition-new(root)',
   })

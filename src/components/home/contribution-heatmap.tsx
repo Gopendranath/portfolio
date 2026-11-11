@@ -1,11 +1,11 @@
 import type { KeyboardEvent } from 'react'
+import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip'
 import {
   type ContributionDay,
   type ContributionLevel,
   type ContributionWeek,
   formatContributionDate,
-} from '../../lib/github-contributions'
-import { Tooltip, TooltipTrigger } from '../ui/tooltip'
+} from '@/lib/github'
 
 const levelClasses: Record<ContributionLevel, string> = {
   0: 'bg-line/35',

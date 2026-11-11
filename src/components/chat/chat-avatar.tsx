@@ -1,5 +1,5 @@
-import type { ChatProfile } from '../../data/types'
-import { Avatar } from '../ui/avatar'
+import { Avatar } from '@/components/ui/avatar'
+import type { ChatProfile } from '@/data/types'
 
 interface ChatAvatarProps {
   profile: ChatProfile

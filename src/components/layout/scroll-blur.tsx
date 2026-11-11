@@ -1,4 +1,4 @@
-import { useScrollEdges } from '../../lib/use-scroll-edges'
+import { useScrollEdges } from '@/hooks/use-scroll-edges'
 
 export function ScrollBlur() {
   const edges = useScrollEdges()

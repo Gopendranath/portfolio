@@ -1,31 +1,27 @@
 import { useRef, useState } from 'react'
-import { chatProfiles, initialChatMessages } from '../../data/chat'
-import type { ChatMessage, ChatProfileId } from '../../data/types'
+import {
+  chatProfiles,
+  chatProfilesById,
+  createInitialChatMessages,
+} from '@/data/chat'
+import type { ChatMessage, ChatProfileId } from '@/data/types'
 import { ChatAvatar } from './chat-avatar'
 import { ChatComposer } from './chat-composer'
 import { MessageList } from './message-list'
 import { ProfileList } from './profile-list'
-
-function createInitialMessages(): Record<ChatProfileId, ChatMessage[]> {
-  return {
-    assistant: initialChatMessages.assistant.map((message) => ({ ...message })),
-    owner: initialChatMessages.owner.map((message) => ({ ...message })),
-  }
-}
+import './chat-shell.css'
 
 export function ChatShell() {
   const [activeProfileId, setActiveProfileId] =
     useState<ChatProfileId>('assistant')
-  const [messages, setMessages] = useState(createInitialMessages)
+  const [messages, setMessages] = useState(createInitialChatMessages)
   const [drafts, setDrafts] = useState<Record<ChatProfileId, string>>({
     assistant: '',
     owner: '',
   })
   const nextMessageId = useRef(0)
 
-  const activeProfile =
-    chatProfiles.find((profile) => profile.id === activeProfileId) ??
-    chatProfiles[0]
+  const activeProfile = chatProfilesById[activeProfileId]
   const activeMessages = messages[activeProfileId]
   const activeDraft = drafts[activeProfileId]
 

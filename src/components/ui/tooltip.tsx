@@ -1,3 +1,8 @@
+import type {
+  AnchorHTMLAttributes,
+  ButtonHTMLAttributes,
+  ReactNode,
+} from 'react'
 import {
   createContext,
   useCallback,
@@ -6,11 +11,6 @@ import {
   useId,
   useRef,
   useState,
-} from 'react'
-import type {
-  AnchorHTMLAttributes,
-  ButtonHTMLAttributes,
-  ReactNode,
 } from 'react'
 import { createPortal } from 'react-dom'
 
@@ -21,10 +21,10 @@ interface TooltipContextValue {
 const TooltipContext = createContext<TooltipContextValue | null>(null)
 
 import {
-  type TooltipPlacement,
-  type TooltipPosition,
   placementClasses,
   resolveTooltipPosition,
+  type TooltipPlacement,
+  type TooltipPosition,
 } from './tooltip-position'
 
 export type { TooltipPlacement } from './tooltip-position'

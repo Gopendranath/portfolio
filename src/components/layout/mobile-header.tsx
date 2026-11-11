@@ -1,8 +1,8 @@
 import { Link } from '@tanstack/react-router'
-import { profile } from '../../data/profile'
-import { useScrollEdges } from '../../lib/use-scroll-edges'
-import { ThemeToggle } from '../theme/theme-toggle'
-import { Avatar } from '../ui/avatar'
+import { ThemeToggle } from '@/components/theme/theme-toggle'
+import { Avatar } from '@/components/ui/avatar'
+import { profile } from '@/data/profile'
+import { useScrollEdges } from '@/hooks/use-scroll-edges'
 
 export function MobileHeader() {
   const { atTop } = useScrollEdges()

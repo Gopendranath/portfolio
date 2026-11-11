@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { spring } from '../target-cursor-spring'
+import { spring } from '@/components/ui/target-cursor-spring'
 
 function run(stiffness: number, damping: number) {
   const state = { x: 0, v: 0 }

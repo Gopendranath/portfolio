@@ -1,5 +1,5 @@
-import { CrosshairCursor } from '../ui/crosshair-cursor'
-import TargetCursor from '../ui/target-cursor'
+import { CrosshairCursor } from '@/components/ui/crosshair-cursor'
+import TargetCursor from '@/components/ui/target-cursor'
 import { useAppearance } from './appearance-context'
 
 interface CursorLayerProps {

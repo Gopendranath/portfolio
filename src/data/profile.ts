@@ -1,4 +1,4 @@
-import type { Profile } from './types'
+import type { Profile } from './types.ts'
 
 export const profile: Profile = {
   name: 'Gopendranath Sasmal',
@@ -101,3 +101,22 @@ export const profile: Profile = {
   ],
   resumeAvailable: false,
 }
+
+/**
+ * Curated shortlist for the home page. Deliberately narrower than
+ * `profile.stack`, which lists every tool grouped by discipline.
+ */
+export const coreStack: readonly string[] = [
+  'React',
+  'TypeScript',
+  'Next.js',
+  'Node.js',
+  'Java',
+  'Spring Boot',
+  'Spring AI',
+  'Tailwind CSS',
+  'PostgreSQL',
+  'Redis',
+  'LangChain',
+  'Docker',
+]

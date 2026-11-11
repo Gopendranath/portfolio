@@ -1,5 +1,6 @@
 /* biome-ignore-all lint/complexity/noImportantStyles: !important is required to override utility transitions during theme switches and reduced motion. */
 @import "tailwindcss";
+@import "./styles/utilities.css";
 
 @theme {
   --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
@@ -26,68 +27,6 @@
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes avatar-shine {
-  0% {
-    opacity: 0;
-    transform: translateX(-250%) rotate(18deg);
-  }
-  15% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translateX(350%) rotate(18deg);
-  }
-}
-
-.avatar-frame::after {
-  content: "";
-  position: absolute;
-  top: -50%;
-  bottom: -50%;
-  left: 0;
-  width: 45%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgb(255 255 255 / 0.55),
-    transparent
-  );
-  opacity: 0;
-  transform: translateX(-250%) rotate(18deg);
-  pointer-events: none;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .avatar-frame:hover::after {
-    animation: avatar-shine 650ms cubic-bezier(0.23, 1, 0.32, 1);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .avatar-frame:hover::after {
-    animation: none;
-  }
-}
-
-@layer components {
-  .surface-tinted {
-    background-color: color-mix(
-      in oklab,
-      var(--color-accent) 5%,
-      var(--color-surface)
-    );
-  }
-
-  html[data-theme="light"] .surface-tinted {
-    background-color: color-mix(
-      in oklab,
-      var(--color-accent) 4%,
-      var(--color-canvas)
-    );
   }
 }
 
@@ -244,98 +183,5 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
     }
-  }
-}
-
-.safe-x {
-  padding-left: max(1.25rem, env(safe-area-inset-left));
-  padding-right: max(1.25rem, env(safe-area-inset-right));
-}
-
-.safe-t {
-  padding-top: max(1.5rem, env(safe-area-inset-top));
-}
-
-.safe-b {
-  padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
-}
-
-@media (min-width: 40rem) {
-  .safe-x {
-    padding-left: max(2rem, env(safe-area-inset-left));
-    padding-right: max(2rem, env(safe-area-inset-right));
-  }
-}
-
-@media (min-width: 64rem) {
-  .safe-x-lg {
-    padding-left: max(3rem, env(safe-area-inset-left));
-    padding-right: max(3rem, env(safe-area-inset-right));
-  }
-}
-
-.scroll-blur-top {
-  mask-image: linear-gradient(to bottom, black, transparent);
-  -webkit-mask-image: linear-gradient(to bottom, black, transparent);
-}
-
-.scroll-blur-bottom {
-  mask-image: linear-gradient(to top, black, transparent);
-  -webkit-mask-image: linear-gradient(to top, black, transparent);
-}
-
-.mobile-dock-link {
-  -webkit-tap-highlight-color: transparent;
-}
-
-.mobile-dock-link .dock-icon {
-  transform-origin: center;
-  transition: transform 180ms var(--ease-spring);
-}
-
-.mobile-dock-link[aria-current="page"] .dock-icon {
-  transform: translateY(-1px) scale(1.06);
-}
-
-.mobile-dock-link:active .dock-icon {
-  transform: scale(0.9);
-  transition-duration: 110ms;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .mobile-dock-link:hover .dock-icon {
-    transform: translateY(-1px) scale(1.04);
-  }
-
-  .mobile-dock-link[aria-current="page"]:hover .dock-icon {
-    transform: translateY(-1px) scale(1.08);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .mobile-dock-link .dock-icon,
-  .mobile-dock-link[aria-current="page"] .dock-icon,
-  .mobile-dock-link:active .dock-icon,
-  .mobile-dock-link:hover .dock-icon,
-  .mobile-dock-link[aria-current="page"]:hover .dock-icon {
-    transform: none;
-  }
-}
-
-@media (max-height: 520px) {
-  .chat-profile-panel {
-    padding: 0.5rem 0.75rem;
-  }
-
-  .chat-profile-heading {
-    display: none;
-  }
-
-  .chat-profile-list {
-    margin-top: 0;
-  }
-
-  .chat-thread-header {
-    display: none;
   }
 }

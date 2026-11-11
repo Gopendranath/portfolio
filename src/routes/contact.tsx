@@ -1,17 +1,20 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { ArrowRightIcon, DownloadIcon } from '../components/ui/icons'
-import { PageHeader } from '../components/ui/page-header'
-import { SectionLabel } from '../components/ui/section-label'
-import { SocialLinks } from '../components/ui/social-links'
-import { StatusBadge } from '../components/ui/status-badge'
-import { profile } from '../data/profile'
-import { pageHead } from '../lib/seo'
+import { FactList } from '@/components/ui/fact-list'
+import { ArrowRightIcon, DownloadIcon } from '@/components/ui/icons'
+import { PageHeader } from '@/components/ui/page-header'
+import { SectionLabel } from '@/components/ui/section-label'
+import { SocialLinks } from '@/components/ui/social-links'
+import { StatusBadge } from '@/components/ui/status-badge'
+import { pageMeta } from '@/data/pages'
+import { profile } from '@/data/profile'
+import { pageHead } from '@/lib/seo'
 
 export const Route = createFileRoute('/contact')({
   head: () =>
     pageHead(
-      'Contact — Gopendranath Sasmal',
-      'Get in touch with Gopendranath Sasmal about full-stack roles, product work, and collaborations.',
+      pageMeta.contact.title,
+      pageMeta.contact.description,
+      pageMeta.contact.path,
     ),
   component: ContactPage,
 })
@@ -69,32 +72,17 @@ function ContactPage() {
 
           <div>
             <SectionLabel>Details</SectionLabel>
-            <dl className="mt-4 divide-y divide-line border-y border-line">
-              <div className="flex items-start justify-between gap-6 py-3">
-                <dt className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted">
-                  Location
-                </dt>
-                <dd className="text-right text-sm text-ink">
-                  {profile.location}
-                </dd>
-              </div>
-              <div className="flex items-start justify-between gap-6 py-3">
-                <dt className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted">
-                  Timezone
-                </dt>
-                <dd className="text-right text-sm text-ink">
-                  {profile.timezone}
-                </dd>
-              </div>
-              <div className="flex items-start justify-between gap-6 py-3">
-                <dt className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted">
-                  Status
-                </dt>
-                <dd>
-                  <StatusBadge label={profile.availability} />
-                </dd>
-              </div>
-            </dl>
+            <FactList
+              className="mt-4"
+              items={[
+                { label: 'Location', value: profile.location },
+                { label: 'Timezone', value: profile.timezone },
+                {
+                  label: 'Status',
+                  value: <StatusBadge label={profile.availability} />,
+                },
+              ]}
+            />
           </div>
         </div>
       </div>

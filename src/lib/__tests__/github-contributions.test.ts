@@ -1,13 +1,13 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import type { ContributionDay } from '@/lib/github'
 import {
-  GITHUB_CONTRIBUTIONS_FALLBACK,
   fetchGithubContributions,
   formatContributionDate,
+  GITHUB_CONTRIBUTIONS_FALLBACK,
   getMonthLabels,
   groupContributionsIntoWeeks,
   toGithubContributions,
-} from '../github-contributions'
-import type { ContributionDay } from '../github-contributions'
+} from '@/lib/github'
 
 afterEach(() => {
   vi.unstubAllGlobals()
@@ -56,7 +56,7 @@ describe('groupContributionsIntoWeeks', () => {
     const weeks = groupContributionsIntoWeeks(days)
 
     expect(weeks).toHaveLength(2)
-    expect(weeks[0].days.map((day) => day?.date ?? null)).toEqual([
+    expect(weeks[0]?.days.map((day) => day?.date ?? null)).toEqual([
       null,
       '2025-11-03',
       '2025-11-04',
@@ -65,7 +65,7 @@ describe('groupContributionsIntoWeeks', () => {
       '2025-11-07',
       '2025-11-08',
     ])
-    expect(weeks[1].days.map((day) => day?.date ?? null)).toEqual([
+    expect(weeks[1]?.days.map((day) => day?.date ?? null)).toEqual([
       '2025-11-09',
       null,
       null,

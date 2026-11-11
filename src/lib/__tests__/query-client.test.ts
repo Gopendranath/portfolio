@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest'
-import { queryClient } from '../query-client'
+import { queryClient } from '@/lib/query/client'
 
 it('uses the portfolio cache defaults', () => {
   const queries = queryClient.getDefaultOptions().queries

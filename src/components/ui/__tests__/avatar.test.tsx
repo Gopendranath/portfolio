@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { expect, it } from 'vitest'
-import { Avatar } from '../avatar'
+import { Avatar } from '@/components/ui/avatar'
 
 it('serves responsive optimized images with eager priority', () => {
   render(<Avatar alt="Gopendranath Sasmal" sizes="40px" priority />)

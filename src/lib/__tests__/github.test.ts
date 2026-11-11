@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { GITHUB_FALLBACK, toGithubSnapshot } from '../github'
+import { GITHUB_FALLBACK, toGithubSnapshot } from '@/lib/github'
 
 describe('toGithubSnapshot', () => {
   it('uses profile counts and sums stars from original repos only', () => {

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import type { ChatMessage, ChatProfile } from '../../data/types'
+import type { ChatMessage, ChatProfile } from '@/data/types'
 import { MessageBubble } from './message-bubble'
 
 interface MessageListProps {
@@ -14,15 +14,28 @@ export function MessageList({
   onEditMessage,
 }: MessageListProps) {
   const logRef = useRef<HTMLDivElement>(null)
+  const threadRef = useRef(profile.id)
+  const countRef = useRef(0)
 
+  // Only follow the newest message: scrolling on every change would yank the
+  // viewport while an older message is being edited.
   useEffect(() => {
     const log = logRef.current
-    const lastMessage = messages.at(-1)
 
-    if (log && lastMessage) {
+    if (!log) {
+      return
+    }
+
+    const changedThread = threadRef.current !== profile.id
+    const grew = messages.length > countRef.current
+
+    threadRef.current = profile.id
+    countRef.current = messages.length
+
+    if (changedThread || grew) {
       log.scrollTop = log.scrollHeight
     }
-  }, [messages])
+  }, [messages, profile.id])
 
   return (
     <div

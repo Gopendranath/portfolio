@@ -1,5 +1,5 @@
-import { projects } from '../../data/projects'
-import type { ProjectResult, WebMcpTool } from './tool'
+import type { Project } from '../../data/types.ts'
+import type { ProjectResult, WebMcpTool } from './tool.ts'
 
 export interface ListProjectsInput {
   technology?: string
@@ -25,20 +25,31 @@ export type GetProjectResult =
   | { error: string; expected: string }
   | { error: string; availableSlugs: string[] }
 
-const projectResults: ProjectResult[] = projects.map((project) => ({
-  slug: project.slug,
-  title: project.title,
-  year: project.year,
-  summary: project.summary,
-  stack: [...project.stack],
-  links: project.links.map(({ label, href }) => ({ label, href })),
-  featured: project.featured ?? false,
-}))
+interface ProjectCatalog {
+  projects: ProjectResult[]
+  slugs: string[]
+  technologies: string[]
+}
 
-const availableSlugs = projectResults.map(({ slug }) => slug)
-const availableTechnologies = [
-  ...new Set(projectResults.flatMap(({ stack }) => stack)),
-].sort((left, right) => left.localeCompare(right))
+function buildCatalog(source: readonly Project[]): ProjectCatalog {
+  const projects = source.map((project) => ({
+    slug: project.slug,
+    title: project.title,
+    year: project.year,
+    summary: project.summary,
+    stack: [...project.stack],
+    links: project.links.map(({ label, href }) => ({ label, href })),
+    featured: project.featured ?? false,
+  }))
+
+  return {
+    projects,
+    slugs: projects.map(({ slug }) => slug),
+    technologies: [...new Set(projects.flatMap(({ stack }) => stack))].sort(
+      (left, right) => left.localeCompare(right),
+    ),
+  }
+}
 
 function copyProject(project: ProjectResult): ProjectResult {
   return {
@@ -48,10 +59,11 @@ function copyProject(project: ProjectResult): ProjectResult {
   }
 }
 
-export function createListProjectsTool(): WebMcpTool<
-  ListProjectsInput,
-  ListProjectsResult
-> {
+export function createListProjectsTool(
+  source: readonly Project[],
+): WebMcpTool<ListProjectsInput, ListProjectsResult> {
+  const catalog = buildCatalog(source)
+
   return {
     name: 'list-projects',
     description:
@@ -94,7 +106,7 @@ export function createListProjectsTool(): WebMcpTool<
 
       const trimmedTechnology = technology?.trim() ?? ''
       const query = trimmedTechnology.toLowerCase()
-      const filtered = projectResults.filter((project) => {
+      const filtered = catalog.projects.filter((project) => {
         if (featuredOnly && !project.featured) return false
         if (query === '') return true
 
@@ -110,7 +122,7 @@ export function createListProjectsTool(): WebMcpTool<
           message: trimmedTechnology
             ? `No projects match "${trimmedTechnology}".`
             : 'No projects match.',
-          availableTechnologies: [...availableTechnologies],
+          availableTechnologies: [...catalog.technologies],
         }
       }
 
@@ -122,10 +134,11 @@ export function createListProjectsTool(): WebMcpTool<
   }
 }
 
-export function createGetProjectTool(): WebMcpTool<
-  GetProjectInput,
-  GetProjectResult
-> {
+export function createGetProjectTool(
+  source: readonly Project[],
+): WebMcpTool<GetProjectInput, GetProjectResult> {
+  const catalog = buildCatalog(source)
+
   return {
     name: 'get-project',
     description:
@@ -135,7 +148,7 @@ export function createGetProjectTool(): WebMcpTool<
       properties: {
         slug: {
           type: 'string',
-          enum: [...availableSlugs],
+          enum: [...catalog.slugs],
           description: 'Project slug returned by list-projects.',
         },
       },
@@ -154,13 +167,13 @@ export function createGetProjectTool(): WebMcpTool<
 
       const query = value.trim().toLowerCase()
       const project =
-        projectResults.find(({ slug }) => slug.toLowerCase() === query) ??
-        projectResults.find(({ title }) => title.toLowerCase() === query)
+        catalog.projects.find(({ slug }) => slug.toLowerCase() === query) ??
+        catalog.projects.find(({ title }) => title.toLowerCase() === query)
 
       if (!project) {
         return {
           error: `Project "${value}" not found.`,
-          availableSlugs: [...availableSlugs],
+          availableSlugs: [...catalog.slugs],
         }
       }
 

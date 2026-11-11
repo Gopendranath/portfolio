@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { createGetProjectTool, createListProjectsTool } from '../project-tools'
-import type { GetProjectInput } from '../project-tools'
+import { projects } from '@/data/projects'
+import type { GetProjectInput } from '@/lib/webmcp/project-tools'
+import {
+  createGetProjectTool,
+  createListProjectsTool,
+} from '@/lib/webmcp/project-tools'
 
 const options = { signal: new AbortController().signal }
 const allSlugs = [
@@ -14,7 +18,7 @@ const allSlugs = [
 
 describe('list-projects', () => {
   it('returns all projects with normalized featured flags', () => {
-    const result = createListProjectsTool().execute({}, options)
+    const result = createListProjectsTool(projects).execute({}, options)
     if (!('projects' in result)) throw new Error('Expected a project list')
 
     expect(result.count).toBe(6)
@@ -42,14 +46,14 @@ describe('list-projects', () => {
   })
 
   it('returns all projects when input is missing', () => {
-    const result = createListProjectsTool().execute(undefined, options)
+    const result = createListProjectsTool(projects).execute(undefined, options)
     if (!('projects' in result)) throw new Error('Expected a project list')
 
     expect(result.count).toBe(6)
   })
 
   it('filters featured projects', () => {
-    const result = createListProjectsTool().execute(
+    const result = createListProjectsTool(projects).execute(
       { featuredOnly: true },
       options,
     )
@@ -63,7 +67,7 @@ describe('list-projects', () => {
   })
 
   it('matches technology case-insensitively and partially', () => {
-    const result = createListProjectsTool().execute(
+    const result = createListProjectsTool(projects).execute(
       { technology: '  ReAcT  ' },
       options,
     )
@@ -76,7 +80,7 @@ describe('list-projects', () => {
   })
 
   it('treats a blank technology filter as no filter', () => {
-    const result = createListProjectsTool().execute(
+    const result = createListProjectsTool(projects).execute(
       { technology: '   ' },
       options,
     )
@@ -86,7 +90,7 @@ describe('list-projects', () => {
   })
 
   it('returns available technologies when nothing matches', () => {
-    const result = createListProjectsTool().execute(
+    const result = createListProjectsTool(projects).execute(
       { technology: 'spring boot' },
       options,
     )
@@ -102,7 +106,7 @@ describe('list-projects', () => {
 
   it('rejects non-string technology values', () => {
     expect(
-      createListProjectsTool().execute(
+      createListProjectsTool(projects).execute(
         { technology: 42 as unknown as string },
         options,
       ),
@@ -114,7 +118,7 @@ describe('list-projects', () => {
 
   it('rejects non-boolean featuredOnly values', () => {
     expect(
-      createListProjectsTool().execute(
+      createListProjectsTool(projects).execute(
         { featuredOnly: 'yes' as unknown as boolean },
         options,
       ),
@@ -126,7 +130,7 @@ describe('list-projects', () => {
 
   it('rejects null featuredOnly values instead of defaulting them', () => {
     expect(
-      createListProjectsTool().execute(
+      createListProjectsTool(projects).execute(
         { featuredOnly: null as unknown as boolean },
         options,
       ),
@@ -139,7 +143,7 @@ describe('list-projects', () => {
 
 describe('get-project', () => {
   it('resolves a slug case-insensitively', () => {
-    const result = createGetProjectTool().execute(
+    const result = createGetProjectTool(projects).execute(
       { slug: 'RAG-PDF-CHAT' },
       options,
     )
@@ -152,7 +156,7 @@ describe('get-project', () => {
   })
 
   it('falls back to a display-title match', () => {
-    const result = createGetProjectTool().execute(
+    const result = createGetProjectTool(projects).execute(
       { slug: 'rag pdf chat' },
       options,
     )
@@ -164,17 +168,19 @@ describe('get-project', () => {
   })
 
   it('rejects a missing or blank slug', () => {
-    expect(createGetProjectTool().execute(undefined, options)).toEqual({
+    expect(createGetProjectTool(projects).execute(undefined, options)).toEqual({
       error: 'Pass a project slug.',
       expected: 'slug: string',
     })
     expect(
-      createGetProjectTool().execute({} as GetProjectInput, options),
+      createGetProjectTool(projects).execute({} as GetProjectInput, options),
     ).toEqual({
       error: 'Pass a project slug.',
       expected: 'slug: string',
     })
-    expect(createGetProjectTool().execute({ slug: '   ' }, options)).toEqual({
+    expect(
+      createGetProjectTool(projects).execute({ slug: '   ' }, options),
+    ).toEqual({
       error: 'Pass a project slug.',
       expected: 'slug: string',
     })
@@ -182,7 +188,7 @@ describe('get-project', () => {
 
   it('rejects a non-string slug', () => {
     expect(
-      createGetProjectTool().execute(
+      createGetProjectTool(projects).execute(
         { slug: 42 as unknown as string },
         options,
       ),
@@ -193,21 +199,28 @@ describe('get-project', () => {
   })
 
   it('returns available slugs for an unknown project', () => {
-    expect(createGetProjectTool().execute({ slug: 'nope' }, options)).toEqual({
+    expect(
+      createGetProjectTool(projects).execute({ slug: 'nope' }, options),
+    ).toEqual({
       error: 'Project "nope" not found.',
       availableSlugs: allSlugs,
     })
   })
 
   it('does not let callers mutate the published slug list', () => {
-    const first = createGetProjectTool().execute({ slug: 'nope' }, options)
+    const first = createGetProjectTool(projects).execute(
+      { slug: 'nope' },
+      options,
+    )
     if (!('availableSlugs' in first)) {
       throw new Error('Expected available slugs')
     }
 
     first.availableSlugs.push('injected')
 
-    expect(createGetProjectTool().execute({ slug: 'nope' }, options)).toEqual({
+    expect(
+      createGetProjectTool(projects).execute({ slug: 'nope' }, options),
+    ).toEqual({
       error: 'Project "nope" not found.',
       availableSlugs: allSlugs,
     })

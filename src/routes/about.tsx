@@ -1,32 +1,21 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Avatar } from '../components/ui/avatar'
-import { DownloadIcon, MapPinIcon } from '../components/ui/icons'
-import { PageHeader } from '../components/ui/page-header'
-import { SectionLabel } from '../components/ui/section-label'
-import { StatusBadge } from '../components/ui/status-badge'
-import { profile } from '../data/profile'
-import { pageHead } from '../lib/seo'
-
-const principles = [
-  {
-    title: 'Ship end to end',
-    body: 'From the first component to the deployed service, I prefer owning the whole path.',
-  },
-  {
-    title: 'Keep interfaces simple',
-    body: 'Good abstractions make the next change cheaper. I optimize for that, not for cleverness.',
-  },
-  {
-    title: 'Learn in public',
-    body: 'New tools become useful when they turn into shipped work, not just notes.',
-  },
-]
+import { DownloadIcon, MapPinIcon } from '@/components/ui/icons'
+import { PageHeader } from '@/components/ui/page-header'
+import { PageSection } from '@/components/ui/page-section'
+import { StackTags } from '@/components/ui/stack-tags'
+import { StatusBadge } from '@/components/ui/status-badge'
+import { principles } from '@/data/about'
+import { pageMeta } from '@/data/pages'
+import { profile } from '@/data/profile'
+import { PortraitRipple } from '@/features/portrait-ripple'
+import { pageHead } from '@/lib/seo'
 
 export const Route = createFileRoute('/about')({
   head: () =>
     pageHead(
-      'About — Gopendranath Sasmal',
-      'About Gopendranath Sasmal, a full-stack developer focused on React, TypeScript, Node.js, AI, and maintainable product work.',
+      pageMeta.about.title,
+      pageMeta.about.description,
+      pageMeta.about.path,
     ),
   component: AboutPage,
 })
@@ -42,13 +31,7 @@ function AboutPage() {
 
       <div className="mt-14 grid gap-12 border-t border-line pt-10 lg:grid-cols-[0.8fr_1.2fr]">
         <div>
-          <div className="cursor-target relative aspect-square w-full max-w-[320px] overflow-hidden border border-line bg-surface/60">
-            <Avatar
-              alt="Gopendranath Sasmal’s GitHub avatar"
-              className="size-full"
-              sizes="320px"
-            />
-          </div>
+          <PortraitRipple alt="Gopendranath Sasmal’s GitHub avatar" />
           <div className="cursor-target mt-5 w-fit">
             <p
               className="text-2xl font-medium tracking-[-0.03em] text-ink"
@@ -79,37 +62,20 @@ function AboutPage() {
         </div>
       </div>
 
-      <section
-        aria-label="Technical stack"
-        className="mt-20 border-t border-line pt-10"
-      >
-        <SectionLabel>Stack</SectionLabel>
+      <PageSection label="Stack" ariaLabel="Technical stack">
         <div className="mt-8 grid gap-8 sm:grid-cols-2">
           {profile.stack.map((group) => (
             <div key={group.title}>
               <h2 className="font-mono text-[10px] uppercase tracking-[0.18em] text-accent">
                 {group.title}
               </h2>
-              <ul className="mt-4 flex flex-wrap gap-1.5">
-                {group.items.map((item) => (
-                  <li
-                    key={item}
-                    className="cursor-target border border-line bg-surface/60 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.1em] text-muted transition-colors hover:border-accent hover:bg-accent/10 hover:text-accent"
-                  >
-                    {item}
-                  </li>
-                ))}
-              </ul>
+              <StackTags items={group.items} className="mt-4" hover />
             </div>
           ))}
         </div>
-      </section>
+      </PageSection>
 
-      <section
-        aria-label="Working principles"
-        className="mt-20 border-t border-line pt-10"
-      >
-        <SectionLabel>How I work</SectionLabel>
+      <PageSection label="How I work" ariaLabel="Working principles">
         <div className="mt-8 grid gap-8 md:grid-cols-3">
           {principles.map((principle, index) => (
             <div
@@ -128,7 +94,7 @@ function AboutPage() {
             </div>
           ))}
         </div>
-      </section>
+      </PageSection>
 
       <p className="mt-20 flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.14em] text-muted">
         <DownloadIcon className="size-3.5" />

@@ -1,4 +1,4 @@
-import type { ParticlePreferenceKey } from '../../lib/appearance'
+import type { ParticlePreferenceKey } from '@/lib/appearance'
 import { useAppearance } from './appearance-context'
 
 const effectRows: readonly {

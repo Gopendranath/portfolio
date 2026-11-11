@@ -1,7 +1,7 @@
 import { Link, useRouterState } from '@tanstack/react-router'
 import { useLayoutEffect, useRef, useState } from 'react'
-import { navItems } from '../../data/navigation'
-import { isNavItemActive } from '../../lib/navigation'
+import { navItems } from '@/data/navigation'
+import { isNavItemActive } from '@/lib/routing/active'
 
 interface PrimaryNavProps {
   className?: string

@@ -16,7 +16,7 @@
  * Vendored from the current upstream implementation:
  * https://github.com/GoogleChromeLabs/use-webmcp-tool/blob/main/useWebMCP.js
  */
-import { useEffect, useReducer, useRef, useState } from 'react'
+import { useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import type { WebMCP } from 'webmcp-types'
 
 export type WebMcpToolResponse = {
@@ -52,6 +52,58 @@ function safeStringify(value: unknown) {
   }
 }
 
+type ModelContext = WebMCP.ModelContext
+
+/**
+ * One shared poll for the late-injected `document.modelContext`, instead of one
+ * interval per registered tool (there are five).
+ */
+const modelContextWaiters = new Set<() => void>()
+let watchingForModelContext = false
+
+function watchForModelContext(onAppear: () => void) {
+  if (typeof document === 'undefined' || document.modelContext) {
+    return () => {}
+  }
+
+  modelContextWaiters.add(onAppear)
+
+  if (!watchingForModelContext) {
+    watchingForModelContext = true
+    let attempts = 0
+    const timer = setInterval(() => {
+      const appeared = Boolean(document.modelContext)
+      attempts += 1
+
+      if (appeared || attempts >= 20) {
+        clearInterval(timer)
+        watchingForModelContext = false
+
+        if (appeared) {
+          for (const notify of modelContextWaiters) {
+            notify()
+          }
+          modelContextWaiters.clear()
+        }
+      }
+    }, 500)
+  }
+
+  return () => modelContextWaiters.delete(onAppear)
+}
+
+/**
+ * A tool can report failure by returning `{ error }` instead of throwing. That
+ * still has to reach the agent as `isError`, or a failed lookup reads as data.
+ */
+function isErrorResult(value: unknown): boolean {
+  return (
+    Boolean(value) &&
+    typeof value === 'object' &&
+    typeof (value as { error?: unknown }).error === 'string'
+  )
+}
+
 function toToolResponse(value: unknown): WebMcpToolResponse {
   if (
     value &&
@@ -70,7 +122,7 @@ function toToolResponse(value: unknown): WebMcpToolResponse {
     return { content: [{ type: 'text', text: value }] }
   }
 
-  return { content: [{ type: 'text', text: JSON.stringify(value) }] }
+  return { content: [{ type: 'text', text: safeStringify(value) }] }
 }
 
 function toErrorResponse(error: unknown): WebMcpToolResponse {
@@ -129,33 +181,26 @@ export function useWebMCP<
     annotationsRef.current = annotations
   })
 
-  const schemaKey = inputSchema ? JSON.stringify(inputSchema) : ''
-  const annotationsKey = annotations ? JSON.stringify(annotations) : ''
+  const schemaKey = useMemo(
+    () => (inputSchema ? safeStringify(inputSchema) : ''),
+    [inputSchema],
+  )
+  const annotationsKey = useMemo(
+    () => (annotations ? safeStringify(annotations) : ''),
+    [annotations],
+  )
 
   const [detectTick, redetect] = useReducer((n: number) => n + 1, 0)
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: schemaKey and annotationsKey stand in for the ref-tracked inputSchema and annotations; detectTick forces re-registration after late API injection.
   useEffect(() => {
-    const modelContext =
+    const modelContext: ModelContext | undefined =
       typeof document === 'undefined' ? undefined : document.modelContext
 
     if (!modelContext) {
       if (typeof document === 'undefined') return
 
-      let attempts = 0
-      const timer = setInterval(() => {
-        if (document.modelContext) {
-          clearInterval(timer)
-          redetect()
-        } else {
-          attempts += 1
-          if (attempts >= 20) {
-            clearInterval(timer)
-          }
-        }
-      }, 500)
-
-      return () => clearInterval(timer)
+      return watchForModelContext(redetect)
     }
 
     if (!enabled) return
@@ -193,6 +238,11 @@ export function useWebMCP<
                 return toErrorResponse(shaped)
               }
 
+              if (isErrorResult(shaped)) {
+                const response = toToolResponse(shaped)
+                return { ...response, isError: true }
+              }
+
               return toToolResponse(shaped)
             },
           },
@@ -213,6 +263,17 @@ export function useWebMCP<
     return () => {
       cancelled = true
       controller.abort()
+      // Abort is the documented path; the explicit call covers builds that
+      // ignore the signal, which would otherwise duplicate tools on remount.
+      const unregister = (
+        modelContext as ModelContext & {
+          unregisterTool?: (name: string) => void
+        }
+      ).unregisterTool
+
+      if (typeof unregister === 'function') {
+        unregister.call(modelContext, name)
+      }
     }
   }, [name, description, schemaKey, annotationsKey, enabled, detectTick])
 

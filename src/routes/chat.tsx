@@ -1,12 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { ChatPage } from '../components/chat/chat-page'
-import { pageHead } from '../lib/seo'
+import { ChatShell } from '@/components/chat/chat-shell'
+import { pageMeta } from '@/data/pages'
+import { pageHead } from '@/lib/seo'
 
 export const Route = createFileRoute('/chat')({
   head: () =>
     pageHead(
-      'Chat — Gopendranath Sasmal',
-      'Preview the portfolio assistant and a direct owner thread. Messages stay on the page and are not sent.',
+      pageMeta.chat.title,
+      pageMeta.chat.description,
+      pageMeta.chat.path,
     ),
-  component: ChatPage,
+  component: ChatShell,
 })

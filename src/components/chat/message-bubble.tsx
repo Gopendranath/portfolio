@@ -1,9 +1,11 @@
-import type { ChatMessage, ChatProfile } from '../../data/types'
+import { useEffect, useRef } from 'react'
+import type { ChatMessage, ChatProfile } from '@/data/types'
 import { ChatAvatar } from './chat-avatar'
 import { MessageActions } from './message-actions'
 import { MessageEditor } from './message-editor'
 import { MessageTimestamp } from './message-timestamp'
-import { useCopyFeedback, useMessageEditing } from './use-message-actions'
+import { useCopyFeedback } from './use-copy-feedback'
+import { useMessageEditing } from './use-message-editing'
 
 interface MessageBubbleProps {
   message: ChatMessage
@@ -17,14 +19,27 @@ export function MessageBubble({
   onEdit,
 }: MessageBubbleProps) {
   const isUser = message.author === 'user'
+  const actionsRef = useRef<HTMLDivElement>(null)
+  const wasEditing = useRef(false)
   const { copyLabel, copyAnnouncement, copyMessage } = useCopyFeedback(
     message.body,
   )
   const editor = useMessageEditing({ message, onEdit })
 
+  // Returning focus to the Edit control keeps keyboard users where they were.
+  useEffect(() => {
+    if (wasEditing.current && !editor.isEditing) {
+      actionsRef.current
+        ?.querySelector<HTMLButtonElement>('[data-message-action="edit"]')
+        ?.focus()
+    }
+
+    wasEditing.current = editor.isEditing
+  }, [editor.isEditing])
+
   return (
     <article
-      aria-label={`${isUser ? 'You' : profile.name}: ${message.body}`}
+      aria-label={isUser ? 'You' : profile.name}
       className={`group flex items-end gap-2.5 ${isUser ? 'justify-end' : ''}`}
     >
       {isUser ? null : <ChatAvatar profile={profile} size="sm" />}
@@ -70,6 +85,7 @@ export function MessageBubble({
 
           {editor.isEditing ? null : (
             <MessageActions
+              ref={actionsRef}
               canEdit={isUser}
               copyLabel={copyLabel}
               onCopy={copyMessage}

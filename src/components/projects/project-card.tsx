@@ -1,5 +1,5 @@
-import type { Project } from '../../data/types'
-import { ExternalLink } from '../ui/external-link'
+import { ExternalLink } from '@/components/ui/external-link'
+import type { Project } from '@/data/types'
 
 interface ProjectCardProps {
   project: Project

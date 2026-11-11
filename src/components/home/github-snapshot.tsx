@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
-import { GITHUB_FALLBACK, githubSnapshotQuery } from '../../lib/github'
-import { ExternalLink } from '../ui/external-link'
-import { SectionLabel } from '../ui/section-label'
+import { ExternalLink } from '@/components/ui/external-link'
+import { SectionLabel } from '@/components/ui/section-label'
+import { GITHUB_FALLBACK, githubSnapshotQuery } from '@/lib/github'
+import { querySourceLabel } from '@/lib/query/status'
 
 interface SnapshotStatProps {
   label: string
@@ -27,16 +28,12 @@ export function GithubSnapshot() {
   const { data, isError, isFetching, isPlaceholderData } =
     useQuery(githubSnapshotQuery)
   const snapshot = data ?? GITHUB_FALLBACK
-  const hasFetchedData = data !== undefined && data !== GITHUB_FALLBACK
-  const sourceLabel = isFetching
-    ? 'Syncing…'
-    : isError
-      ? hasFetchedData
-        ? 'Cached GitHub data'
-        : 'Static snapshot'
-      : isPlaceholderData
-        ? 'Cached snapshot'
-        : 'Live from GitHub'
+  const sourceLabel = querySourceLabel({
+    isFetching,
+    isError,
+    isPlaceholderData,
+    hasData: data !== undefined,
+  })
 
   return (
     <section

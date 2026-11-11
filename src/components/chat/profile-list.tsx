@@ -1,4 +1,4 @@
-import type { ChatProfile, ChatProfileId } from '../../data/types'
+import type { ChatProfile, ChatProfileId } from '@/data/types'
 import { ChatAvatar } from './chat-avatar'
 
 interface ProfileListProps {

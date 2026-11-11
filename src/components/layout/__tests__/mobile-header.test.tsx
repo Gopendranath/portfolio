@@ -1,9 +1,9 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import type { AnchorHTMLAttributes, ReactNode } from 'react'
 import { expect, it, vi } from 'vitest'
-import { profile } from '../../../data/profile'
-import { ThemeProvider } from '../../theme/theme-provider'
-import { MobileHeader } from '../mobile-header'
+import { MobileHeader } from '@/components/layout/mobile-header'
+import { ThemeProvider } from '@/components/theme/theme-provider'
+import { profile } from '@/data/profile'
 
 vi.mock('@tanstack/react-router', async () => {
   const { createElement } = await import('react')
@@ -33,9 +33,7 @@ it('shows identity and theme control without a drawer trigger', () => {
   expect(
     screen.getByRole('link', { name: new RegExp(profile.name) }),
   ).toHaveAttribute('href', '/')
-  expect(screen.getByRole('button', { name: /theme toggle/i })).toHaveClass(
-    'min-h-11',
-  )
+  expect(screen.getByRole('button', { name: /dark/i })).toHaveClass('min-h-11')
   expect(
     screen.queryByRole('button', { name: /open navigation/i }),
   ).not.toBeInTheDocument()

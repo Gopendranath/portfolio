@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { expect, it, vi } from 'vitest'
-import { Tooltip, TooltipTrigger } from '../tooltip'
+import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip'
 
 it('shows on hover and focus, links the trigger, and closes on Escape', async () => {
   const user = userEvent.setup()

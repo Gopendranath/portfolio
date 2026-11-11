@@ -1,11 +1,5 @@
-import {
-  createCheckAvailabilityTool,
-  createGetContactTool,
-  createGetProfileTool,
-  createGetProjectTool,
-  createListProjectsTool,
-  useWebMCP,
-} from '../../lib/webmcp'
+import { profile } from '@/data/profile'
+import { projects } from '@/data/projects'
 import type {
   AvailabilityResult,
   ContactResult,
@@ -14,13 +8,21 @@ import type {
   ListProjectsInput,
   ListProjectsResult,
   ProfileResult,
-} from '../../lib/webmcp'
+} from '@/lib/webmcp'
+import {
+  createCheckAvailabilityTool,
+  createGetContactTool,
+  createGetProfileTool,
+  createGetProjectTool,
+  createListProjectsTool,
+  useWebMCP,
+} from '@/lib/webmcp'
 
-const getProfileTool = createGetProfileTool()
-const listProjectsTool = createListProjectsTool()
-const getProjectTool = createGetProjectTool()
-const checkAvailabilityTool = createCheckAvailabilityTool()
-const getContactTool = createGetContactTool()
+const getProfileTool = createGetProfileTool(profile)
+const listProjectsTool = createListProjectsTool(projects)
+const getProjectTool = createGetProjectTool(projects)
+const checkAvailabilityTool = createCheckAvailabilityTool(profile)
+const getContactTool = createGetContactTool(profile)
 
 export function WebMcpTools() {
   useWebMCP<Record<string, never>, ProfileResult>(getProfileTool)

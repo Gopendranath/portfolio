@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isNavItemActive } from '../navigation'
+import { isNavItemActive } from '@/lib/routing/active'
 
 describe('isNavItemActive', () => {
   it('matches the home route exactly', () => {

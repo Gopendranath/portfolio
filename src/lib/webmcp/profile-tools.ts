@@ -1,5 +1,5 @@
-import { profile } from '../../data/profile'
-import type { SocialResult, WebMcpTool } from './tool'
+import type { Profile } from '../../data/types.ts'
+import type { SocialResult, WebMcpTool } from './tool.ts'
 
 export interface ProfileResult {
   name: string
@@ -32,16 +32,15 @@ export interface ContactResult {
   socials: SocialResult[]
 }
 
-function contactSocials(): SocialResult[] {
+function contactSocials(profile: Profile): SocialResult[] {
   return profile.socials
     .filter((social) => social.id !== 'email')
     .map(({ label, href }) => ({ label, href }))
 }
 
-export function createGetProfileTool(): WebMcpTool<
-  Record<string, never>,
-  ProfileResult
-> {
+export function createGetProfileTool(
+  profile: Profile,
+): WebMcpTool<Record<string, never>, ProfileResult> {
   return {
     name: 'get-profile',
     description:
@@ -61,15 +60,14 @@ export function createGetProfileTool(): WebMcpTool<
         title,
         items: [...items],
       })),
-      socials: contactSocials(),
+      socials: contactSocials(profile),
     }),
   }
 }
 
-export function createCheckAvailabilityTool(): WebMcpTool<
-  Record<string, never>,
-  AvailabilityResult
-> {
+export function createCheckAvailabilityTool(
+  profile: Profile,
+): WebMcpTool<Record<string, never>, AvailabilityResult> {
   return {
     name: 'check-availability',
     description:
@@ -89,10 +87,9 @@ export function createCheckAvailabilityTool(): WebMcpTool<
   }
 }
 
-export function createGetContactTool(): WebMcpTool<
-  Record<string, never>,
-  ContactResult
-> {
+export function createGetContactTool(
+  profile: Profile,
+): WebMcpTool<Record<string, never>, ContactResult> {
   return {
     name: 'get-contact',
     description:
@@ -105,7 +102,7 @@ export function createGetContactTool(): WebMcpTool<
       preferredChannel: 'email',
       location: profile.location,
       timezone: profile.timezone,
-      socials: contactSocials(),
+      socials: contactSocials(profile),
     }),
   }
 }

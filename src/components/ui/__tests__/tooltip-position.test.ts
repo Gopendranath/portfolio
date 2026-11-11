@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { resolveTooltipPosition } from '../tooltip-position'
+import { resolveTooltipPosition } from '@/components/ui/tooltip-position'
 
 const viewport = { width: 1280, height: 800 }
 

@@ -1,13 +1,14 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { ExternalLink } from '@/components/ui/external-link'
+import { SectionLabel } from '@/components/ui/section-label'
 import {
   GITHUB_CONTRIBUTIONS_FALLBACK,
   getMonthLabels,
   githubContributionsQuery,
   groupContributionsIntoWeeks,
-} from '../../lib/github-contributions'
-import { ExternalLink } from '../ui/external-link'
-import { SectionLabel } from '../ui/section-label'
+} from '@/lib/github'
+import { querySourceLabel } from '@/lib/query/status'
 import { ContributionHeatmap } from './contribution-heatmap'
 
 const numberFormat = new Intl.NumberFormat('en-US')
@@ -15,21 +16,15 @@ const numberFormat = new Intl.NumberFormat('en-US')
 export function ContributionGraph() {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [activeIndex, setActiveIndex] = useState(0)
-  const { data, isError, isFetching, isPlaceholderData } = useQuery(
-    githubContributionsQuery,
-  )
-  const contributions = data ?? GITHUB_CONTRIBUTIONS_FALLBACK
-  const hasFetchedData =
-    data !== undefined && data !== GITHUB_CONTRIBUTIONS_FALLBACK
-  const sourceLabel = isFetching
-    ? 'Syncing...'
-    : isError
-      ? hasFetchedData
-        ? 'Cached GitHub data'
-        : 'Static snapshot'
-      : isPlaceholderData
-        ? 'Cached snapshot'
-        : 'Live from GitHub'
+  const query = useQuery(githubContributionsQuery)
+  const { isError, isFetching, isPlaceholderData } = query
+  const contributions = query.data ?? GITHUB_CONTRIBUTIONS_FALLBACK
+  const sourceLabel = querySourceLabel({
+    isFetching,
+    isError,
+    isPlaceholderData,
+    hasData: query.data !== undefined,
+  })
 
   const weeks = useMemo(
     () => groupContributionsIntoWeeks(contributions.days),

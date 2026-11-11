@@ -1,4 +1,4 @@
-import type { ChatMessage } from '../../data/types'
+import type { ChatMessage } from '@/data/types'
 
 const timeFormatter = new Intl.DateTimeFormat('en-GB', {
   hour: '2-digit',

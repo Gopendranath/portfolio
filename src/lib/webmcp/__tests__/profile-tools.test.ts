@@ -1,16 +1,16 @@
 import { describe, expect, it } from 'vitest'
-import { profile } from '../../../data/profile'
+import { profile } from '@/data/profile'
 import {
   createCheckAvailabilityTool,
   createGetContactTool,
   createGetProfileTool,
-} from '../profile-tools'
+} from '@/lib/webmcp/profile-tools'
 
 const options = { signal: new AbortController().signal }
 
 describe('get-profile', () => {
   it('returns the profile with non-email socials', () => {
-    const result = createGetProfileTool().execute({}, options)
+    const result = createGetProfileTool(profile).execute({}, options)
 
     expect(result.name).toBe('Gopendranath Sasmal')
     expect(result.firstName).toBe('Gopendranath')
@@ -32,7 +32,7 @@ describe('get-profile', () => {
   })
 
   it('ignores missing input', () => {
-    const result = createGetProfileTool().execute(undefined, options)
+    const result = createGetProfileTool(profile).execute(undefined, options)
 
     expect(result.name).toBe('Gopendranath Sasmal')
     expect(result.socials).toHaveLength(4)
@@ -41,7 +41,7 @@ describe('get-profile', () => {
 
 describe('check-availability', () => {
   it('reports availability, location, and resume status', () => {
-    expect(createCheckAvailabilityTool().execute({}, options)).toEqual({
+    expect(createCheckAvailabilityTool(profile).execute({}, options)).toEqual({
       availability: 'Open to work',
       openToWork: true,
       location: 'BTM Layout, Bengaluru, India',
@@ -52,7 +52,9 @@ describe('check-availability', () => {
   })
 
   it('reports availability when input is missing', () => {
-    expect(createCheckAvailabilityTool().execute(undefined, options)).toEqual({
+    expect(
+      createCheckAvailabilityTool(profile).execute(undefined, options),
+    ).toEqual({
       availability: 'Open to work',
       openToWork: true,
       location: 'BTM Layout, Bengaluru, India',
@@ -65,7 +67,7 @@ describe('check-availability', () => {
 
 describe('get-contact', () => {
   it('returns email and non-email socials', () => {
-    const result = createGetContactTool().execute({}, options)
+    const result = createGetContactTool(profile).execute({}, options)
 
     expect(result.email).toBe('gopendranathsasmal7@gmail.com')
     expect(result.mailto).toBe('mailto:gopendranathsasmal7@gmail.com')
@@ -81,8 +83,8 @@ describe('get-contact', () => {
   })
 
   it('returns contact details when input is missing', () => {
-    expect(createGetContactTool().execute(undefined, options).email).toBe(
-      'gopendranathsasmal7@gmail.com',
-    )
+    expect(
+      createGetContactTool(profile).execute(undefined, options).email,
+    ).toBe('gopendranathsasmal7@gmail.com')
   })
 })

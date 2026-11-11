@@ -1,4 +1,4 @@
-import type { Project } from './types'
+import type { Project } from './types.ts'
 
 export const projects: readonly Project[] = [
   {
@@ -115,3 +115,7 @@ export const projects: readonly Project[] = [
     ],
   },
 ]
+
+export const featuredProjects: readonly Project[] = projects.filter(
+  (project) => project.featured,
+)

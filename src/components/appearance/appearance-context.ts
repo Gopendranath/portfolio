@@ -4,7 +4,7 @@ import type {
   CursorStyleId,
   ParticlePreferenceKey,
   ParticlePreferences,
-} from '../../lib/appearance'
+} from '@/lib/appearance'
 
 export interface AppearanceContextValue {
   accent: AccentId

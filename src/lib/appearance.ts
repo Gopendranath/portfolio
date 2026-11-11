@@ -127,7 +127,11 @@ export function isCursorStyleId(value: unknown): value is CursorStyleId {
 }
 
 export function getAccentPalette(id: AccentId): AccentPalette {
-  return (
-    accentPalettes.find((palette) => palette.id === id) ?? accentPalettes[0]
-  )
+  const palette = accentPalettes.find((candidate) => candidate.id === id)
+
+  if (!palette) {
+    throw new Error(`Unknown accent palette: ${id}`)
+  }
+
+  return palette
 }

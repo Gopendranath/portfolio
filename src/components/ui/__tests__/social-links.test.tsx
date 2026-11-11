@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { expect, it } from 'vitest'
-import { SocialLinks } from '../social-links'
+import { SocialLinks } from '@/components/ui/social-links'
 
 it('shows custom tooltips for icon-only social links', async () => {
   const user = userEvent.setup()

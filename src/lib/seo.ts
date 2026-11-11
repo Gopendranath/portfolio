@@ -3,27 +3,28 @@ export const SITE_TITLE = 'Gopendranath Sasmal — Full Stack Developer'
 export const SITE_DESCRIPTION =
   'Full-stack developer in Bengaluru building web products across React, TypeScript, Java, Spring Boot, Node.js, and AI. Open to full-stack roles.'
 
-const SITE_ORIGIN = 'https://gopendra.is-a.dev'
-const OG_IMAGE_URL = `${SITE_ORIGIN}/og-image.png`
+export const SITE_ORIGIN = 'https://gopendra.is-a.dev'
 
-export function pageHead(title: string, description: string) {
+export const siteYear = new Date().getFullYear()
+
+/**
+ * Per-route head. Social-card tags live in `index.html` (generated from these
+ * same constants at build time) because link unfurlers do not run JavaScript;
+ * duplicating them here would emit two of every tag. Pass `path` only for the
+ * leaf routes, otherwise every page would inherit the home canonical.
+ */
+export function pageHead(title: string, description: string, path?: string) {
   return {
-    meta: [
-      { title },
-      { name: 'description', content: description },
-      { property: 'og:title', content: title },
-      { property: 'og:description', content: description },
-      { property: 'og:type', content: 'website' },
-      { property: 'og:image', content: OG_IMAGE_URL },
-      { property: 'og:image:type', content: 'image/png' },
-      { property: 'og:image:width', content: '1200' },
-      { property: 'og:image:height', content: '630' },
-      { property: 'og:image:alt', content: SITE_TITLE },
-      { name: 'twitter:card', content: 'summary_large_image' },
-      { name: 'twitter:image', content: OG_IMAGE_URL },
-      { name: 'twitter:image:alt', content: SITE_TITLE },
-      { name: 'twitter:title', content: title },
-      { name: 'twitter:description', content: description },
-    ],
+    meta: [{ title }, { name: 'description', content: description }],
+    ...(path === undefined
+      ? {}
+      : {
+          links: [
+            {
+              rel: 'canonical',
+              href: `${SITE_ORIGIN}${path === '/' ? '' : path}`,
+            },
+          ],
+        }),
   }
 }

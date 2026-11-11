@@ -1,5 +1,10 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.6.6/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
   "files": {
     "includes": [
       "src/**/*.ts",
@@ -14,7 +19,7 @@
   "assist": {
     "actions": {
       "source": {
-        "organizeImports": "off"
+        "organizeImports": "on"
       }
     }
   },
@@ -34,6 +39,45 @@
       "arrowParentheses": "always"
     }
   },
+  "linter": {
+    "domains": {
+      "react": "recommended",
+      "tanstackQuery": "recommended",
+      "tailwind": "recommended",
+      "test": "recommended"
+    },
+    "rules": {
+      "style": {
+        "noRestrictedImports": {
+          "level": "error",
+          "options": {
+            "patterns": [
+              {
+                "group": ["../**"],
+                "message": "Use the @/ alias for cross-folder imports (keep ./ for siblings). Only the files Vite's native config loader reads may stay relative."
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": [
+        "src/data/pages.ts",
+        "src/lib/webmcp/profile-tools.ts",
+        "src/lib/webmcp/project-tools.ts"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": "off"
+          }
+        }
+      }
+    }
+  ],
   "css": {
     "parser": {
       "tailwindDirectives": true

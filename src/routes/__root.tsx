@@ -1,19 +1,15 @@
 import {
+  createRootRoute,
   HeadContent,
   Link,
   Scripts,
-  createRootRouteWithContext,
 } from '@tanstack/react-router'
-import type { QueryClient } from '@tanstack/react-query'
-import { RootLayout } from '../components/layout/root-layout'
-import { SITE_DESCRIPTION, SITE_TITLE, pageHead } from '../lib/seo'
+import { RootLayout } from '@/components/layout/root-layout'
+import { pageMeta } from '@/data/pages'
+import { pageHead } from '@/lib/seo'
 
-export interface RouterContext {
-  queryClient: QueryClient
-}
-
-export const Route = createRootRouteWithContext<RouterContext>()({
-  head: () => pageHead(SITE_TITLE, SITE_DESCRIPTION),
+export const Route = createRootRoute({
+  head: () => pageHead(pageMeta.home.title, pageMeta.home.description),
   component: RootComponent,
   notFoundComponent: NotFound,
   errorComponent: ({ error, reset }) => (

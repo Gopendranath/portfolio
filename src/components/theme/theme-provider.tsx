@@ -1,14 +1,14 @@
 import {
+  type ReactNode,
   useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
   useState,
-  type ReactNode,
 } from 'react'
 import { flushSync } from 'react-dom'
-import { ThemeContext } from './theme-context'
 import type { Theme, ThemeToggleOrigin } from './theme-context'
+import { ThemeContext } from './theme-context'
 
 const themeColors: Record<Theme, string> = {
   dark: '#08090a',
@@ -74,7 +74,9 @@ function applyTheme(theme: Theme) {
   document
     .querySelector('meta[name="theme-color"]')
     ?.setAttribute('content', themeColors[theme])
+}
 
+function persistTheme(theme: Theme) {
   try {
     localStorage.setItem('theme', theme)
   } catch {
@@ -88,6 +90,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   useLayoutEffect(() => {
     applyTheme(theme)
   }, [theme])
+
+  // Persisting is tied to the user's action, so mounting and another tab's
+  // change never write storage back.
+  const updateTheme = useCallback((next: Theme) => {
+    persistTheme(next)
+    setTheme(next)
+  }, [])
 
   const toggleTheme = useCallback(
     (origin?: ThemeToggleOrigin) => {
@@ -105,35 +114,47 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
           Math.max(x, window.innerWidth - x),
           Math.max(y, window.innerHeight - y),
         )
-        const transition = (
-          document as Document & {
-            startViewTransition: (callback: () => void) => {
-              ready: Promise<void>
-            }
-          }
-        ).startViewTransition(() => {
-          flushSync(() => setTheme(next))
+        const transition = document.startViewTransition(() => {
+          flushSync(() => updateTheme(next))
         })
-        void transition.ready.then(() => {
-          document.documentElement.animate(
-            [
-              { clipPath: `circle(0px at ${x}px ${y}px)` },
-              { clipPath: `circle(${endRadius}px at ${x}px ${y}px)` },
-            ],
-            {
-              duration: 500,
-              easing: 'cubic-bezier(0.23, 1, 0.32, 1)',
-              pseudoElement: '::view-transition-new(root)',
-            },
-          )
-        })
+        void transition.ready
+          .then(() => {
+            document.documentElement.animate(
+              [
+                { clipPath: `circle(0px at ${x}px ${y}px)` },
+                { clipPath: `circle(${endRadius}px at ${x}px ${y}px)` },
+              ],
+              {
+                duration: 500,
+                easing: 'cubic-bezier(0.23, 1, 0.32, 1)',
+                pseudoElement: '::view-transition-new(root)',
+              },
+            )
+          })
+          .catch(() => {
+            // The transition can be skipped by the browser; the theme is already applied.
+          })
         return
       }
 
-      setTheme(next)
+      updateTheme(next)
     },
-    [theme],
+    [theme, updateTheme],
   )
+
+  useEffect(() => {
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key !== 'theme') {
+        return
+      }
+
+      setTheme(event.newValue === 'light' ? 'light' : 'dark')
+    }
+
+    window.addEventListener('storage', handleStorage)
+
+    return () => window.removeEventListener('storage', handleStorage)
+  }, [])
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {

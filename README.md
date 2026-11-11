@@ -33,6 +33,7 @@ Open `http://localhost:5173`.
 ```bash
 pnpm dev        # Vite dev server
 pnpm build      # TypeScript project build + production bundle
+pnpm typecheck  # tsc project references, no emit
 pnpm preview    # Preview the production build
 pnpm test       # Vitest run
 pnpm test:watch # Vitest watch mode
@@ -46,27 +47,63 @@ pnpm format     # Write Biome formatting
 ```text
 src/
   components/
+    appearance/  accent, cursor, and hero-name preferences
     chat/        assistant and owner chat preview
     home/        GitHub snapshot and contribution graph
     layout/      sidebar, mobile header and dock, shell
     projects/    project card
-    ui/          headers, labels, icons, links, status
-  data/          profile, navigation, projects, shared types
-  lib/           query client, GitHub query, site constants
-  routes/        file-based TanStack Router routes
+    theme/       dark/light theme provider and toggle
+    ui/          shared primitives (page section, facts, stack tags)
+  data/          profile, navigation, projects, about, site copy, page meta, types
+  features/
+    particle-name/  simulation/ (pure math) + engine/ (canvas, DOM)
+    portrait-ripple/ WebGL portrait scene and its React adapters
+  hooks/         shared React hooks (scroll edges, reduced motion)
+  lib/
+    dom/ github/ query/ routing/ text/   small focused modules
+    seo.ts         head/meta factory and site constants
+    preferences.ts versioned appearance/theme storage
+    appearance.ts  accent and particle preference model
+    webmcp/        Model Context Protocol tool definitions
+  routes/        file-based TanStack Router routes (thin page wiring)
+  styles/        shared utilities extracted from the global sheet
   main.tsx
   index.css
   routeTree.gen.ts  # generated, do not edit
 ```
 
+Layering rules: `lib` never imports `data` or `components`; `features` may import `lib`; `components` may import both; `data` may import `lib` constants but not components. `strict` and `noUncheckedIndexedAccess` are on.
+
+Import style: `@/` (aliased to `src/`) for anything in another folder, `./` for siblings. Biome's `noRestrictedImports` fails the build on `../` specifiers so the alias cannot drift back. `@` is declared in three places that must stay in sync: `vite.config.ts`, `vitest.config.ts` (it does not merge the Vite config), and `tsconfig.app.json` `paths`.
+
 Tests live in `__tests__` folders beside the module they cover.
+
+## Generated shell
+
+`vite.config.ts` generates three things from app constants, so nothing drifts:
+
+- the document head and pre-paint boot script (`index.html` tokens), so a stored accent never flashes the default lime,
+- the Agentic Resource Discovery manifest, emitted as `/.well-known/ard.json` and — for consumers still looking for the predecessor name — `/.well-known/ai-catalog.json`, both from one source,
+- `agent-catalog.json`, the resource that manifest entry points at. It carries the same ARD core (`specVersion` + `entries`) so it validates as a manifest too, plus the site-catalog members (`pages`, `tools`) that ARD ignores as transport-defined.
+
+All three documents validate with zero errors and zero warnings against the ARD conformance tester Lighthouse uses (`lighthouse/third-party/ard`). Discovery uses the modern signals only (`rel="ard"` and the `/.well-known/ard.json` path), so the audit reports no legacy-location warning. `Agentmap:` in `robots.txt` is deliberately not used: Lighthouse's robots.txt validator rejects it as an unknown directive, which costs SEO points.
+
+## Config imports
+
+Anything `vite.config.ts` imports is also loaded by Vite's `configLoader: 'native'`, which resolves specifiers itself: aliases do not apply there. So that small subgraph keeps relative, extension-explicit specifiers — in practice `src/data/pages.ts`, `src/lib/webmcp/profile-tools.ts`, and `src/lib/webmcp/project-tools.ts` — and Biome's `noRestrictedImports` override exempts exactly those three files. The rest of the app keeps extensionless `@/…` imports, valid under `moduleResolution: "bundler"`. If you add a module to that graph, use relative specifiers with the extension or Vite will warn.
+
+## Preferences
+
+Appearance lives in one versioned `localStorage` key, `appearance:v1`, parsed by `src/lib/preferences.ts`. Legacy per-setting keys are migrated once and removed. Theme stays in `theme` and is synced across tabs, as are appearance changes.
 
 ## Content
 
 - `src/data/profile.ts` — name, bio, location, email, socials, availability, stack.
 - `src/data/projects.ts` — project titles, summaries, stack tags, and links.
-- `src/data/navigation.ts` — sidebar labels, indices, and paths.
-- `src/data/github-contributions.ts` — committed daily fallback counts for the contribution heatmap.
+- `src/data/navigation.ts` — nav labels, indices, and paths (the route union is derived from it).
+- `src/data/pages.ts` — per-route title and description used by both the router head and the agent catalog.
+- `src/lib/github/contributions-fallback.ts` — committed daily fallback counts for the contribution heatmap.
+
 
 Project data is curated locally. The Projects page does not call GitHub at runtime. The Home page fetches public profile statistics from the GitHub API through TanStack Query and falls back to a verified static snapshot when the API is unavailable or rate-limited. It also renders a 53-week contribution heatmap from the public [jogruber GitHub contributions API](https://github.com/grubersjoe/github-contributions-api), with a committed fallback containing a real year of daily counts.
 

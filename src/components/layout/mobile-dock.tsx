@@ -1,25 +1,8 @@
 import { Link, useRouterState } from '@tanstack/react-router'
-import type { ComponentType, SVGProps } from 'react'
-import { navItems } from '../../data/navigation'
-import type { RoutePath } from '../../data/types'
-import { isNavItemActive } from '../../lib/navigation'
-import {
-  EllipsisIcon,
-  FolderIcon,
-  HomeIcon,
-  MailIcon,
-  MessageIcon,
-  UserIcon,
-} from '../ui/icons'
-
-const dockIcons: Record<RoutePath, ComponentType<SVGProps<SVGSVGElement>>> = {
-  '/': HomeIcon,
-  '/projects': FolderIcon,
-  '/about': UserIcon,
-  '/contact': MailIcon,
-  '/chat': MessageIcon,
-  '/more': EllipsisIcon,
-}
+import { navItems } from '@/data/navigation'
+import { isNavItemActive } from '@/lib/routing/active'
+import { navIcons } from './nav-icons'
+import './mobile-dock.css'
 
 export function MobileDock() {
   const pathname = useRouterState({
@@ -31,7 +14,7 @@ export function MobileDock() {
 
   return (
     <nav
-      aria-label="Primary"
+      aria-label="Primary mobile"
       className="fixed inset-x-0 bottom-0 z-40 flex justify-center px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:hidden"
     >
       <div className="relative w-full max-w-[24rem] border border-line bg-canvas/[0.92] shadow-[0_18px_36px_-22px_rgb(0_0_0/0.85)] backdrop-blur-md">
@@ -62,7 +45,7 @@ export function MobileDock() {
           ) : null}
           {navItems.map((item, index) => {
             const isActive = isNavItemActive(pathname, item.to)
-            const Icon = dockIcons[item.to]
+            const Icon = navIcons[item.to]
 
             return (
               <li key={item.to} className="relative min-w-0 flex-1">

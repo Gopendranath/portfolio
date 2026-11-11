@@ -1,8 +1,8 @@
 import { render, screen, within } from '@testing-library/react'
 import type { AnchorHTMLAttributes, ReactNode } from 'react'
 import { expect, it, vi } from 'vitest'
-import { navItems } from '../../../data/navigation'
-import { MobileDock } from '../mobile-dock'
+import { MobileDock } from '@/components/layout/mobile-dock'
+import { navItems } from '@/data/navigation'
 
 const routerState = vi.hoisted(() => ({ pathname: '/' }))
 
@@ -30,7 +30,7 @@ it('renders every destination and marks the active route', () => {
   routerState.pathname = '/projects'
   render(<MobileDock />)
 
-  const nav = screen.getByRole('navigation', { name: 'Primary' })
+  const nav = screen.getByRole('navigation', { name: 'Primary mobile' })
   const links = within(nav).getAllByRole('link')
 
   expect(links).toHaveLength(navItems.length)

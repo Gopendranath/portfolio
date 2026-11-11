@@ -1,15 +1,16 @@
 import { act, renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, expect, it } from 'vitest'
+import { useAppearance } from '@/components/appearance/appearance-context'
+import { AppearanceProvider } from '@/components/appearance/appearance-provider'
+import { ThemeProvider } from '@/components/theme/theme-provider'
 import {
   ACCENT_STORAGE_KEY,
   CURSOR_STORAGE_KEY,
   DEFAULT_PARTICLE_PREFERENCES,
   PARTICLE_STORAGE_KEYS,
-} from '../../../lib/appearance'
-import { ThemeProvider } from '../../theme/theme-provider'
-import { useAppearance } from '../appearance-context'
-import { AppearanceProvider } from '../appearance-provider'
+} from '@/lib/appearance'
+import { PREFERENCES_STORAGE_KEY, readPreferences } from '@/lib/preferences'
 
 function Wrapper({ children }: { children: ReactNode }) {
   return (
@@ -19,27 +20,29 @@ function Wrapper({ children }: { children: ReactNode }) {
   )
 }
 
+function storedPreferences() {
+  const raw = localStorage.getItem(PREFERENCES_STORAGE_KEY)
+  return raw ? JSON.parse(raw) : null
+}
+
 beforeEach(() => {
   localStorage.clear()
   delete document.documentElement.dataset.accent
-  delete document.documentElement.dataset.cursor
   delete document.documentElement.dataset.theme
   document.documentElement.style.removeProperty('--color-accent')
   document.documentElement.style.removeProperty('--color-accent-ink')
 })
 
-it('defaults to the target cursor and lime accent', () => {
+it('defaults to the target cursor and lime accent without writing storage', () => {
   const { result } = renderHook(() => useAppearance(), { wrapper: Wrapper })
 
   expect(result.current.accent).toBe('lime')
   expect(result.current.cursorStyle).toBe('target')
   expect(document.documentElement.dataset.accent).toBe('lime')
-  expect(document.documentElement.dataset.cursor).toBe('target')
   expect(
     document.documentElement.style.getPropertyValue('--color-accent'),
   ).toBe('#c7f464')
-  expect(localStorage.getItem(ACCENT_STORAGE_KEY)).toBe('lime')
-  expect(localStorage.getItem(CURSOR_STORAGE_KEY)).toBe('target')
+  expect(localStorage.getItem(PREFERENCES_STORAGE_KEY)).toBeNull()
 })
 
 it('defaults the particle cloud on with hover on', () => {
@@ -52,18 +55,9 @@ it('defaults the particle cloud on with hover on', () => {
     dust: true,
     hover: true,
   })
-
-  for (const [key, storageKey] of Object.entries(PARTICLE_STORAGE_KEYS)) {
-    const expected = String(
-      DEFAULT_PARTICLE_PREFERENCES[
-        key as keyof typeof DEFAULT_PARTICLE_PREFERENCES
-      ],
-    )
-    expect(localStorage.getItem(storageKey)).toBe(expected)
-  }
 })
 
-it('persists individual particle preferences', () => {
+it('persists individual particle preferences in one blob', () => {
   const { result } = renderHook(() => useAppearance(), { wrapper: Wrapper })
 
   act(() => result.current.setParticlePreference('hover', true))
@@ -71,8 +65,12 @@ it('persists individual particle preferences', () => {
 
   expect(result.current.particles.hover).toBe(true)
   expect(result.current.particles.cloud).toBe(false)
-  expect(localStorage.getItem(PARTICLE_STORAGE_KEYS.hover)).toBe('true')
-  expect(localStorage.getItem(PARTICLE_STORAGE_KEYS.cloud)).toBe('false')
+  expect(storedPreferences()?.particles).toEqual({
+    cloud: false,
+    scan: true,
+    dust: true,
+    hover: true,
+  })
 })
 
 it('resets particle preferences to the defaults', () => {
@@ -83,8 +81,7 @@ it('resets particle preferences to the defaults', () => {
   act(() => result.current.resetAppearance())
 
   expect(result.current.particles).toEqual(DEFAULT_PARTICLE_PREFERENCES)
-  expect(localStorage.getItem(PARTICLE_STORAGE_KEYS.scan)).toBe('true')
-  expect(localStorage.getItem(PARTICLE_STORAGE_KEYS.hover)).toBe('true')
+  expect(storedPreferences()?.particles).toEqual(DEFAULT_PARTICLE_PREFERENCES)
 })
 
 it('applies and persists accent and cursor changes', () => {
@@ -96,12 +93,13 @@ it('applies and persists accent and cursor changes', () => {
   expect(result.current.accent).toBe('cyan')
   expect(result.current.cursorStyle).toBe('crosshair')
   expect(document.documentElement.dataset.accent).toBe('cyan')
-  expect(document.documentElement.dataset.cursor).toBe('crosshair')
   expect(
     document.documentElement.style.getPropertyValue('--color-accent'),
   ).toBe('#67e8f9')
-  expect(localStorage.getItem(ACCENT_STORAGE_KEY)).toBe('cyan')
-  expect(localStorage.getItem(CURSOR_STORAGE_KEY)).toBe('crosshair')
+  expect(storedPreferences()).toMatchObject({
+    accent: 'cyan',
+    cursorStyle: 'crosshair',
+  })
 })
 
 it('applies the light variant of the selected accent', () => {
@@ -117,7 +115,7 @@ it('applies the light variant of the selected accent', () => {
   ).toBe('#f8f7f1')
 })
 
-it('reads stored preferences and ignores invalid values', () => {
+it('migrates legacy keys once and removes them', () => {
   localStorage.setItem(ACCENT_STORAGE_KEY, 'violet')
   localStorage.setItem(CURSOR_STORAGE_KEY, 'nonsense')
   localStorage.setItem(PARTICLE_STORAGE_KEYS.cloud, 'false')
@@ -134,6 +132,25 @@ it('reads stored preferences and ignores invalid values', () => {
     dust: true,
     hover: true,
   })
+  expect(storedPreferences()).toMatchObject({
+    accent: 'violet',
+    cursorStyle: 'target',
+  })
+  expect(localStorage.getItem(ACCENT_STORAGE_KEY)).toBeNull()
+  expect(localStorage.getItem(CURSOR_STORAGE_KEY)).toBeNull()
+  expect(localStorage.getItem(PARTICLE_STORAGE_KEYS.cloud)).toBeNull()
+})
+
+it('ignores stored values for unknown accents and shared it through the blob', () => {
+  localStorage.setItem(
+    PREFERENCES_STORAGE_KEY,
+    JSON.stringify({ version: 1, accent: 'chartreuse', cursorStyle: 'system' }),
+  )
+
+  expect(readPreferences()).toMatchObject({
+    accent: 'lime',
+    cursorStyle: 'system',
+  })
 })
 
 it('resets appearance preferences', () => {
@@ -145,6 +162,8 @@ it('resets appearance preferences', () => {
 
   expect(result.current.accent).toBe('lime')
   expect(result.current.cursorStyle).toBe('target')
-  expect(localStorage.getItem(ACCENT_STORAGE_KEY)).toBe('lime')
-  expect(localStorage.getItem(CURSOR_STORAGE_KEY)).toBe('target')
+  expect(storedPreferences()).toMatchObject({
+    accent: 'lime',
+    cursorStyle: 'target',
+  })
 })

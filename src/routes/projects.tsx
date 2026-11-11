@@ -1,16 +1,18 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { ProjectCard } from '../components/projects/project-card'
-import { ExternalLink } from '../components/ui/external-link'
-import { PageHeader } from '../components/ui/page-header'
-import { SectionLabel } from '../components/ui/section-label'
-import { projects } from '../data/projects'
-import { pageHead } from '../lib/seo'
+import { ProjectCard } from '@/components/projects/project-card'
+import { ExternalLink } from '@/components/ui/external-link'
+import { PageHeader } from '@/components/ui/page-header'
+import { SectionLabel } from '@/components/ui/section-label'
+import { pageMeta } from '@/data/pages'
+import { projects } from '@/data/projects'
+import { pageHead } from '@/lib/seo'
 
 export const Route = createFileRoute('/projects')({
   head: () =>
     pageHead(
-      'Projects — Gopendranath Sasmal',
-      'Selected full-stack projects across React, TypeScript, AI, WebAssembly, and browser tooling.',
+      pageMeta.projects.title,
+      pageMeta.projects.description,
+      pageMeta.projects.path,
     ),
   component: ProjectsPage,
 })

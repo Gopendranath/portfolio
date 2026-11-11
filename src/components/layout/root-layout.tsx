@@ -1,12 +1,13 @@
 import { Outlet, useRouterState } from '@tanstack/react-router'
 import { Analytics } from '@vercel/analytics/react'
-import { profile } from '../../data/profile'
-import { siteYear } from '../../lib/site'
-import { AppearanceProvider } from '../appearance/appearance-provider'
-import { CursorLayer } from '../appearance/cursor-layer'
-import { Devtools } from '../devtools'
-import { ThemeProvider } from '../theme/theme-provider'
-import { WebMcpTools } from '../webmcp/webmcp-tools'
+import { AppearanceProvider } from '@/components/appearance/appearance-provider'
+import { CursorLayer } from '@/components/appearance/cursor-layer'
+import { Devtools } from '@/components/devtools'
+import { ThemeProvider } from '@/components/theme/theme-provider'
+import { WebMcpTools } from '@/components/webmcp/webmcp-tools'
+import { profile } from '@/data/profile'
+import { shouldEnableAnalytics } from '@/lib/analytics'
+import { siteYear } from '@/lib/seo'
 import { AppSidebar } from './app-sidebar'
 import { MobileDock } from './mobile-dock'
 import { MobileHeader } from './mobile-header'
@@ -26,7 +27,9 @@ export function RootLayout() {
     <ThemeProvider>
       <AppearanceProvider>
         <WebMcpTools />
-        <Analytics route={pathname} path={pathname} />
+        {shouldEnableAnalytics() ? (
+          <Analytics route={pathname} path={pathname} />
+        ) : null}
         <SkipLink />
         <AppSidebar />
         {/* Remount on navigation so scroll-edge state resets before the scroll event fires. */}
