@@ -20,100 +20,20 @@ interface TooltipContextValue {
 
 const TooltipContext = createContext<TooltipContextValue | null>(null)
 
-export type TooltipPlacement =
-  | 'top'
-  | 'top-left'
-  | 'top-right'
-  | 'right'
-  | 'bottom'
-  | 'bottom-left'
-  | 'bottom-right'
-  | 'left'
+import {
+  type TooltipPlacement,
+  type TooltipPosition,
+  placementClasses,
+  resolveTooltipPosition,
+} from './tooltip-position'
+
+export type { TooltipPlacement } from './tooltip-position'
 
 interface TooltipProps {
   label: string
   placement?: TooltipPlacement
   className?: string
   children: ReactNode
-}
-
-interface TooltipPosition {
-  left: number
-  top: number
-  placement: TooltipPlacement
-}
-
-const TOOLTIP_GAP = 8
-const TOOLTIP_ESTIMATED_WIDTH = 140
-const TOOLTIP_ESTIMATED_HEIGHT = 32
-
-function clamp(value: number, min: number, max: number) {
-  return Math.min(Math.max(value, min), max)
-}
-
-function resolvePlacement(
-  rect: DOMRect,
-  preferred: TooltipPlacement,
-): TooltipPlacement {
-  if (
-    preferred === 'right' &&
-    rect.right + TOOLTIP_GAP + TOOLTIP_ESTIMATED_WIDTH > window.innerWidth
-  ) {
-    return 'left'
-  }
-
-  if (
-    preferred === 'left' &&
-    rect.left - TOOLTIP_GAP - TOOLTIP_ESTIMATED_WIDTH < 0
-  ) {
-    return 'right'
-  }
-
-  if (preferred === 'top' && rect.top < 56) {
-    return 'bottom'
-  }
-
-  if (preferred === 'top-left' && rect.top < 56) {
-    return 'bottom-left'
-  }
-
-  if (preferred === 'top-right' && rect.top < 56) {
-    return 'bottom-right'
-  }
-
-  if (
-    preferred === 'bottom' &&
-    rect.bottom + TOOLTIP_GAP + TOOLTIP_ESTIMATED_HEIGHT > window.innerHeight
-  ) {
-    return 'top'
-  }
-
-  if (
-    preferred === 'bottom-left' &&
-    rect.bottom + TOOLTIP_GAP + TOOLTIP_ESTIMATED_HEIGHT > window.innerHeight
-  ) {
-    return 'top-left'
-  }
-
-  if (
-    preferred === 'bottom-right' &&
-    rect.bottom + TOOLTIP_GAP + TOOLTIP_ESTIMATED_HEIGHT > window.innerHeight
-  ) {
-    return 'top-right'
-  }
-
-  return preferred
-}
-
-const placementClasses: Record<TooltipPlacement, string> = {
-  top: '-translate-x-1/2 -translate-y-full',
-  'top-left': '-translate-y-full',
-  'top-right': '-translate-x-full -translate-y-full',
-  bottom: '-translate-x-1/2',
-  'bottom-left': '',
-  'bottom-right': '-translate-x-full',
-  right: '-translate-y-1/2',
-  left: '-translate-x-full -translate-y-1/2',
 }
 
 export function Tooltip({
@@ -134,59 +54,12 @@ export function Tooltip({
       return
     }
 
-    const rect = trigger.getBoundingClientRect()
-    const resolvedPlacement = resolvePlacement(rect, placement)
-    const centerX = rect.left + rect.width / 2
-    const centerY = rect.top + rect.height / 2
-    const isTop =
-      resolvedPlacement === 'top' ||
-      resolvedPlacement === 'top-left' ||
-      resolvedPlacement === 'top-right'
-    const isBottom =
-      resolvedPlacement === 'bottom' ||
-      resolvedPlacement === 'bottom-left' ||
-      resolvedPlacement === 'bottom-right'
-
-    let left = centerX
-    let top = rect.top - TOOLTIP_GAP
-
-    if (isBottom) {
-      top = rect.bottom + TOOLTIP_GAP
-    }
-
-    if (
-      resolvedPlacement === 'top-left' ||
-      resolvedPlacement === 'bottom-left'
-    ) {
-      left = rect.left
-    } else if (
-      resolvedPlacement === 'top-right' ||
-      resolvedPlacement === 'bottom-right'
-    ) {
-      left = rect.right
-    } else if (resolvedPlacement === 'right') {
-      left = rect.right + TOOLTIP_GAP
-      top = centerY
-    } else if (resolvedPlacement === 'left') {
-      left = rect.left - TOOLTIP_GAP
-      top = centerY
-    }
-
-    if (isTop || isBottom) {
-      const isCorner =
-        resolvedPlacement.endsWith('left') ||
-        resolvedPlacement.endsWith('right')
-
-      left = clamp(
-        left,
-        isCorner ? 8 : 60,
-        isCorner ? window.innerWidth - 8 : window.innerWidth - 60,
-      )
-    } else {
-      top = clamp(top, 20, window.innerHeight - 20)
-    }
-
-    setPosition({ left, top, placement: resolvedPlacement })
+    setPosition(
+      resolveTooltipPosition(trigger.getBoundingClientRect(), placement, {
+        width: window.innerWidth,
+        height: window.innerHeight,
+      }),
+    )
     setIsOpen(true)
   }, [placement])
 
