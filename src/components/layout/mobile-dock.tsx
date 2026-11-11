@@ -34,7 +34,7 @@ export function MobileDock() {
       aria-label="Primary"
       className="fixed inset-x-0 bottom-0 z-40 flex justify-center px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:hidden"
     >
-      <div className="w-full max-w-[22rem] rounded-2xl border border-line bg-canvas/90 p-1.5 backdrop-blur-md">
+      <div className="w-full max-w-[22rem] rounded-2xl border border-line bg-canvas/90 p-1.5 shadow-[0_16px_40px_-12px_rgb(0_0_0/0.7),0_4px_12px_rgb(0_0_0/0.35),inset_0_1px_0_rgb(255_255_255/0.04)] backdrop-blur-md">
         <ul className="relative flex items-stretch">
           {activeIndex >= 0 ? (
             <span
