@@ -29,10 +29,13 @@ it('shows identity and theme control without a drawer trigger', () => {
 
   expect(
     screen.getByRole('link', { name: new RegExp(profile.name) }),
-  ).toHaveAttribute('href', '/')
+  ).toHaveClass('min-h-11')
   expect(
-    screen.getByRole('button', { name: /theme toggle/i }),
-  ).toBeInTheDocument()
+    screen.getByRole('link', { name: new RegExp(profile.name) }),
+  ).toHaveAttribute('href', '/')
+  expect(screen.getByRole('button', { name: /theme toggle/i })).toHaveClass(
+    'min-h-11',
+  )
   expect(
     screen.queryByRole('button', { name: /open navigation/i }),
   ).not.toBeInTheDocument()

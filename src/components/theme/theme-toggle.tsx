@@ -2,7 +2,11 @@ import { MoonIcon, SunIcon } from '../ui/icons'
 import { Tooltip, TooltipTrigger } from '../ui/tooltip'
 import { useTheme } from './theme-context'
 
-export function ThemeToggle() {
+interface ThemeToggleProps {
+  className?: string
+}
+
+export function ThemeToggle({ className = '' }: ThemeToggleProps) {
   const { theme, toggleTheme } = useTheme()
   const isDark = theme === 'dark'
   const currentTheme = isDark ? 'Dark' : 'Light'
@@ -15,7 +19,7 @@ export function ThemeToggle() {
         onClick={(event) => toggleTheme({ x: event.clientX, y: event.clientY })}
         aria-label={`${currentTheme} theme toggle (T). Switch to ${nextTheme} theme`}
         aria-keyshortcuts="T"
-        className="group inline-flex h-9 items-center gap-2 rounded-full border border-line bg-surface p-[7px] text-muted transition-colors hover:border-accent hover:text-accent"
+        className={`group inline-flex h-9 items-center gap-2 rounded-full border border-line bg-surface p-[7px] text-muted transition-colors hover:border-accent hover:text-accent ${className}`}
       >
         <span className="grid size-5 place-items-center rounded-full bg-accent text-accent-ink">
           {isDark ? (
