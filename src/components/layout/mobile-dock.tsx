@@ -57,7 +57,7 @@ export function MobileDock() {
                     isActive ? 'text-accent' : 'text-muted hover:text-ink'
                   }`}
                 >
-                  <Icon className="size-[18px]" />
+                  <Icon className="dock-icon size-[18px]" />
                   <span className="max-w-full truncate font-mono text-[8px]">
                     {item.label}
                   </span>

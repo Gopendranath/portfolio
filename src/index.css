@@ -288,6 +288,40 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+.mobile-dock-link .dock-icon {
+  transform-origin: center;
+  transition: transform 180ms var(--ease-spring);
+}
+
+.mobile-dock-link[aria-current="page"] .dock-icon {
+  transform: translateY(-1px) scale(1.06);
+}
+
+.mobile-dock-link:active .dock-icon {
+  transform: scale(0.9);
+  transition-duration: 110ms;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mobile-dock-link:hover .dock-icon {
+    transform: translateY(-1px) scale(1.04);
+  }
+
+  .mobile-dock-link[aria-current="page"]:hover .dock-icon {
+    transform: translateY(-1px) scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-dock-link .dock-icon,
+  .mobile-dock-link[aria-current="page"] .dock-icon,
+  .mobile-dock-link:active .dock-icon,
+  .mobile-dock-link:hover .dock-icon,
+  .mobile-dock-link[aria-current="page"]:hover .dock-icon {
+    transform: none;
+  }
+}
+
 @media (max-height: 520px) {
   .chat-profile-panel {
     padding: 0.5rem 0.75rem;
