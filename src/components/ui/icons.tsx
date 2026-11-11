@@ -64,6 +64,49 @@ export function MailIcon(props: IconProps) {
   )
 }
 
+export function HomeIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10Z" />
+    </StrokeIcon>
+  )
+}
+
+export function FolderIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" />
+    </StrokeIcon>
+  )
+}
+
+export function UserIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 21a8 8 0 0 1 16 0" />
+    </StrokeIcon>
+  )
+}
+
+export function MessageIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M21 12a8 8 0 0 1-8 8H4l2-3a8 8 0 1 1 15-5Z" />
+    </StrokeIcon>
+  )
+}
+
+export function EllipsisIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <circle cx="5" cy="12" r="0.75" fill="currentColor" />
+      <circle cx="12" cy="12" r="0.75" fill="currentColor" />
+      <circle cx="19" cy="12" r="0.75" fill="currentColor" />
+    </StrokeIcon>
+  )
+}
+
 export function MenuIcon(props: IconProps) {
   return (
     <StrokeIcon {...props}>
