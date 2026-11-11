@@ -1,3 +1,5 @@
+* text=auto eol=lf
+
 # Serve llms.txt with LF so agents get clean UTF-8 text regardless of checkout OS.
 .gitattributes text eol=lf
 *.txt text eol=lf
