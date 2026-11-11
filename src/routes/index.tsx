@@ -3,6 +3,7 @@ import { useAppearance } from '@/components/appearance/appearance-context'
 import { ContributionGraph } from '@/components/home/contribution-graph'
 import { GithubSnapshot } from '@/components/home/github-snapshot'
 import { ProjectCard } from '@/components/projects/project-card'
+import { ExternalLink } from '@/components/ui/external-link'
 import { ArrowRightIcon } from '@/components/ui/icons'
 import { ScrambleText } from '@/components/ui/scramble-text'
 import { SectionLabel } from '@/components/ui/section-label'
@@ -32,7 +33,14 @@ function HomePage() {
         <p className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
           <span className="h-px w-10 bg-accent" aria-hidden="true" />
           <ScrambleText text={profile.role} animateOnHover />
-          <span> · Bengaluru, India</span>
+          <span aria-hidden="true">·</span>
+          <ExternalLink
+            href={profile.locationUrl}
+            showIcon={false}
+            className="transition-colors hover:text-accent"
+          >
+            {profile.location}
+          </ExternalLink>
         </p>
 
         <ParticleName

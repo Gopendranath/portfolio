@@ -98,7 +98,7 @@ Appearance lives in one versioned `localStorage` key, `appearance:v1`, parsed by
 
 ## Content
 
-- `src/data/profile.ts` — name, bio, location, email, socials, availability, stack.
+- `src/data/profile.ts` — name, bio, location (with its Google Maps link), email, socials, availability, stack.
 - `src/data/projects.ts` — project titles, summaries, stack tags, and links.
 - `src/data/navigation.ts` — nav labels, indices, and paths (the route union is derived from it).
 - `src/data/pages.ts` — per-route title and description used by both the router head and the agent catalog.

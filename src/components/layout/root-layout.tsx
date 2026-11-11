@@ -64,7 +64,14 @@ export function RootLayout() {
                   © {siteYear} {profile.name}
                 </p>
                 <div className="flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[9px] uppercase tracking-[0.14em] text-muted">
-                  <span className="cursor-target">{profile.location}</span>
+                  <a
+                    href={profile.locationUrl}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="cursor-target transition-colors hover:text-accent"
+                  >
+                    {profile.location}
+                  </a>
                   <a
                     href={`mailto:${profile.email}`}
                     className="transition-colors hover:text-accent"

@@ -1,11 +1,12 @@
 # Gopendranath Sasmal — Portfolio
 
-> Full-stack developer in Bengaluru building web products across React, TypeScript, Java, Spring Boot, Node.js, and AI. Open to full-stack roles in Bengaluru or remote.
+> Full-stack developer in BTM Layout, Bengaluru, India building web products across React, TypeScript, Java, Spring Boot, and AI. Open to full-stack roles.
 
 This is a personal portfolio site. Pages are client-rendered React (TanStack Router); the content below is the authoritative summary for agents that cannot execute JavaScript. In-site links are root-relative; use them against the origin serving this file.
 
 Contact: gopendranathsasmal7@gmail.com
 Location: BTM Layout, Bengaluru, India (IST, UTC+5:30)
+Map: https://www.google.com/maps/search/?api=1&query=BTM%20Layout%2C%20Bengaluru%2C%20Karnataka%2C%20India
 Availability: Open to work. Resume is not currently published.
 
 ## Pages

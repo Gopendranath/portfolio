@@ -17,6 +17,7 @@ describe('get-profile', () => {
     expect(result.lastName).toBe('Sasmal')
     expect(result.role).toBe('Full Stack Developer')
     expect(result.location).toBe('BTM Layout, Bengaluru, India')
+    expect(result.locationUrl).toBe(profile.locationUrl)
     expect(result.timezone).toBe('IST (UTC+5:30)')
     expect(result.bio).toBe(profile.bio)
     expect(result.about).toEqual(profile.about)
@@ -45,6 +46,8 @@ describe('check-availability', () => {
       availability: 'Open to work',
       openToWork: true,
       location: 'BTM Layout, Bengaluru, India',
+      locationUrl:
+        'https://www.google.com/maps/search/?api=1&query=BTM%20Layout%2C%20Bengaluru%2C%20Karnataka%2C%20India',
       timezone: 'IST (UTC+5:30)',
       resumeAvailable: false,
       note: 'Resume is not published on this site.',
@@ -58,6 +61,8 @@ describe('check-availability', () => {
       availability: 'Open to work',
       openToWork: true,
       location: 'BTM Layout, Bengaluru, India',
+      locationUrl:
+        'https://www.google.com/maps/search/?api=1&query=BTM%20Layout%2C%20Bengaluru%2C%20Karnataka%2C%20India',
       timezone: 'IST (UTC+5:30)',
       resumeAvailable: false,
       note: 'Resume is not published on this site.',
@@ -73,6 +78,7 @@ describe('get-contact', () => {
     expect(result.mailto).toBe('mailto:gopendranathsasmal7@gmail.com')
     expect(result.preferredChannel).toBe('email')
     expect(result.location).toBe(profile.location)
+    expect(result.locationUrl).toBe(profile.locationUrl)
     expect(result.timezone).toBe(profile.timezone)
     expect(result.socials.map(({ label }) => label)).toEqual([
       'GitHub',

@@ -1,7 +1,7 @@
 export const SITE_TITLE = 'Gopendranath Sasmal — Full Stack Developer'
 
 export const SITE_DESCRIPTION =
-  'Full-stack developer in Bengaluru building web products across React, TypeScript, Java, Spring Boot, Node.js, and AI. Open to full-stack roles.'
+  'Full-stack developer in BTM Layout, Bengaluru, India building web products across React, TypeScript, Java, Spring Boot, and AI. Open to full-stack roles.'
 
 export const SITE_ORIGIN = 'https://gopendra.is-a.dev'
 

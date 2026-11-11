@@ -44,10 +44,15 @@ function AboutPage() {
             </p>
           </div>
           <div className="mt-6 space-y-3">
-            <p className="cursor-target flex w-fit items-center gap-2 font-mono text-[9px] uppercase leading-relaxed tracking-[0.14em] text-muted">
+            <a
+              href={profile.locationUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="cursor-target flex w-fit items-center gap-2 font-mono text-[9px] uppercase leading-relaxed tracking-[0.14em] text-muted transition-colors hover:text-accent"
+            >
               <MapPinIcon className="size-3.5 shrink-0" />
               {profile.location}
-            </p>
+            </a>
             <StatusBadge
               iconClassName="size-3.5"
               label={profile.availability}

@@ -26,9 +26,15 @@ export function AppSidebar() {
         </span>
       </Link>
 
-      <p className="cursor-target mt-4 whitespace-nowrap font-mono text-[9px] uppercase leading-relaxed tracking-[0.14em] text-muted">
-        Bengaluru, IN · {profile.timezone}
-      </p>
+      <a
+        href={profile.locationUrl}
+        target="_blank"
+        rel="noreferrer noopener"
+        className="cursor-target mt-4 block font-mono text-[9px] uppercase leading-relaxed tracking-[0.14em] text-muted transition-colors hover:text-accent"
+      >
+        <span className="block">{profile.location}</span>
+        <span className="block">{profile.timezone}</span>
+      </a>
 
       <PrimaryNav className="mt-12" />
 

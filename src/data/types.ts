@@ -32,6 +32,8 @@ export interface Profile {
   lastName: string
   role: string
   location: string
+  /** Google Maps link for `location`, used wherever the location is shown. */
+  locationUrl: string
   timezone: string
   email: string
   availability: string

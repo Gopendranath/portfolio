@@ -7,6 +7,7 @@ export interface ProfileResult {
   lastName: string
   role: string
   location: string
+  locationUrl: string
   timezone: string
   bio: string
   about: string[]
@@ -18,6 +19,7 @@ export interface AvailabilityResult {
   availability: string
   openToWork: boolean
   location: string
+  locationUrl: string
   timezone: string
   resumeAvailable: boolean
   note: string
@@ -28,6 +30,7 @@ export interface ContactResult {
   mailto: string
   preferredChannel: 'email'
   location: string
+  locationUrl: string
   timezone: string
   socials: SocialResult[]
 }
@@ -53,6 +56,7 @@ export function createGetProfileTool(
       lastName: profile.lastName,
       role: profile.role,
       location: profile.location,
+      locationUrl: profile.locationUrl,
       timezone: profile.timezone,
       bio: profile.bio,
       about: [...profile.about],
@@ -78,6 +82,7 @@ export function createCheckAvailabilityTool(
       availability: profile.availability,
       openToWork: profile.availability === 'Open to work',
       location: profile.location,
+      locationUrl: profile.locationUrl,
       timezone: profile.timezone,
       resumeAvailable: profile.resumeAvailable,
       note: profile.resumeAvailable
@@ -101,6 +106,7 @@ export function createGetContactTool(
       mailto: `mailto:${profile.email}`,
       preferredChannel: 'email',
       location: profile.location,
+      locationUrl: profile.locationUrl,
       timezone: profile.timezone,
       socials: contactSocials(profile),
     }),

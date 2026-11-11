@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { ExternalLink } from '@/components/ui/external-link'
 import { FactList } from '@/components/ui/fact-list'
 import { ArrowRightIcon, DownloadIcon } from '@/components/ui/icons'
 import { PageHeader } from '@/components/ui/page-header'
@@ -59,8 +60,8 @@ function ContactPage() {
           </div>
 
           <p className="mt-6 max-w-md text-sm leading-relaxed text-muted">
-            Based in Bengaluru and working across time zones. Email is the best
-            way to start a conversation.
+            Based in BTM Layout, Bengaluru, India and working across time zones.
+            Email is the best way to start a conversation.
           </p>
         </div>
 
@@ -75,7 +76,18 @@ function ContactPage() {
             <FactList
               className="mt-4"
               items={[
-                { label: 'Location', value: profile.location },
+                {
+                  label: 'Location',
+                  value: (
+                    <ExternalLink
+                      href={profile.locationUrl}
+                      showIcon={false}
+                      className="transition-colors hover:text-accent"
+                    >
+                      {profile.location}
+                    </ExternalLink>
+                  ),
+                },
                 { label: 'Timezone', value: profile.timezone },
                 {
                   label: 'Status',
