@@ -283,3 +283,21 @@
   mask-image: linear-gradient(to top, black, transparent);
   -webkit-mask-image: linear-gradient(to top, black, transparent);
 }
+
+@media (max-height: 520px) {
+  .chat-profile-panel {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .chat-profile-heading {
+    display: none;
+  }
+
+  .chat-profile-list {
+    margin-top: 0;
+  }
+
+  .chat-thread-header {
+    display: none;
+  }
+}

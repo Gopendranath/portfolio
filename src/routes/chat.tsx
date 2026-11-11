@@ -11,9 +11,9 @@ export const Route = createFileRoute('/chat')({
   component: ChatPage,
 })
 
-function ChatPage() {
+export function ChatPage() {
   return (
-    <div className="flex h-[calc(100dvh-4rem)] min-h-0 flex-col overflow-hidden lg:h-dvh">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       <ChatShell />
     </div>
   )

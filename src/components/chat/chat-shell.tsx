@@ -72,8 +72,8 @@ export function ChatShell() {
       aria-label="Chat preview"
       className="flex min-h-0 flex-1 flex-col overflow-hidden md:grid md:grid-cols-[280px_minmax(0,1fr)]"
     >
-      <div className="flex shrink-0 flex-col border-b border-line p-4 md:border-b-0 md:border-r">
-        <div className="shrink-0">
+      <div className="chat-profile-panel flex shrink-0 flex-col border-b border-line p-4 md:border-b-0 md:border-r">
+        <div className="chat-profile-heading shrink-0">
           <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-accent">
             05 / Chat
           </p>
@@ -82,7 +82,7 @@ export function ChatShell() {
           </h1>
         </div>
 
-        <div className="mt-4">
+        <div className="chat-profile-list mt-4">
           <ProfileList
             profiles={chatProfiles}
             activeProfileId={activeProfileId}
@@ -96,7 +96,7 @@ export function ChatShell() {
         aria-labelledby="chat-thread-title"
         className="flex min-h-0 flex-1 flex-col overflow-hidden"
       >
-        <header className="flex shrink-0 items-center gap-3 border-b border-line p-4">
+        <header className="chat-thread-header flex shrink-0 items-center gap-3 border-b border-line p-4">
           <ChatAvatar profile={activeProfile} />
           <div className="min-w-0">
             <h2
