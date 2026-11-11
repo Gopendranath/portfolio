@@ -58,7 +58,7 @@ export function MobileDock() {
                   }`}
                 >
                   <Icon className="size-[18px]" />
-                  <span className="max-w-full truncate font-mono text-[8px] uppercase">
+                  <span className="max-w-full truncate font-mono text-[8px]">
                     {item.label}
                   </span>
                 </Link>
