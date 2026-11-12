@@ -14,6 +14,7 @@
     "check": "biome check .",
     "format": "biome format --write .",
     "test": "vitest run",
+    "test:unit": "vitest run --exclude functions/__tests__/ai.test.ts --exclude functions/__tests__/conversations.test.ts --exclude functions/__tests__/history.test.ts --exclude functions/__tests__/inbox.test.ts --exclude functions/__tests__/rate-limit.test.ts",
     "typecheck": "tsc -b",
     "test:watch": "vitest",
     "preview": "vite preview",

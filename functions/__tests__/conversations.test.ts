@@ -85,14 +85,12 @@ describe.skipIf(!hasDatabase)('conversation helpers', () => {
   })
 
   it('paginates newest ten and walks backwards', async () => {
-    for (let index = 1; index <= 25; index += 1) {
-      await createMessage(requirePool(), {
-        conversationId,
-        author: 'user',
-        body: `message ${index}`,
-        clientId: `client-page-${index}`,
-      })
-    }
+    await requirePool().query(
+      `insert into messages (conversation_id, author, body, client_id)
+       select $1, 'user', 'message ' || value, 'client-page-' || value
+         from generate_series(1, 25) as value`,
+      [conversationId],
+    )
 
     const first = await getMessagePage(requirePool(), conversationId, {
       limit: 10,

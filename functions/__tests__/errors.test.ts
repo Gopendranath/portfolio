@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { ChatValidationError } from '@/lib/chat/protocol'
 import { ApiError, toApiError } from '../chat/errors'
 
@@ -22,8 +22,12 @@ describe('ApiError', () => {
   })
 
   it('hides unknown errors behind INTERNAL', () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+
     const error = toApiError(new Error('database password leaked'))
+
     expect(error.code).toBe('INTERNAL')
     expect(error.message).not.toContain('password')
+    expect(consoleError).toHaveBeenCalledOnce()
   })
 })
