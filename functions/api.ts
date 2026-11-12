@@ -38,7 +38,6 @@ import {
   listAssistantConversations,
 } from './chat/history'
 import {
-  countUserOwnerUnread,
   createOwnerReply,
   getOwnerThreadMessages,
   listOwnerThreads,
@@ -52,8 +51,13 @@ import { assertAiEligible, assertAiRateLimits, assertAllowedRateLimit, assertOwn
 import { streamTurn } from './http/sse'
 import { resolveAppUser } from './chat/users'
 import { parseBody } from './chat/validation'
+import { healthRouter } from './routes/health'
+import { meRouter } from './routes/me'
 
 const app = new Hono()
+
+app.route('/', healthRouter)
+app.route('/', meRouter)
 
 app.use('*', async (context, next) => {
   for (const [key, value] of getCorsHeaders(context.req.raw)) {
@@ -65,28 +69,6 @@ app.use('*', async (context, next) => {
   }
 
   await next()
-})
-
-app.get('/api/health', (context) => context.json({ ok: true }))
-
-app.get('/api/me', async (context) => {
-  const { authUserId } = await requireAuth(context.req.raw)
-  const pool = getPool()
-  const { user, isOwner, aiEligible, aiReason } = await resolveAppUser(pool, authUserId)
-  const ownerUnreadCount = await countUserOwnerUnread(pool, user.id)
-
-  return context.json({
-    user: {
-      id: user.id,
-      githubLogin: user.githubLogin,
-      githubCreatedAt: user.githubCreatedAt?.toISOString() ?? null,
-      role: user.role,
-    },
-    isOwner,
-    aiEligible,
-    aiReason,
-    ownerUnreadCount,
-  })
 })
 
 app.post('/api/chat/owner', async (context) => {
