@@ -8,7 +8,6 @@ import {
   paginationSchema,
 } from '../../src/lib/chat/protocol'
 import { requireAuth } from '../chat/auth'
-import { editMessage, listMessages } from '../chat/messages'
 import { getOrCreateConversation, markRead } from '../chat/conversations'
 import { getPool } from '../chat/db'
 import { ApiError } from '../chat/errors'
@@ -19,6 +18,7 @@ import {
   listAssistantConversations,
 } from '../chat/history'
 import { markUserOwnerUnread } from '../chat/inbox'
+import { editMessage, listMessages } from '../chat/messages'
 import { consumeUserRateLimit } from '../chat/rate-limit'
 import { resolveAppUser } from '../chat/users'
 import { parseBody } from '../chat/validation'

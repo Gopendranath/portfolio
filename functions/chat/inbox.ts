@@ -5,9 +5,9 @@ import {
   type OwnerThreadPage,
   PAGE_SIZE,
 } from '../../src/lib/chat/protocol'
-import { createMessage, listMessages } from './messages'
 import { getConversationForUser, markRead, markUnread } from './conversations'
 import { ApiError } from './errors'
+import { createMessage, listMessages } from './messages'
 
 interface ThreadRow {
   id: string

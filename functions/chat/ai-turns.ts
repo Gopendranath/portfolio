@@ -1,6 +1,5 @@
 import type { Pool } from 'pg'
 import type { ChatMessageDTO } from '../../src/lib/chat/protocol'
-import { createMessage, MESSAGE_COLUMNS, type MessageRow, toMessageDTO } from './messages'
 import { ApiError } from './errors'
 import {
   createAssistantConversation,
@@ -8,6 +7,7 @@ import {
   retitleAssistantConversation,
   setAssistantTitleIfEmpty,
 } from './history'
+import { createMessage, MESSAGE_COLUMNS, type MessageRow, toMessageDTO } from './messages'
 import { OPENROUTER_MODEL } from './openrouter'
 
 async function loadContext(

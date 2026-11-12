@@ -1,9 +1,9 @@
 import { randomUUID } from 'node:crypto'
 import { Pool } from 'pg'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import { createMessage } from '../chat/messages'
 import { getOrCreateConversation } from '../chat/conversations'
 import { createOwnerReply, listOwnerThreads, markOwnerRead, markOwnerUnread } from '../chat/inbox'
+import { createMessage } from '../chat/messages'
 
 const hasDatabase = Boolean(process.env.TEST_DATABASE_URL)
 const pool = hasDatabase

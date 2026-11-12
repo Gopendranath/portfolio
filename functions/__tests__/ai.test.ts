@@ -1,10 +1,10 @@
 import { randomUUID } from 'node:crypto'
 import { Pool } from 'pg'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import { beginAssistantEdit, beginAssistantRetry, beginAssistantTurn } from '../chat/ai-turns'
 import { runAssistantTurn } from '../chat/ai-stream'
-import { createMessage } from '../chat/messages'
+import { beginAssistantEdit, beginAssistantRetry, beginAssistantTurn } from '../chat/ai-turns'
 import { getOrCreateConversation } from '../chat/conversations'
+import { createMessage } from '../chat/messages'
 import type { OpenRouterGateway } from '../chat/openrouter'
 
 const hasDatabase = Boolean(process.env.TEST_DATABASE_URL)

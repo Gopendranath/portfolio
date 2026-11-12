@@ -2,11 +2,11 @@ import { Hono } from 'hono'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import { getCorsHeaders } from './chat/cors'
 import { toApiError } from './chat/errors'
+import { assistantRouter } from './routes/assistant'
+import { conversationsRouter } from './routes/conversations'
 import { healthRouter } from './routes/health'
 import { meRouter } from './routes/me'
-import { assistantRouter } from './routes/assistant'
 import { ownerChatRouter } from './routes/owner-chat'
-import { conversationsRouter } from './routes/conversations'
 import { ownerInboxRouter } from './routes/owner-inbox'
 
 const app = new Hono()

@@ -1,5 +1,9 @@
 import { Hono } from 'hono'
-import { paginationSchema, sendMessageSchema, threadPaginationSchema } from '../../src/lib/chat/protocol'
+import {
+  paginationSchema,
+  sendMessageSchema,
+  threadPaginationSchema,
+} from '../../src/lib/chat/protocol'
 import { requireAuth } from '../chat/auth'
 import { getPool } from '../chat/db'
 import {

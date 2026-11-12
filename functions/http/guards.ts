@@ -1,6 +1,6 @@
 import type { Context } from 'hono'
-import { ApiError } from '../chat/errors'
 import type { getPool } from '../chat/db'
+import { ApiError } from '../chat/errors'
 import {
   consumeGlobalAiLimit,
   consumeUserRateLimit,
