@@ -56,6 +56,7 @@ function chatThread(): ChatThreadController {
     loadOlder: vi.fn(async () => {}),
     send: vi.fn(async () => {}),
     stop: vi.fn(),
+    reset: vi.fn(),
     retry: vi.fn(async () => {}),
     edit: vi.fn(async () => {}),
     refetch: vi.fn(async () => {}),

@@ -17,8 +17,11 @@ export interface ViewMessage extends Omit<ChatMessageDTO, 'status'> {
 interface UseChatThreadOptions {
   kind: ChatKind
   ownerThreadUserId?: string
+  conversationId?: string | null
   enabled: boolean
   pollMs?: number
+  onConversationStarted?: (conversationId: string) => void
+  onConversationLost?: (conversationId: string, body: string) => void
 }
 
 export interface ChatThreadController {
@@ -32,6 +35,7 @@ export interface ChatThreadController {
   loadOlder: () => Promise<void>
   send: (body: string) => Promise<void>
   stop: () => void
+  reset: () => void
   retry: (message: ViewMessage) => Promise<void>
   edit: (messageId: string, body: string) => Promise<void>
   refetch: () => Promise<void>
@@ -66,8 +70,11 @@ function errorMessage(error: unknown): string {
 export function useChatThread({
   kind,
   ownerThreadUserId,
+  conversationId,
   enabled,
   pollMs,
+  onConversationStarted,
+  onConversationLost,
 }: UseChatThreadOptions): ChatThreadController {
   const queryClient = useQueryClient()
   const [pending, setPending] = useState<ViewMessage[]>([])
@@ -78,19 +85,40 @@ export function useChatThread({
   const abortRef = useRef<AbortController | null>(null)
 
   const isOwnerInbox = Boolean(ownerThreadUserId)
+  const assistantConversationId =
+    kind === 'assistant' && !isOwnerInbox ? (conversationId ?? null) : null
   const path = isOwnerInbox
     ? `/api/owner/threads/${ownerThreadUserId}/messages`
     : `/api/conversations/${kind}/messages`
+  const queryKey = useMemo(
+    () =>
+      [
+        'chat',
+        'messages',
+        kind,
+        ownerThreadUserId ??
+          (kind === 'assistant' ? (conversationId ?? 'draft') : 'me'),
+      ] as const,
+    [conversationId, kind, ownerThreadUserId],
+  )
 
   const query = useInfiniteQuery({
-    queryKey: ['chat', 'messages', kind, ownerThreadUserId ?? 'me'],
-    queryFn: ({ pageParam }) =>
-      chatFetch<MessagePage>(
-        `${path}?limit=10${pageParam === undefined ? '' : `&before=${pageParam}`}`,
-      ),
+    queryKey,
+    queryFn: ({ pageParam }) => {
+      const params = new URLSearchParams({ limit: '10' })
+      if (pageParam !== undefined) {
+        params.set('before', String(pageParam))
+      }
+      if (assistantConversationId) {
+        params.set('conversationId', assistantConversationId)
+      }
+      return chatFetch<MessagePage>(`${path}?${params.toString()}`)
+    },
     initialPageParam: undefined as number | undefined,
     getNextPageParam: (last) => last.nextCursor ?? undefined,
-    enabled,
+    enabled:
+      enabled &&
+      (kind === 'owner' || isOwnerInbox || Boolean(conversationId)),
     staleTime: 0,
     refetchOnWindowFocus: false,
     refetchInterval: pollMs ?? false,
@@ -127,7 +155,9 @@ export function useChatThread({
       ...persisted
         .map(toViewMessage)
         .filter(
-          (message) => forkedAtSeq === null || message.seq <= forkedAtSeq,
+          (message) =>
+            (forkedAtSeq === null || message.seq <= forkedAtSeq) &&
+            message.id !== streaming?.id,
         ),
       ...pendingMessages,
       ...(streaming ? [streaming] : []),
@@ -167,6 +197,9 @@ export function useChatThread({
       const handlers: StreamHandlers = {
         onMeta: (meta) => {
           receivedMeta = true
+          if (kind === 'assistant' && !conversationId) {
+            onConversationStarted?.(meta.conversationId)
+          }
           setPending((current) =>
             current.map((message) =>
               message.clientId === clientId
@@ -199,10 +232,21 @@ export function useChatThread({
           setPending([])
           setIsStreaming(false)
           void queryClient.invalidateQueries({
-            queryKey: ['chat', 'messages', kind, ownerThreadUserId ?? 'me'],
+            queryKey,
           })
         },
         onError: (error) => {
+          if (
+            error.code === 'NOT_FOUND' &&
+            kind === 'assistant' &&
+            conversationId
+          ) {
+            onConversationLost?.(conversationId, userMessage.body)
+            setStreaming(null)
+            setPending([])
+            setIsStreaming(false)
+            return
+          }
           setStreaming((current) =>
             current
               ? {
@@ -229,7 +273,7 @@ export function useChatThread({
             setStreaming(null)
             setPending([])
             void queryClient.invalidateQueries({
-              queryKey: ['chat', 'messages', kind, ownerThreadUserId ?? 'me'],
+              queryKey,
             })
           }
         },
@@ -266,14 +310,22 @@ export function useChatThread({
           setStreaming(null)
           setPending([])
           void queryClient.invalidateQueries({
-            queryKey: ['chat', 'messages', kind, ownerThreadUserId ?? 'me'],
+            queryKey,
           })
         }
       } finally {
         abortRef.current = null
       }
     },
-    [kind, ownerThreadUserId, queryClient],
+    [
+      conversationId,
+      kind,
+      onConversationLost,
+      onConversationStarted,
+      ownerThreadUserId,
+      queryClient,
+      queryKey,
+    ],
   )
 
   const send = useCallback(
@@ -290,7 +342,11 @@ export function useChatThread({
       if (kind === 'assistant' && !isOwnerInbox) {
         await runStream(
           '/api/chat/assistant',
-          { body: trimmed, clientId },
+          {
+            body: trimmed,
+            clientId,
+            ...(conversationId ? { conversationId } : {}),
+          },
           clientId,
           optimistic,
         )
@@ -328,7 +384,7 @@ export function useChatThread({
         setIsSending(false)
       }
     },
-    [isOwnerInbox, kind, ownerThreadUserId, query, runStream],
+    [conversationId, isOwnerInbox, kind, ownerThreadUserId, query, runStream],
   )
 
   const retry = useCallback(
@@ -511,6 +567,15 @@ export function useChatThread({
     abortRef.current?.abort()
   }, [])
 
+  const reset = useCallback(() => {
+    abortRef.current?.abort()
+    setPending([])
+    setStreaming(null)
+    setIsSending(false)
+    setIsStreaming(false)
+    setForkedAtSeq(null)
+  }, [])
+
   return {
     messages,
     isLoading: query.isLoading,
@@ -529,6 +594,7 @@ export function useChatThread({
     },
     send,
     stop,
+    reset,
     retry,
     edit,
     refetch,
