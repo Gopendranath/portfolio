@@ -71,7 +71,7 @@ function HomePage() {
 
       <ContributionGraph />
 
-      <section aria-label="Selected work">
+      <section aria-label="Selected work" className="border-t border-line pt-10">
         <h2 className="sr-only">Selected work</h2>
         <div className="flex items-end justify-between gap-6">
           <SectionLabel className="flex-1">Selected work</SectionLabel>

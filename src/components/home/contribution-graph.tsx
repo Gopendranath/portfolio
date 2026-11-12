@@ -46,7 +46,7 @@ export function ContributionGraph() {
   }, [contributions.days])
 
   return (
-    <section aria-label="Contribution activity" className="border-t border-line pt-10">
+    <section aria-label="Contribution activity">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <SectionLabel className="min-w-[10rem] flex-1">Contribution activity</SectionLabel>
         <span role="status" className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted">
