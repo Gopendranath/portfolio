@@ -1,6 +1,7 @@
 import type { Context } from 'hono'
 import { streamSSE } from 'hono/streaming'
-import { markAssistantFailed, runAssistantTurn, type AssistantTurn } from '../chat/ai'
+import { markAssistantFailed, runAssistantTurn } from '../chat/ai-stream'
+import type { AssistantTurn } from '../chat/ai-turns'
 import type { getPool } from '../chat/db'
 import type { OpenRouterGateway } from '../chat/openrouter'
 

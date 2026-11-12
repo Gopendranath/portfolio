@@ -8,7 +8,7 @@ import {
   beginAssistantEdit,
   beginAssistantRetry,
   beginAssistantTurn,
-} from '../chat/ai'
+} from '../chat/ai-turns'
 import { requireAuth } from '../chat/auth'
 import { getPool } from '../chat/db'
 import {

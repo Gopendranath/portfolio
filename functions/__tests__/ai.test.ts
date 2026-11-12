@@ -1,12 +1,8 @@
 import { randomUUID } from 'node:crypto'
 import { Pool } from 'pg'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import {
-  beginAssistantEdit,
-  beginAssistantRetry,
-  beginAssistantTurn,
-  runAssistantTurn,
-} from '../chat/ai'
+import { beginAssistantEdit, beginAssistantRetry, beginAssistantTurn } from '../chat/ai-turns'
+import { runAssistantTurn } from '../chat/ai-stream'
 import { createMessage } from '../chat/messages'
 import { getOrCreateConversation } from '../chat/conversations'
 import type { OpenRouterGateway } from '../chat/openrouter'
