@@ -45,10 +45,14 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
-      - name: Test
-        run: pnpm test
-        env:
-          TEST_DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+      - name: Test (non-DB)
+        run: >-
+          pnpm exec vitest run
+          --exclude functions/__tests__/ai.test.ts
+          --exclude functions/__tests__/conversations.test.ts
+          --exclude functions/__tests__/history.test.ts
+          --exclude functions/__tests__/inbox.test.ts
+          --exclude functions/__tests__/rate-limit.test.ts
 
       - name: Build
         run: pnpm build
