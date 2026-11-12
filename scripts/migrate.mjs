@@ -4,12 +4,7 @@ import { fileURLToPath } from 'node:url'
 import pg from 'pg'
 
 const { Client } = pg
-const migrationsDir = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '..',
-  'db',
-  'migrations',
-)
+const migrationsDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'db', 'migrations')
 const connectionString = process.env.DATABASE_URL
 
 if (!connectionString) {
@@ -28,15 +23,12 @@ try {
     )
   `)
 
-  const files = (await readdir(migrationsDir))
-    .filter((file) => file.endsWith('.sql'))
-    .sort()
+  const files = (await readdir(migrationsDir)).filter((file) => file.endsWith('.sql')).sort()
 
   for (const file of files) {
-    const { rowCount } = await client.query(
-      'select 1 from schema_migrations where name = $1',
-      [file],
-    )
+    const { rowCount } = await client.query('select 1 from schema_migrations where name = $1', [
+      file,
+    ])
 
     if (rowCount) {
       console.log(`skip ${file}`)

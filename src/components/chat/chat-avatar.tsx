@@ -26,11 +26,7 @@ export function ChatAvatar({ profile, label, size = 'md' }: ChatAvatarProps) {
       <span
         className={`avatar-frame relative block shrink-0 overflow-hidden border border-line ${dimensions}`}
       >
-        <Avatar
-          alt=""
-          className="size-full"
-          sizes={size === 'sm' ? '32px' : '40px'}
-        />
+        <Avatar alt="" className="size-full" sizes={size === 'sm' ? '32px' : '40px'} />
       </span>
     )
   }

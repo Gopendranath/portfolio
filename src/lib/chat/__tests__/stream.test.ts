@@ -68,13 +68,7 @@ describe('streamChat', () => {
     )
     const delta = vi.fn()
 
-    await streamChat(
-      '/api/chat/assistant',
-      {},
-      { onDelta: delta },
-      undefined,
-      'token',
-    )
+    await streamChat('/api/chat/assistant', {}, { onDelta: delta }, undefined, 'token')
 
     expect(delta).toHaveBeenCalledTimes(1)
     expect(delta).toHaveBeenCalledWith('ok')
@@ -83,11 +77,7 @@ describe('streamChat', () => {
   it('reports EOF without a terminal frame as interrupted', async () => {
     vi.stubGlobal(
       'fetch',
-      vi
-        .fn()
-        .mockResolvedValue(
-          sseResponse(['event: delta\ndata: {"text":"hi"}\n\n']),
-        ),
+      vi.fn().mockResolvedValue(sseResponse(['event: delta\ndata: {"text":"hi"}\n\n'])),
     )
     const onError = vi.fn()
 

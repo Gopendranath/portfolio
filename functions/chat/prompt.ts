@@ -3,10 +3,7 @@ import { profile } from '../../src/data/profile'
 import { projects } from '../../src/data/projects'
 import { siteFacts } from '../../src/data/site'
 import type { ChatMessageDTO } from '../../src/lib/chat/protocol'
-import {
-  AI_CONTEXT_CHAR_LIMIT,
-  AI_CONTEXT_MESSAGE_LIMIT,
-} from '../../src/lib/chat/protocol'
+import { AI_CONTEXT_CHAR_LIMIT, AI_CONTEXT_MESSAGE_LIMIT } from '../../src/lib/chat/protocol'
 
 export interface AiContextMessage {
   role: 'user' | 'assistant'
@@ -14,12 +11,8 @@ export interface AiContextMessage {
 }
 
 export function buildSystemPrompt(): string {
-  const stack = profile.stack
-    .map((group) => `${group.title}: ${group.items.join(', ')}`)
-    .join('\n')
-  const socials = profile.socials
-    .map((link) => `${link.label}: ${link.href}`)
-    .join('\n')
+  const stack = profile.stack.map((group) => `${group.title}: ${group.items.join(', ')}`).join('\n')
+  const socials = profile.socials.map((link) => `${link.label}: ${link.href}`).join('\n')
   const projectLines = projects
     .map(
       (project) =>
@@ -29,9 +22,7 @@ export function buildSystemPrompt(): string {
   const principleLines = principles
     .map((principle) => `- ${principle.title}: ${principle.body}`)
     .join('\n')
-  const factLines = siteFacts
-    .map((fact) => `- ${fact.label}: ${fact.value}`)
-    .join('\n')
+  const factLines = siteFacts.map((fact) => `- ${fact.label}: ${fact.value}`).join('\n')
 
   return `You are the portfolio assistant for ${profile.name}.
 
@@ -75,14 +66,9 @@ Rules:
 - Never claim to have taken an action, sent a message, scheduled a call, or accessed a system.`
 }
 
-export function buildAiContext(
-  messages: readonly ChatMessageDTO[],
-): AiContextMessage[] {
+export function buildAiContext(messages: readonly ChatMessageDTO[]): AiContextMessage[] {
   const complete = messages
-    .filter(
-      (message) =>
-        message.status === 'complete' && message.body.trim().length > 0,
-    )
+    .filter((message) => message.status === 'complete' && message.body.trim().length > 0)
     .slice(-AI_CONTEXT_MESSAGE_LIMIT)
 
   const selected: ChatMessageDTO[] = []

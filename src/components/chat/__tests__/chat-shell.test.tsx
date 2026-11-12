@@ -5,10 +5,7 @@ import { ChatShell } from '@/components/chat/chat-shell'
 import { chatFetch } from '@/lib/chat/api-client'
 import type { AssistantConversationDTO } from '@/lib/chat/protocol'
 import type { ChatSessionState } from '@/lib/chat/session'
-import type {
-  ChatThreadController,
-  ViewMessage,
-} from '@/lib/chat/use-chat-thread'
+import type { ChatThreadController, ViewMessage } from '@/lib/chat/use-chat-thread'
 
 vi.mock('@tanstack/react-query', () => ({
   useQueryClient: () => ({ invalidateQueries: vi.fn() }),
@@ -83,9 +80,7 @@ function viewMessage(overrides: Partial<ViewMessage> = {}): ViewMessage {
   }
 }
 
-function thread(
-  overrides: Partial<ChatThreadController> = {},
-): ChatThreadController {
+function thread(overrides: Partial<ChatThreadController> = {}): ChatThreadController {
   return {
     messages: [viewMessage()],
     isLoading: false,
@@ -105,9 +100,7 @@ function thread(
   }
 }
 
-function conversation(
-  overrides: Partial<AssistantConversationDTO> = {},
-): AssistantConversationDTO {
+function conversation(overrides: Partial<AssistantConversationDTO> = {}): AssistantConversationDTO {
   return {
     id: 'conversation-1',
     title: 'First chat',
@@ -143,9 +136,7 @@ function setup(
   vi.mocked(useChatSession).mockReturnValue({ ...sessionBase, ...session })
   vi.mocked(useChatThread).mockReturnValue(thread())
   vi.mocked(useAssistantConversations).mockReturnValue(
-    history(conversations) as unknown as ReturnType<
-      typeof useAssistantConversations
-    >,
+    history(conversations) as unknown as ReturnType<typeof useAssistantConversations>,
   )
   const deleteConversation = vi.fn(deleteImpl)
   vi.mocked(useDeleteAssistantConversation).mockReturnValue(deleteConversation)
@@ -183,9 +174,7 @@ describe('ChatShell', () => {
 
     render(<ChatShell />)
 
-    expect(
-      screen.getByRole('button', { name: /continue with github/i }),
-    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /continue with github/i })).toBeInTheDocument()
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
   })
 
@@ -193,9 +182,7 @@ describe('ChatShell', () => {
     render(<ChatShell />)
 
     expect(screen.getByText('Hello from the assistant')).toBeInTheDocument()
-    expect(
-      screen.getByRole('textbox', { name: 'Message Portfolio assistant' }),
-    ).toBeInTheDocument()
+    expect(screen.getByRole('textbox', { name: 'Message Portfolio assistant' })).toBeInTheDocument()
   })
 
   it('locks the assistant for an ineligible account', () => {
@@ -210,9 +197,7 @@ describe('ChatShell', () => {
   it('shows the history triggers for an eligible assistant', () => {
     render(<ChatShell />)
 
-    expect(
-      screen.getAllByRole('button', { name: 'Chat history' }).length,
-    ).toBeGreaterThan(0)
+    expect(screen.getAllByRole('button', { name: 'Chat history' }).length).toBeGreaterThan(0)
   })
 
   it('hides the history triggers when the assistant is locked', () => {
@@ -220,9 +205,7 @@ describe('ChatShell', () => {
 
     render(<ChatShell />)
 
-    expect(
-      screen.queryByRole('button', { name: 'Chat history' }),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Chat history' })).not.toBeInTheDocument()
   })
 
   it('hides the history triggers in the owner inbox', async () => {
@@ -240,9 +223,7 @@ describe('ChatShell', () => {
     render(<ChatShell />)
     await user.click(screen.getByRole('button', { name: /inbox/i }))
 
-    expect(
-      screen.queryByRole('button', { name: 'Chat history' }),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Chat history' })).not.toBeInTheDocument()
   })
 
   it('shows the owner inbox in the same nav grid as the assistant', () => {
@@ -259,12 +240,8 @@ describe('ChatShell', () => {
     render(<ChatShell />)
 
     const nav = screen.getByRole('group', { name: 'Chat profiles' })
-    expect(
-      within(nav).getByRole('button', { name: /inbox/i }),
-    ).toBeInTheDocument()
-    expect(
-      within(nav).getByRole('button', { name: /portfolio assistant/i }),
-    ).toBeInTheDocument()
+    expect(within(nav).getByRole('button', { name: /inbox/i })).toBeInTheDocument()
+    expect(within(nav).getByRole('button', { name: /portfolio assistant/i })).toBeInTheDocument()
   })
 
   it('marks owner messages read when a new message arrives in the open thread', async () => {
@@ -273,9 +250,7 @@ describe('ChatShell', () => {
     vi.mocked(useChatThread).mockReturnValue(thread({ messages: [first] }))
     const { rerender } = render(<ChatShell />)
 
-    await user.click(
-      screen.getByRole('button', { name: /Gopendranath Sasmal/i }),
-    )
+    await user.click(screen.getByRole('button', { name: /Gopendranath Sasmal/i }))
 
     await waitFor(() => {
       expect(chatFetch).toHaveBeenCalledWith('/api/conversations/owner/read', {
@@ -286,10 +261,7 @@ describe('ChatShell', () => {
     vi.mocked(chatFetch).mockClear()
     vi.mocked(useChatThread).mockReturnValue(
       thread({
-        messages: [
-          first,
-          viewMessage({ id: 'owner-message-2', author: 'owner' }),
-        ],
+        messages: [first, viewMessage({ id: 'owner-message-2', author: 'owner' })],
       }),
     )
     rerender(<ChatShell />)
@@ -304,9 +276,7 @@ describe('ChatShell', () => {
   it('hides the owner inbox from visitors', () => {
     render(<ChatShell />)
 
-    expect(
-      screen.queryByRole('button', { name: /inbox/i }),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /inbox/i })).not.toBeInTheDocument()
   })
 
   it('sends the draft and clears the composer', async () => {
@@ -328,14 +298,10 @@ describe('ChatShell', () => {
   it('shows the load previous control and calls the loader', async () => {
     const user = userEvent.setup()
     const loadOlder = vi.fn(async () => {})
-    vi.mocked(useChatThread).mockReturnValue(
-      thread({ hasMore: true, loadOlder }),
-    )
+    vi.mocked(useChatThread).mockReturnValue(thread({ hasMore: true, loadOlder }))
     render(<ChatShell />)
 
-    await user.click(
-      screen.getByRole('button', { name: 'Load previous messages' }),
-    )
+    await user.click(screen.getByRole('button', { name: 'Load previous messages' }))
     expect(loadOlder).toHaveBeenCalled()
   })
 
@@ -386,9 +352,7 @@ describe('ChatShell', () => {
       'time[datetime="2026-11-12T09:30:00.000Z"]',
     )
     expect(editedTime?.parentElement?.textContent).toMatch(/^edited/)
-    expect(
-      within(article as HTMLElement).getByText('edited text'),
-    ).toBeInTheDocument()
+    expect(within(article as HTMLElement).getByText('edited text')).toBeInTheDocument()
   })
 
   it('opens the newest chat automatically', () => {
@@ -419,12 +383,8 @@ describe('ChatShell', () => {
     vi.mocked(useChatThread).mockReturnValue(thread({ reset }))
     render(<ChatShell />)
 
-    await user.click(
-      screen.getAllByRole('button', { name: 'Chat history' })[0] as HTMLElement,
-    )
-    await user.click(
-      screen.getByRole('button', { name: 'Open chat Second chat' }),
-    )
+    await user.click(screen.getAllByRole('button', { name: 'Chat history' })[0] as HTMLElement)
+    await user.click(screen.getByRole('button', { name: 'Open chat Second chat' }))
 
     expect(reset).toHaveBeenCalled()
     expect(assistantThreadOptions()?.conversationId).toBe(second.id)
@@ -435,9 +395,7 @@ describe('ChatShell', () => {
     setup({}, [conversation()])
     render(<ChatShell />)
 
-    await user.click(
-      screen.getAllByRole('button', { name: 'Chat history' })[0] as HTMLElement,
-    )
+    await user.click(screen.getAllByRole('button', { name: 'Chat history' })[0] as HTMLElement)
     await user.click(screen.getByRole('button', { name: 'New chat' }))
 
     expect(assistantThreadOptions()?.conversationId).toBeNull()
@@ -453,18 +411,12 @@ describe('ChatShell', () => {
       lastMessageAt: '2026-11-11T09:00:00.000Z',
     })
     setup({}, [conversation(), second])
-    vi.mocked(useChatThread).mockReturnValue(
-      thread({ isStreaming: true, stop, reset }),
-    )
+    vi.mocked(useChatThread).mockReturnValue(thread({ isStreaming: true, stop, reset }))
     vi.spyOn(window, 'confirm').mockReturnValue(true)
     render(<ChatShell />)
 
-    await user.click(
-      screen.getAllByRole('button', { name: 'Chat history' })[0] as HTMLElement,
-    )
-    await user.click(
-      screen.getByRole('button', { name: 'Open chat Second chat' }),
-    )
+    await user.click(screen.getAllByRole('button', { name: 'Chat history' })[0] as HTMLElement)
+    await user.click(screen.getByRole('button', { name: 'Open chat Second chat' }))
 
     expect(stop).toHaveBeenCalled()
     expect(reset).toHaveBeenCalled()
@@ -486,21 +438,13 @@ describe('ChatShell', () => {
     })
     await user.type(composer, 'first draft')
 
-    await user.click(
-      screen.getAllByRole('button', { name: 'Chat history' })[0] as HTMLElement,
-    )
-    await user.click(
-      screen.getByRole('button', { name: 'Open chat Second chat' }),
-    )
+    await user.click(screen.getAllByRole('button', { name: 'Chat history' })[0] as HTMLElement)
+    await user.click(screen.getByRole('button', { name: 'Open chat Second chat' }))
     expect(composer).toHaveValue('')
 
     await user.type(composer, 'second draft')
-    await user.click(
-      screen.getAllByRole('button', { name: 'Chat history' })[0] as HTMLElement,
-    )
-    await user.click(
-      screen.getByRole('button', { name: 'Open chat First chat' }),
-    )
+    await user.click(screen.getAllByRole('button', { name: 'Chat history' })[0] as HTMLElement)
+    await user.click(screen.getByRole('button', { name: 'Open chat First chat' }))
 
     expect(composer).toHaveValue('first draft')
   })
@@ -509,9 +453,7 @@ describe('ChatShell', () => {
     const user = userEvent.setup()
     setup()
     vi.mocked(useAssistantConversations).mockReturnValue(
-      history([], { isLoading: true }) as unknown as ReturnType<
-        typeof useAssistantConversations
-      >,
+      history([], { isLoading: true }) as unknown as ReturnType<typeof useAssistantConversations>,
     )
     const { rerender } = render(<ChatShell />)
 
@@ -521,9 +463,7 @@ describe('ChatShell', () => {
     await user.type(composer, 'typed while loading')
 
     vi.mocked(useAssistantConversations).mockReturnValue(
-      history([conversation()]) as unknown as ReturnType<
-        typeof useAssistantConversations
-      >,
+      history([conversation()]) as unknown as ReturnType<typeof useAssistantConversations>,
     )
     rerender(<ChatShell />)
 
@@ -546,9 +486,7 @@ describe('ChatShell', () => {
 
     await user.click(screen.getByRole('button', { name: /inbox/i }))
 
-    expect(vi.mocked(useAssistantConversations).mock.calls.at(-1)?.[0]).toBe(
-      false,
-    )
+    expect(vi.mocked(useAssistantConversations).mock.calls.at(-1)?.[0]).toBe(false)
   })
 
   it('deletes the active chat and falls back to the newest remaining', async () => {
@@ -558,26 +496,16 @@ describe('ChatShell', () => {
       title: 'Second chat',
       lastMessageAt: '2026-11-11T09:00:00.000Z',
     })
-    const { deleteConversation } = setup(
-      {},
-      [conversation(), second],
-      async () => {
-        vi.mocked(useAssistantConversations).mockReturnValue(
-          history([second]) as unknown as ReturnType<
-            typeof useAssistantConversations
-          >,
-        )
-      },
-    )
+    const { deleteConversation } = setup({}, [conversation(), second], async () => {
+      vi.mocked(useAssistantConversations).mockReturnValue(
+        history([second]) as unknown as ReturnType<typeof useAssistantConversations>,
+      )
+    })
     vi.spyOn(window, 'confirm').mockReturnValue(true)
     render(<ChatShell />)
 
-    await user.click(
-      screen.getAllByRole('button', { name: 'Chat history' })[0] as HTMLElement,
-    )
-    await user.click(
-      screen.getByRole('button', { name: 'Delete chat First chat' }),
-    )
+    await user.click(screen.getAllByRole('button', { name: 'Chat history' })[0] as HTMLElement)
+    await user.click(screen.getByRole('button', { name: 'Delete chat First chat' }))
 
     expect(deleteConversation).toHaveBeenCalledWith('conversation-1')
     await waitFor(() => {
@@ -599,9 +527,7 @@ describe('ChatShell', () => {
       screen.getByText('This chat was deleted. Your message was not sent.'),
     ).toBeInTheDocument()
 
-    await user.click(
-      screen.getAllByRole('button', { name: 'Chat history' })[0] as HTMLElement,
-    )
+    await user.click(screen.getAllByRole('button', { name: 'Chat history' })[0] as HTMLElement)
     await user.click(screen.getByRole('button', { name: 'New chat' }))
 
     expect(

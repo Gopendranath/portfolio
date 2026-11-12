@@ -26,8 +26,7 @@ export function observeEnvironment(
   let resizeTimer: ReturnType<typeof setTimeout> | undefined
 
   const onMotionChange = () => callbacks.onMotionChange(motionQuery.matches)
-  const onVisibilityChange = () =>
-    callbacks.onVisibilityChange(!document.hidden)
+  const onVisibilityChange = () => callbacks.onVisibilityChange(!document.hidden)
   const onResize = () => {
     clearTimeout(resizeTimer)
     resizeTimer = setTimeout(callbacks.onResize, RESIZE_DEBOUNCE_MS)

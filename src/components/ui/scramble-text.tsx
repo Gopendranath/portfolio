@@ -1,18 +1,10 @@
-import {
-  type PointerEventHandler,
-  useEffect,
-  useState,
-  useSyncExternalStore,
-} from 'react'
+import { type PointerEventHandler, useEffect, useState, useSyncExternalStore } from 'react'
 import { buildScrambledText, initialScramble } from '@/lib/text/scramble'
 
 const FRAME_MS = 28
 
 function subscribeToReducedMotion(callback: () => void) {
-  if (
-    typeof window === 'undefined' ||
-    typeof window.matchMedia !== 'function'
-  ) {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
     return () => undefined
   }
 
@@ -22,8 +14,7 @@ function subscribeToReducedMotion(callback: () => void) {
 }
 
 function getReducedMotionSnapshot() {
-  return typeof window !== 'undefined' &&
-    typeof window.matchMedia === 'function'
+  return typeof window !== 'undefined' && typeof window.matchMedia === 'function'
     ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
     : false
 }
@@ -95,11 +86,7 @@ function AnimatedScramble({
   )
 }
 
-export function ScrambleText({
-  text,
-  className = '',
-  animateOnHover = false,
-}: ScrambleTextProps) {
+export function ScrambleText({ text, className = '', animateOnHover = false }: ScrambleTextProps) {
   const reducedMotion = useSyncExternalStore(
     subscribeToReducedMotion,
     getReducedMotionSnapshot,

@@ -9,10 +9,7 @@ interface RippleBoundaryState {
   failed: boolean
 }
 
-export class RippleBoundary extends Component<
-  RippleBoundaryProps,
-  RippleBoundaryState
-> {
+export class RippleBoundary extends Component<RippleBoundaryProps, RippleBoundaryState> {
   override state: RippleBoundaryState = { failed: false }
 
   static getDerivedStateFromError(): RippleBoundaryState {

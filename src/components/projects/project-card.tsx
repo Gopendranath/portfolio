@@ -18,9 +18,7 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
         {project.title}
       </h3>
 
-      <p className="mt-3 flex-1 text-sm leading-relaxed text-muted">
-        {project.summary}
-      </p>
+      <p className="mt-3 flex-1 text-sm leading-relaxed text-muted">{project.summary}</p>
 
       <ul className="mt-6 flex flex-wrap gap-1.5">
         {project.stack.map((technology) => (

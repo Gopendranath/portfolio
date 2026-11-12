@@ -15,12 +15,7 @@ import { ParticleName } from '@/features/particle-name'
 import { pageHead } from '@/lib/seo'
 
 export const Route = createFileRoute('/')({
-  head: () =>
-    pageHead(
-      pageMeta.home.title,
-      pageMeta.home.description,
-      pageMeta.home.path,
-    ),
+  head: () => pageHead(pageMeta.home.title, pageMeta.home.description, pageMeta.home.path),
   component: HomePage,
 })
 
@@ -49,10 +44,7 @@ function HomePage() {
           dust={particles.dust}
           hover={particles.hover}
           className="mt-8 text-[clamp(3rem,8vw,6.5rem)] font-medium leading-[0.9] tracking-[-0.06em] text-ink"
-          lines={[
-            { text: profile.firstName },
-            { text: profile.lastName, muted: true },
-          ]}
+          lines={[{ text: profile.firstName }, { text: profile.lastName, muted: true }]}
         />
 
         <p className="mt-8 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
@@ -92,11 +84,7 @@ function HomePage() {
 
         <div className="mt-8 grid gap-4 content-auto [contain-intrinsic-size:auto_500px] sm:grid-cols-2 xl:grid-cols-3">
           {featuredProjects.map((project, index) => (
-            <ProjectCard
-              key={project.slug}
-              project={project}
-              index={index + 1}
-            />
+            <ProjectCard key={project.slug} project={project} index={index + 1} />
           ))}
         </div>
       </section>
@@ -106,22 +94,14 @@ function HomePage() {
           <div>
             <SectionLabel>Stack</SectionLabel>
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-muted">
-              The tools I reach for most, from interface work to the services
-              behind it.
+              The tools I reach for most, from interface work to the services behind it.
             </p>
           </div>
 
           <ul className="cursor-target grid grid-cols-2 gap-x-6 gap-y-3 font-mono text-[10px] uppercase tracking-[0.14em] text-muted sm:grid-cols-4">
             {coreStack.map((technology) => (
-              <li
-                key={technology}
-                translate="no"
-                className="flex items-center gap-2"
-              >
-                <span
-                  className="size-1 shrink-0 bg-accent"
-                  aria-hidden="true"
-                />
+              <li key={technology} translate="no" className="flex items-center gap-2">
+                <span className="size-1 shrink-0 bg-accent" aria-hidden="true" />
                 {technology}
               </li>
             ))}

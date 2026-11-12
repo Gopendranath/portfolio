@@ -1,22 +1,13 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useMemo, useState } from 'react'
-import {
-  useAssistantConversations,
-  useDeleteAssistantConversation,
-} from './use-assistant-history'
+import { useAssistantConversations, useDeleteAssistantConversation } from './use-assistant-history'
 import { useChatThread } from './use-chat-thread'
 
 const HISTORY_QUERY_KEY = ['chat', 'assistant-conversations'] as const
 
-type AssistantSelection =
-  | { type: 'auto' }
-  | { type: 'new' }
-  | { type: 'chat'; id: string }
+type AssistantSelection = { type: 'auto' } | { type: 'new' } | { type: 'chat'; id: string }
 
-export function useAssistantChat(input: {
-  enabled: boolean
-  historyEnabled: boolean
-}) {
+export function useAssistantChat(input: { enabled: boolean; historyEnabled: boolean }) {
   const queryClient = useQueryClient()
   const [historyOpen, setHistoryOpen] = useState(false)
   const [selection, setSelection] = useState<AssistantSelection>({

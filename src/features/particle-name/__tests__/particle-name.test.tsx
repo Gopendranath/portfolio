@@ -11,24 +11,16 @@ describe('ParticleName', () => {
   it('keeps the full name as the heading accessible name', () => {
     vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null)
 
-    render(
-      <ParticleName
-        lines={[{ text: 'Gopendranath' }, { text: 'Sasmal', muted: true }]}
-      />,
-    )
+    render(<ParticleName lines={[{ text: 'Gopendranath' }, { text: 'Sasmal', muted: true }]} />)
 
-    expect(
-      screen.getByRole('heading', { name: 'Gopendranath Sasmal' }),
-    ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Gopendranath Sasmal' })).toBeInTheDocument()
   })
 
   it('renders plain text and no canvas when Canvas 2D is unavailable', () => {
     vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null)
 
     const { container } = render(
-      <ParticleName
-        lines={[{ text: 'Gopendranath' }, { text: 'Sasmal', muted: true }]}
-      />,
+      <ParticleName lines={[{ text: 'Gopendranath' }, { text: 'Sasmal', muted: true }]} />,
     )
 
     expect(container.querySelector('canvas')).toBeNull()
@@ -49,17 +41,13 @@ describe('ParticleName', () => {
 
     expect(container.querySelector('canvas')).toBeNull()
     expect(container.querySelector('span')).not.toHaveClass('text-transparent')
-    expect(
-      screen.getByRole('heading', { name: 'Gopendranath Sasmal' }),
-    ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Gopendranath Sasmal' })).toBeInTheDocument()
   })
 
   it('stays visible until fonts are ready and the first frame has painted', async () => {
     const { drawImage, resolveFonts } = stubParticleEnvironment()
     const { container } = render(
-      <ParticleName
-        lines={[{ text: 'Gopendranath' }, { text: 'Sasmal', muted: true }]}
-      />,
+      <ParticleName lines={[{ text: 'Gopendranath' }, { text: 'Sasmal', muted: true }]} />,
     )
     const spans = [...container.querySelectorAll('span')]
 
@@ -67,9 +55,7 @@ describe('ParticleName', () => {
       await Promise.resolve()
     })
 
-    expect(
-      spans.every((span) => !span.className.includes('text-transparent')),
-    ).toBe(true)
+    expect(spans.every((span) => !span.className.includes('text-transparent'))).toBe(true)
     expect(drawImage).not.toHaveBeenCalled()
 
     await act(async () => {
@@ -87,9 +73,7 @@ describe('ParticleName', () => {
       reducedMotion: true,
     })
     const { container } = render(
-      <ParticleName
-        lines={[{ text: 'Gopendranath' }, { text: 'Sasmal', muted: true }]}
-      />,
+      <ParticleName lines={[{ text: 'Gopendranath' }, { text: 'Sasmal', muted: true }]} />,
     )
 
     await act(async () => {
@@ -108,11 +92,7 @@ describe('ParticleName', () => {
   })
 })
 
-function stubParticleEnvironment({
-  reducedMotion = false,
-}: {
-  reducedMotion?: boolean
-} = {}) {
+function stubParticleEnvironment({ reducedMotion = false }: { reducedMotion?: boolean } = {}) {
   const context = {
     beginPath: vi.fn(),
     clearRect: vi.fn(),
@@ -128,13 +108,11 @@ function stubParticleEnvironment({
     save: vi.fn(),
     stroke: vi.fn(),
     translate: vi.fn(),
-    getImageData: vi.fn(
-      (_x: number, _y: number, width: number, height: number) => ({
-        data: new Uint8ClampedArray(width * height * 4).fill(255),
-        width,
-        height,
-      }),
-    ),
+    getImageData: vi.fn((_x: number, _y: number, width: number, height: number) => ({
+      data: new Uint8ClampedArray(width * height * 4).fill(255),
+      width,
+      height,
+    })),
     measureText: vi.fn(() => ({
       fontBoundingBoxAscent: 10,
       fontBoundingBoxDescent: 2,
@@ -145,13 +123,8 @@ function stubParticleEnvironment({
   vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(
     context as unknown as CanvasRenderingContext2D,
   )
-  vi.spyOn(
-    HTMLHeadingElement.prototype,
-    'getBoundingClientRect',
-  ).mockReturnValue(rect(200, 90))
-  vi.spyOn(HTMLSpanElement.prototype, 'getBoundingClientRect').mockReturnValue(
-    rect(200, 45),
-  )
+  vi.spyOn(HTMLHeadingElement.prototype, 'getBoundingClientRect').mockReturnValue(rect(200, 90))
+  vi.spyOn(HTMLSpanElement.prototype, 'getBoundingClientRect').mockReturnValue(rect(200, 45))
 
   let resolveFonts = () => {}
   const ready = new Promise<void>((resolve) => {
@@ -195,9 +168,7 @@ function stubParticleEnvironment({
     frames += 1
     return setTimeout(() => callback(performance.now()), 16)
   })
-  vi.stubGlobal('cancelAnimationFrame', (handle: number) =>
-    clearTimeout(handle),
-  )
+  vi.stubGlobal('cancelAnimationFrame', (handle: number) => clearTimeout(handle))
 
   return {
     context,

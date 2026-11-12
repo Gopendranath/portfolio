@@ -36,9 +36,7 @@ function lineClassName(active: boolean, muted: boolean): string {
 }
 
 function lineSignature(lines: readonly ParticleNameLine[]): string {
-  return lines
-    .map((line) => `${line.muted ? 'muted' : 'ink'}\u0000${line.text}`)
-    .join('\u0001')
+  return lines.map((line) => `${line.muted ? 'muted' : 'ink'}\u0000${line.text}`).join('\u0001')
 }
 
 function lineKeys(lines: readonly ParticleNameLine[]): string[] {
@@ -106,10 +104,7 @@ export function ParticleName({
         </span>
       ))}
       {supported && enabled ? (
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 block"
-        >
+        <span aria-hidden="true" className="pointer-events-none absolute inset-0 block">
           <canvas ref={canvasRef} className="h-full w-full" />
         </span>
       ) : null}

@@ -31,8 +31,7 @@ interface GithubContributionsResponse {
   }>
 }
 
-const GITHUB_CONTRIBUTIONS_API =
-  'https://github-contributions-api.jogruber.de/v4'
+const GITHUB_CONTRIBUTIONS_API = 'https://github-contributions-api.jogruber.de/v4'
 
 const dateFormatter = new Intl.DateTimeFormat('en-US', {
   weekday: 'short',
@@ -68,9 +67,7 @@ export function formatContributionDate(date: string) {
   return dateFormatter.format(parseDateKey(date))
 }
 
-export function toGithubContributions(
-  response: GithubContributionsResponse,
-): GithubContributions {
+export function toGithubContributions(response: GithubContributionsResponse): GithubContributions {
   return {
     total: response.total.lastYear,
     days: response.contributions.map((day) => ({
@@ -81,9 +78,7 @@ export function toGithubContributions(
   }
 }
 
-export function groupContributionsIntoWeeks(
-  days: readonly ContributionDay[],
-): ContributionWeek[] {
+export function groupContributionsIntoWeeks(days: readonly ContributionDay[]): ContributionWeek[] {
   if (days.length === 0) {
     return []
   }
@@ -117,9 +112,7 @@ export function groupContributionsIntoWeeks(
   return weeks.map((days) => ({ days }))
 }
 
-export function getMonthLabels(
-  weeks: readonly ContributionWeek[],
-): Array<string | null> {
+export function getMonthLabels(weeks: readonly ContributionWeek[]): Array<string | null> {
   let lastMonth = -1
 
   return weeks.map((week) => {
@@ -142,9 +135,7 @@ export function getMonthLabels(
   })
 }
 
-export async function fetchGithubContributions(
-  signal?: AbortSignal,
-): Promise<GithubContributions> {
+export async function fetchGithubContributions(signal?: AbortSignal): Promise<GithubContributions> {
   return toGithubContributions(
     await fetchGithubJson<GithubContributionsResponse>(
       `${GITHUB_CONTRIBUTIONS_API}/${GITHUB_USERNAME}?y=last`,

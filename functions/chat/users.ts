@@ -50,10 +50,7 @@ function toAppUser(row: UserRow): AppUser {
   }
 }
 
-async function selectUser(
-  pool: Pool,
-  authUserId: string,
-): Promise<UserRow | undefined> {
+async function selectUser(pool: Pool, authUserId: string): Promise<UserRow | undefined> {
   const { rows } = await pool.query<UserRow>(
     `select ${USER_COLUMNS} from app_users where auth_user_id = $1`,
     [authUserId],
@@ -61,10 +58,7 @@ async function selectUser(
   return rows[0]
 }
 
-async function findGitHubAccount(
-  pool: Pool,
-  authUserId: string,
-): Promise<string> {
+async function findGitHubAccount(pool: Pool, authUserId: string): Promise<string> {
   const { rows } = await pool.query<{ account_id: string }>(
     `select "accountId" as account_id
        from neon_auth.account
@@ -112,12 +106,7 @@ export async function resolveAppUser(
 
   if (!row) {
     const githubId = await findGitHubAccount(pool, authUserId)
-    row = await insertUser(
-      pool,
-      authUserId,
-      githubId,
-      isOwnerGithubId(githubId) ? 'owner' : 'user',
-    )
+    row = await insertUser(pool, authUserId, githubId, isOwnerGithubId(githubId) ? 'owner' : 'user')
   }
 
   const isOwner = isOwnerGithubId(row.github_id) || row.role === 'owner'

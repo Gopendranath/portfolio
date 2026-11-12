@@ -20,10 +20,7 @@ export function useScrollEdges(): ScrollEdges {
     const update = () => {
       setEdges((current) => {
         const next = readScrollEdges()
-        return current.atTop === next.atTop &&
-          current.atBottom === next.atBottom
-          ? current
-          : next
+        return current.atTop === next.atTop && current.atBottom === next.atBottom ? current : next
       })
     }
 

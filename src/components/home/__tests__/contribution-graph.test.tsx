@@ -21,10 +21,7 @@ function renderGraph() {
 }
 
 it('renders the verified static fallback when the contributions API fails', async () => {
-  vi.stubGlobal(
-    'fetch',
-    vi.fn().mockRejectedValue(new Error('Contributions unavailable')),
-  )
+  vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Contributions unavailable')))
 
   renderGraph()
 
@@ -43,10 +40,7 @@ it('renders the verified static fallback when the contributions API fails', asyn
 })
 
 it('shows a day tooltip with the contribution count and date', async () => {
-  vi.stubGlobal(
-    'fetch',
-    vi.fn().mockRejectedValue(new Error('Contributions unavailable')),
-  )
+  vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Contributions unavailable')))
   const user = userEvent.setup()
 
   renderGraph()
@@ -62,10 +56,7 @@ it('shows a day tooltip with the contribution count and date', async () => {
 })
 
 it('moves day focus with arrow keys and keeps one tab stop', async () => {
-  vi.stubGlobal(
-    'fetch',
-    vi.fn().mockRejectedValue(new Error('Contributions unavailable')),
-  )
+  vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Contributions unavailable')))
   const user = userEvent.setup()
 
   renderGraph()

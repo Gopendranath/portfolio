@@ -34,26 +34,18 @@ describe('particleScaleForFontSize', () => {
 
 describe('dustBudget', () => {
   it('keeps the desktop proportional count', () => {
-    expect(
-      dustBudget({ particleCount: 2200, particleScale: 1, width: 900 }),
-    ).toBe(330)
+    expect(dustBudget({ particleCount: 2200, particleScale: 1, width: 900 })).toBe(330)
   })
 
   it('floors the count on narrow headings', () => {
-    expect(
-      dustBudget({ particleCount: 2000, particleScale: 0.9, width: 430 }),
-    ).toBe(150)
+    expect(dustBudget({ particleCount: 2000, particleScale: 0.9, width: 430 })).toBe(150)
   })
 
   it('caps the count on very wide headings', () => {
-    expect(
-      dustBudget({ particleCount: 10000, particleScale: 1, width: 1600 }),
-    ).toBe(420)
+    expect(dustBudget({ particleCount: 10000, particleScale: 1, width: 1600 })).toBe(420)
   })
 
   it('never returns zero dust', () => {
-    expect(dustBudget({ particleCount: 0, particleScale: 1, width: 320 })).toBe(
-      150,
-    )
+    expect(dustBudget({ particleCount: 0, particleScale: 1, width: 320 })).toBe(150)
   })
 })

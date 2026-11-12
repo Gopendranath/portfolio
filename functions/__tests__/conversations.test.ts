@@ -1,14 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { Pool } from 'pg'
-import {
-  afterAll,
-  afterEach,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-} from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import {
   createMessage,
   editMessage,
@@ -35,9 +27,7 @@ function requirePool(): Pool {
 
 async function createTestUser(): Promise<string> {
   const authUserId = `test-${randomUUID()}`
-  const githubId = String(
-    1_000_000_000 + Math.floor(Math.random() * 800_000_000),
-  )
+  const githubId = String(1_000_000_000 + Math.floor(Math.random() * 800_000_000))
   const { rows } = await requirePool().query<{ id: string }>(
     `insert into app_users (auth_user_id, github_id, github_login, github_created_at, github_checked_at)
      values ($1, $2, 'test-user', now() - interval '2 years', now())
@@ -60,11 +50,7 @@ describe.skipIf(!hasDatabase)('conversation helpers', () => {
 
   beforeEach(async () => {
     userId = await createTestUser()
-    const conversation = await getOrCreateConversation(
-      requirePool(),
-      userId,
-      'owner',
-    )
+    const conversation = await getOrCreateConversation(requirePool(), userId, 'owner')
     conversationId = conversation.id
   })
 
@@ -175,9 +161,10 @@ describe.skipIf(!hasDatabase)('conversation helpers', () => {
     const page = await listMessages(requirePool(), conversationId, {
       limit: 10,
     })
-    expect(
-      page.messages.find((candidate) => candidate.id === message.id),
-    ).toMatchObject({ status: 'failed', errorCode: 'STALE_STREAM' })
+    expect(page.messages.find((candidate) => candidate.id === message.id)).toMatchObject({
+      status: 'failed',
+      errorCode: 'STALE_STREAM',
+    })
   })
 
   it('edits an own owner-thread message and keeps a revision', async () => {
@@ -221,9 +208,7 @@ describe.skipIf(!hasDatabase)('conversation helpers', () => {
       }),
     ).rejects.toMatchObject({ code: 'NOT_FOUND' })
 
-    await requirePool().query('delete from app_users where id = $1', [
-      otherUserId,
-    ])
+    await requirePool().query('delete from app_users where id = $1', [otherUserId])
   })
 
   it('marks the user side read', async () => {

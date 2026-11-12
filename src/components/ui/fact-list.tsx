@@ -18,10 +18,7 @@ export function FactList({ items, className }: FactListProps) {
         .join(' ')}
     >
       {items.map((fact) => (
-        <div
-          key={fact.label}
-          className="flex items-start justify-between gap-6 py-3"
-        >
+        <div key={fact.label} className="flex items-start justify-between gap-6 py-3">
           <dt className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted">
             {fact.label}
           </dt>

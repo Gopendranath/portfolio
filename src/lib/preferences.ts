@@ -128,9 +128,7 @@ function readLegacyPreferences(storage: Storage): Preferences | null {
 
   return {
     accent: isAccentId(accent) ? accent : defaults.accent,
-    cursorStyle: isCursorStyleId(cursorStyle)
-      ? cursorStyle
-      : defaults.cursorStyle,
+    cursorStyle: isCursorStyleId(cursorStyle) ? cursorStyle : defaults.cursorStyle,
     particles: {
       ...defaults.particles,
       ...parseParticles(
@@ -157,9 +155,7 @@ function clearLegacyPreferences(storage: Storage): void {
   }
 }
 
-export function readPreferences(
-  storage: Storage | null = getStorage(),
-): Preferences {
+export function readPreferences(storage: Storage | null = getStorage()): Preferences {
   if (!storage) {
     return createDefaultPreferences()
   }

@@ -23,9 +23,7 @@ interface ThreadRow {
   unread_count: number
 }
 
-function parseCursor(
-  cursor: string | undefined,
-): { at: Date; id: string } | null {
+function parseCursor(cursor: string | undefined): { at: Date; id: string } | null {
   if (!cursor) {
     return null
   }
@@ -109,15 +107,11 @@ export async function listOwnerThreads(
   return {
     threads,
     hasMore,
-    nextCursor:
-      hasMore && last ? `${last.lastMessageAt}|${last.conversationId}` : null,
+    nextCursor: hasMore && last ? `${last.lastMessageAt}|${last.conversationId}` : null,
   }
 }
 
-export async function countUserOwnerUnread(
-  pool: Pool,
-  userId: string,
-): Promise<number> {
+export async function countUserOwnerUnread(pool: Pool, userId: string): Promise<number> {
   const { rows } = await pool.query<{ count: number }>(
     `select count(*)::int as count
        from messages m
@@ -145,11 +139,7 @@ export async function getOwnerThreadMessages(
   hasMore: boolean
   nextCursor: number | null
 }> {
-  const conversation = await getConversationForUser(
-    pool,
-    visitorUserId,
-    'owner',
-  )
+  const conversation = await getConversationForUser(pool, visitorUserId, 'owner')
 
   return listMessages(pool, conversation.id, options)
 }
@@ -162,11 +152,7 @@ export async function createOwnerReply(
     clientId: string
   },
 ): Promise<ChatMessageDTO> {
-  const conversation = await getConversationForUser(
-    pool,
-    input.visitorUserId,
-    'owner',
-  )
+  const conversation = await getConversationForUser(pool, input.visitorUserId, 'owner')
 
   const message = await createMessage(pool, {
     conversationId: conversation.id,
@@ -179,34 +165,17 @@ export async function createOwnerReply(
   return message
 }
 
-export async function markOwnerRead(
-  pool: Pool,
-  visitorUserId: string,
-): Promise<void> {
-  const conversation = await getConversationForUser(
-    pool,
-    visitorUserId,
-    'owner',
-  )
+export async function markOwnerRead(pool: Pool, visitorUserId: string): Promise<void> {
+  const conversation = await getConversationForUser(pool, visitorUserId, 'owner')
   await markRead(pool, conversation.id, 'owner')
 }
 
-export async function markOwnerUnread(
-  pool: Pool,
-  visitorUserId: string,
-): Promise<void> {
-  const conversation = await getConversationForUser(
-    pool,
-    visitorUserId,
-    'owner',
-  )
+export async function markOwnerUnread(pool: Pool, visitorUserId: string): Promise<void> {
+  const conversation = await getConversationForUser(pool, visitorUserId, 'owner')
   await markUnread(pool, conversation.id, 'owner')
 }
 
-export async function markUserOwnerUnread(
-  pool: Pool,
-  userId: string,
-): Promise<void> {
+export async function markUserOwnerUnread(pool: Pool, userId: string): Promise<void> {
   const conversation = await getConversationForUser(pool, userId, 'owner')
   await markUnread(pool, conversation.id, 'user')
 }

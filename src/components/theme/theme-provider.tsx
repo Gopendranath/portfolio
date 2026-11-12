@@ -1,11 +1,4 @@
-import {
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useState,
-} from 'react'
+import { type ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import { flushSync } from 'react-dom'
 import type { Theme, ThemeToggleOrigin } from './theme-context'
 import { ThemeContext } from './theme-context'
@@ -71,9 +64,7 @@ function applyTheme(theme: Theme) {
     root.dataset.theme = theme
   }
 
-  document
-    .querySelector('meta[name="theme-color"]')
-    ?.setAttribute('content', themeColors[theme])
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themeColors[theme])
 }
 
 function persistTheme(theme: Theme) {

@@ -36,18 +36,14 @@ function resolvePlacement(
   preferred: TooltipPlacement,
   viewport: TooltipViewport,
 ): TooltipPlacement {
-  const overflowsRight =
-    rect.right + TOOLTIP_GAP + TOOLTIP_ESTIMATED_WIDTH > viewport.width
-  const overflowsBottom =
-    rect.bottom + TOOLTIP_GAP + TOOLTIP_ESTIMATED_HEIGHT > viewport.height
+  const overflowsRight = rect.right + TOOLTIP_GAP + TOOLTIP_ESTIMATED_WIDTH > viewport.width
+  const overflowsBottom = rect.bottom + TOOLTIP_GAP + TOOLTIP_ESTIMATED_HEIGHT > viewport.height
 
   switch (preferred) {
     case 'right':
       return overflowsRight ? 'left' : preferred
     case 'left':
-      return rect.left - TOOLTIP_GAP - TOOLTIP_ESTIMATED_WIDTH < 0
-        ? 'right'
-        : preferred
+      return rect.left - TOOLTIP_GAP - TOOLTIP_ESTIMATED_WIDTH < 0 ? 'right' : preferred
     case 'top':
       return rect.top < TOP_BAR_CLEARANCE ? 'bottom' : preferred
     case 'top-left':
@@ -77,12 +73,9 @@ export function resolveTooltipPosition(
   const placement = resolvePlacement(rect, preferred, viewport)
   const centerX = rect.left + rect.width / 2
   const centerY = rect.top + rect.height / 2
-  const isTop =
-    placement === 'top' || placement === 'top-left' || placement === 'top-right'
+  const isTop = placement === 'top' || placement === 'top-left' || placement === 'top-right'
   const isBottom =
-    placement === 'bottom' ||
-    placement === 'bottom-left' ||
-    placement === 'bottom-right'
+    placement === 'bottom' || placement === 'bottom-left' || placement === 'bottom-right'
 
   let left = centerX
   let top = rect.top - TOOLTIP_GAP
@@ -109,16 +102,10 @@ export function resolveTooltipPosition(
     left = clamp(
       left,
       isCorner ? VIEWPORT_EDGE : VIEWPORT_EDGE_WIDE,
-      isCorner
-        ? viewport.width - VIEWPORT_EDGE
-        : viewport.width - VIEWPORT_EDGE_WIDE,
+      isCorner ? viewport.width - VIEWPORT_EDGE : viewport.width - VIEWPORT_EDGE_WIDE,
     )
   } else {
-    top = clamp(
-      top,
-      VIEWPORT_VERTICAL_EDGE,
-      viewport.height - VIEWPORT_VERTICAL_EDGE,
-    )
+    top = clamp(top, VIEWPORT_VERTICAL_EDGE, viewport.height - VIEWPORT_VERTICAL_EDGE)
   }
 
   return { left, top, placement }

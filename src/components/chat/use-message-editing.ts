@@ -7,10 +7,7 @@ interface UseMessageEditingOptions {
   onEdit: (id: string, body: string) => void
 }
 
-export function useMessageEditing({
-  message,
-  onEdit,
-}: UseMessageEditingOptions) {
+export function useMessageEditing({ message, onEdit }: UseMessageEditingOptions) {
   const [isEditing, setIsEditing] = useState(false)
   const [draft, setDraft] = useState(message.body)
 
@@ -45,11 +42,7 @@ export function useMessageEditing({
       return
     }
 
-    if (
-      event.key === 'Enter' &&
-      !event.shiftKey &&
-      !event.nativeEvent.isComposing
-    ) {
+    if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
       event.preventDefault()
       saveEdit()
     }

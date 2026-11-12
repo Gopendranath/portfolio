@@ -1,11 +1,6 @@
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import {
-  ChatApiError,
-  chatFetch,
-  type StreamHandlers,
-  streamChat,
-} from './api-client'
+import { ChatApiError, chatFetch, type StreamHandlers, streamChat } from './api-client'
 import type { ChatKind, ChatMessageDTO, MessagePage } from './protocol'
 import { MAX_MESSAGE_LENGTH } from './protocol'
 
@@ -97,8 +92,7 @@ export function useChatThread({
         'chat',
         'messages',
         kind,
-        ownerThreadUserId ??
-          (kind === 'assistant' ? (conversationId ?? 'draft') : 'me'),
+        ownerThreadUserId ?? (kind === 'assistant' ? (conversationId ?? 'draft') : 'me'),
       ] as const,
     [conversationId, kind, ownerThreadUserId],
   )
@@ -117,8 +111,7 @@ export function useChatThread({
     },
     initialPageParam: undefined as number | undefined,
     getNextPageParam: (last) => last.nextCursor ?? undefined,
-    enabled:
-      enabled && (kind === 'owner' || isOwnerInbox || Boolean(conversationId)),
+    enabled: enabled && (kind === 'owner' || isOwnerInbox || Boolean(conversationId)),
     staleTime: 0,
     refetchOnWindowFocus: false,
     refetchInterval: pollMs ?? false,
@@ -129,19 +122,13 @@ export function useChatThread({
     if (kind !== 'assistant' || !conversationId) {
       return
     }
-    if (
-      query.error instanceof ChatApiError &&
-      query.error.code === 'NOT_FOUND'
-    ) {
+    if (query.error instanceof ChatApiError && query.error.code === 'NOT_FOUND') {
       onConversationLost?.(conversationId, '')
     }
   }, [conversationId, kind, onConversationLost, query.error])
 
   const persisted = useMemo(
-    () =>
-      query.data
-        ? [...query.data.pages].reverse().flatMap((page) => page.messages)
-        : [],
+    () => (query.data ? [...query.data.pages].reverse().flatMap((page) => page.messages) : []),
     [query.data],
   )
   const persistedClientIds = useMemo(
@@ -168,8 +155,7 @@ export function useChatThread({
         .map(toViewMessage)
         .filter(
           (message) =>
-            (forkedAtSeq === null || message.seq <= forkedAtSeq) &&
-            message.id !== streaming?.id,
+            (forkedAtSeq === null || message.seq <= forkedAtSeq) && message.id !== streaming?.id,
         ),
       ...pendingMessages,
       ...(streaming ? [streaming] : []),
@@ -216,12 +202,7 @@ export function useChatThread({
           })
           if (streamedConversationId) {
             void queryClient.invalidateQueries({
-              queryKey: [
-                'chat',
-                'messages',
-                'assistant',
-                streamedConversationId,
-              ],
+              queryKey: ['chat', 'messages', 'assistant', streamedConversationId],
             })
           }
         }
@@ -256,9 +237,7 @@ export function useChatThread({
           )
         },
         onDelta: (text) => {
-          setStreaming((current) =>
-            current ? { ...current, body: current.body + text } : current,
-          )
+          setStreaming((current) => (current ? { ...current, body: current.body + text } : current))
         },
         onDone: () => {
           setStreaming(null)
@@ -267,11 +246,7 @@ export function useChatThread({
           refreshMessages()
         },
         onError: (error) => {
-          if (
-            error.code === 'NOT_FOUND' &&
-            kind === 'assistant' &&
-            conversationId
-          ) {
+          if (error.code === 'NOT_FOUND' && kind === 'assistant' && conversationId) {
             onConversationLost?.(conversationId, userMessage.body)
             setStreaming(null)
             setPending([])
@@ -344,14 +319,7 @@ export function useChatThread({
         abortRef.current = null
       }
     },
-    [
-      conversationId,
-      kind,
-      onConversationLost,
-      onConversationStarted,
-      queryClient,
-      queryKey,
-    ],
+    [conversationId, kind, onConversationLost, onConversationStarted, queryClient, queryKey],
   )
 
   const send = useCallback(
@@ -382,17 +350,13 @@ export function useChatThread({
       setIsSending(true)
       try {
         await chatFetch(
-          isOwnerInbox
-            ? `/api/owner/threads/${ownerThreadUserId}/messages`
-            : '/api/chat/owner',
+          isOwnerInbox ? `/api/owner/threads/${ownerThreadUserId}/messages` : '/api/chat/owner',
           {
             method: 'POST',
             body: JSON.stringify({ body: trimmed, clientId }),
           },
         )
-        setPending((current) =>
-          current.filter((message) => message.clientId !== clientId),
-        )
+        setPending((current) => current.filter((message) => message.clientId !== clientId))
         await query.refetch()
       } catch (error) {
         setPending((current) =>
@@ -415,12 +379,7 @@ export function useChatThread({
 
   const retry = useCallback(
     async (message: ViewMessage) => {
-      if (
-        message.author === 'user' &&
-        kind === 'assistant' &&
-        !isOwnerInbox &&
-        message.clientId
-      ) {
+      if (message.author === 'user' && kind === 'assistant' && !isOwnerInbox && message.clientId) {
         setIsSending(true)
         try {
           await runStream(
@@ -456,9 +415,7 @@ export function useChatThread({
 
       setPending((current) =>
         current.map((item) =>
-          item.id === message.id
-            ? { ...item, status: 'sending', errorMessage: undefined }
-            : item,
+          item.id === message.id ? { ...item, status: 'sending', errorMessage: undefined } : item,
         ),
       )
       setIsSending(true)
@@ -475,9 +432,7 @@ export function useChatThread({
             }),
           },
         )
-        setPending((current) =>
-          current.filter((item) => item.id !== message.id),
-        )
+        setPending((current) => current.filter((item) => item.id !== message.id))
         await query.refetch()
       } catch (error) {
         setPending((current) =>
@@ -531,9 +486,7 @@ export function useChatThread({
             {
               onMeta: (meta) => {
                 setStreaming((current) =>
-                  current
-                    ? { ...current, id: meta.assistantMessageId }
-                    : current,
+                  current ? { ...current, id: meta.assistantMessageId } : current,
                 )
               },
               onDelta: (text) => {
@@ -565,9 +518,7 @@ export function useChatThread({
               ? {
                   ...current,
                   status: 'failed',
-                  errorCode: controller.signal.aborted
-                    ? 'ABORTED'
-                    : 'UPSTREAM_ERROR',
+                  errorCode: controller.signal.aborted ? 'ABORTED' : 'UPSTREAM_ERROR',
                   errorMessage: controller.signal.aborted
                     ? 'The response was stopped.'
                     : errorMessage(error),

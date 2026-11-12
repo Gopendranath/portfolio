@@ -27,9 +27,7 @@ export function ChatHeader({
   const Heading = level === 1 ? 'h1' : 'h2'
 
   return (
-    <header
-      className={`h-20 shrink-0 items-center gap-3 border-b border-line px-4 ${className}`}
-    >
+    <header className={`h-20 shrink-0 items-center gap-3 border-b border-line px-4 ${className}`}>
       {onBack ? (
         <button
           type="button"
@@ -42,19 +40,14 @@ export function ChatHeader({
       ) : null}
       {avatar}
       <div className="min-w-0 flex-1">
-        <Heading
-          id={titleId}
-          className="truncate text-xl font-medium tracking-[-0.02em] text-ink"
-        >
+        <Heading id={titleId} className="truncate text-xl font-medium tracking-[-0.02em] text-ink">
           {title}
         </Heading>
         <p className="mt-0.5 truncate font-mono text-[9px] uppercase tracking-[0.14em] text-muted">
           {subtitle}
         </p>
       </div>
-      {actions ? (
-        <div className="flex shrink-0 items-center gap-2">{actions}</div>
-      ) : null}
+      {actions ? <div className="flex shrink-0 items-center gap-2">{actions}</div> : null}
     </header>
   )
 }

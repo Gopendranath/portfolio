@@ -32,10 +32,7 @@ export function collectTargets(
   return targets
 }
 
-export function thinTargets(
-  targets: readonly PointTarget[],
-  max: number,
-): PointTarget[] {
+export function thinTargets(targets: readonly PointTarget[], max: number): PointTarget[] {
   if (max <= 0) {
     return []
   }

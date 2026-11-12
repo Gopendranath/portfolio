@@ -5,13 +5,7 @@
  * Licensed under MIT + Commons Clause License Condition v1.0.
  * See https://github.com/DavidHDev/react-bits/blob/main/LICENSE.md
  */
-import {
-  type CSSProperties,
-  type RefObject,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
+import { type CSSProperties, type RefObject, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { spring } from './target-cursor-spring'
 
@@ -38,9 +32,7 @@ export interface TargetCursorProps {
 const CORNER_ANGLES = [0, 90, 180, 270]
 const QUARTER = Math.PI / 2
 
-const resolveElement = (
-  value: TargetCursorProps['container'],
-): HTMLElement | null =>
+const resolveElement = (value: TargetCursorProps['container']): HTMLElement | null =>
   (value && 'current' in value ? value.current : value) || null
 
 const TargetCursor = ({
@@ -153,11 +145,7 @@ const TargetCursor = ({
       if (style.textContent !== rule) style.textContent = rule
     }
 
-    const findTarget = (
-      x: number,
-      y: number,
-      element?: Element | null,
-    ): Element | null => {
+    const findTarget = (x: number, y: number, element?: Element | null): Element | null => {
       const s = settingsRef.current
       const node = element || document.elementFromPoint(x, y)
       const found = node?.closest(s.targetSelector) || null
@@ -172,8 +160,7 @@ const TargetCursor = ({
       if (target) {
         const angle = turn.x
         quarter = Math.round(angle / QUARTER)
-        const corner =
-          Number.parseFloat(getComputedStyle(target).borderTopLeftRadius) || 0
+        const corner = Number.parseFloat(getComputedStyle(target).borderTopLeftRadius) || 0
         targetRadius = corner
         spinSpeed = 0
       }
@@ -212,9 +199,7 @@ const TargetCursor = ({
         const h = rect.height / 2 + s.padding
         goalW = odd ? h : w
         goalH = odd ? w : h
-        goalR = s.matchRadius
-          ? Math.min(targetRadius + Math.max(0, s.padding), s.cornerSize)
-          : 0
+        goalR = s.matchRadius ? Math.min(targetRadius + Math.max(0, s.padding), s.cornerSize) : 0
       }
 
       if (!pointer.inside && presence.x < 0.01) pointer.seen = false
@@ -237,8 +222,7 @@ const TargetCursor = ({
       if (locked) {
         spring(turn, quarter * QUARTER, snapK, snapC, dt)
       } else {
-        const speed =
-          s.spinDuration > 0 && !reduce ? (Math.PI * 2) / s.spinDuration : 0
+        const speed = s.spinDuration > 0 && !reduce ? (Math.PI * 2) / s.spinDuration : 0
         spinSpeed += (speed - spinSpeed) * (1 - Math.exp(-dt * 3))
         turn.v = spinSpeed
         turn.x += spinSpeed * dt
@@ -285,10 +269,7 @@ const TargetCursor = ({
 
       const label = labelRef.current
       if (label) {
-        const text =
-          s.showLabel && target
-            ? target.getAttribute('data-cursor-label') || ''
-            : ''
+        const text = s.showLabel && target ? target.getAttribute('data-cursor-label') || '' : ''
         if (text && text !== lastLabel) label.textContent = text
         if (text) lastLabel = text
         const shown = text ? Math.max(0, Math.min(1, lock.x)) : 0
@@ -296,9 +277,7 @@ const TargetCursor = ({
         label.style.opacity = shown.toFixed(3)
       }
 
-      const mix = s.cursorColorOnTarget
-        ? Math.round(Math.max(0, Math.min(1, lock.x)) * 100)
-        : 0
+      const mix = s.cursorColorOnTarget ? Math.round(Math.max(0, Math.min(1, lock.x)) * 100) : 0
       const color = mix
         ? `color-mix(in oklab, ${s.cursorColorOnTarget} ${mix}%, ${s.cursorColor})`
         : s.cursorColor
@@ -352,20 +331,12 @@ const TargetCursor = ({
       if (event.pointerType && event.pointerType !== 'mouse') return
       pointer.x = event.clientX
       pointer.y = event.clientY
-      const inside = insideScope(
-        pointer.x,
-        pointer.y,
-        event.target as Element | null,
-      )
+      const inside = insideScope(pointer.x, pointer.y, event.target as Element | null)
       if (inside !== pointer.inside) {
         pointer.inside = inside
         hideCursor()
       }
-      lockOn(
-        inside
-          ? findTarget(pointer.x, pointer.y, event.target as Element | null)
-          : null,
-      )
+      lockOn(inside ? findTarget(pointer.x, pointer.y, event.target as Element | null) : null)
       wake()
     }
 

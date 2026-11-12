@@ -5,11 +5,7 @@ const REFERENCE_STEP_SECONDS = 1 / 60
 const SETTLE_DISTANCE = 0.5
 export const MAX_STEP_SECONDS = 1 / 30
 
-function createParticle(
-  target: PointTarget,
-  bounds: SpawnBounds,
-  random: () => number,
-): Particle {
+function createParticle(target: PointTarget, bounds: SpawnBounds, random: () => number): Particle {
   const padding = bounds.padding ?? 0
 
   return {
@@ -58,10 +54,7 @@ export function fitParticles(
   return particles
 }
 
-export function retargetParticles(
-  particles: Particle[],
-  targets: readonly PointTarget[],
-): void {
+export function retargetParticles(particles: Particle[], targets: readonly PointTarget[]): void {
   if (targets.length === 0) {
     return
   }
@@ -131,13 +124,9 @@ export function stepParticles(
       }
 
       particle.vx =
-        (particle.vx +
-          (particle.targetX - particle.x) * particle.stiffness * dt) *
-        damping
+        (particle.vx + (particle.targetX - particle.x) * particle.stiffness * dt) * damping
       particle.vy =
-        (particle.vy +
-          (particle.targetY - particle.y) * particle.stiffness * dt) *
-        damping
+        (particle.vy + (particle.targetY - particle.y) * particle.stiffness * dt) * damping
 
       if (pointer) {
         const dx = particle.x - pointer.x

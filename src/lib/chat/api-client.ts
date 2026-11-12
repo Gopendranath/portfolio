@@ -182,21 +182,15 @@ function dispatchFrame(frame: string, handlers: StreamHandlers): void {
   }
 
   if (event === 'meta') {
-    handlers.onMeta?.(
-      data as Parameters<NonNullable<StreamHandlers['onMeta']>>[0],
-    )
+    handlers.onMeta?.(data as Parameters<NonNullable<StreamHandlers['onMeta']>>[0])
   } else if (event === 'delta') {
     const text = (data as { text?: unknown }).text
     if (typeof text === 'string') {
       handlers.onDelta?.(text)
     }
   } else if (event === 'done') {
-    handlers.onDone?.(
-      data as Parameters<NonNullable<StreamHandlers['onDone']>>[0],
-    )
+    handlers.onDone?.(data as Parameters<NonNullable<StreamHandlers['onDone']>>[0])
   } else if (event === 'error') {
-    handlers.onError?.(
-      data as Parameters<NonNullable<StreamHandlers['onError']>>[0],
-    )
+    handlers.onError?.(data as Parameters<NonNullable<StreamHandlers['onError']>>[0])
   }
 }

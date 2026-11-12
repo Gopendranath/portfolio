@@ -21,9 +21,7 @@ export function MessageTimestamp({ message }: { message: ChatMessage }) {
           </time>
         </>
       ) : (
-        <time dateTime={new Date(message.sentAt).toISOString()}>
-          {formatTime(message.sentAt)}
-        </time>
+        <time dateTime={new Date(message.sentAt).toISOString()}>{formatTime(message.sentAt)}</time>
       )}
     </span>
   )

@@ -29,10 +29,7 @@ export interface WebMcpToolOptions<TInput, TResult> {
   description: string
   inputSchema?: object
   annotations?: WebMCP.ToolAnnotations
-  execute: (
-    input: TInput,
-    options: { signal: AbortSignal },
-  ) => TResult | Promise<TResult>
+  execute: (input: TInput, options: { signal: AbortSignal }) => TResult | Promise<TResult>
   enabled?: boolean
   formatOutput?: (result: TResult, input: TInput) => unknown
   onError?: (error: unknown) => void
@@ -147,10 +144,7 @@ function errorMessage(error: unknown) {
   return typeof error === 'string' ? error : safeStringify(error)
 }
 
-export function useWebMCP<
-  TInput extends object = Record<string, unknown>,
-  TResult = unknown,
->({
+export function useWebMCP<TInput extends object = Record<string, unknown>, TResult = unknown>({
   name,
   description,
   inputSchema,
@@ -161,8 +155,7 @@ export function useWebMCP<
   onError,
 }: WebMcpToolOptions<TInput, TResult>): WebMcpToolState {
   const [state, setState] = useState<WebMcpToolState>(() => ({
-    supported:
-      typeof document !== 'undefined' && Boolean(document.modelContext),
+    supported: typeof document !== 'undefined' && Boolean(document.modelContext),
     registered: false,
     error: null,
   }))
@@ -181,10 +174,7 @@ export function useWebMCP<
     annotationsRef.current = annotations
   })
 
-  const schemaKey = useMemo(
-    () => (inputSchema ? safeStringify(inputSchema) : ''),
-    [inputSchema],
-  )
+  const schemaKey = useMemo(() => (inputSchema ? safeStringify(inputSchema) : ''), [inputSchema])
   const annotationsKey = useMemo(
     () => (annotations ? safeStringify(annotations) : ''),
     [annotations],
@@ -254,8 +244,7 @@ export function useWebMCP<
         commit({
           supported: true,
           registered: false,
-          error:
-            error instanceof Error ? error : new Error(safeStringify(error)),
+          error: error instanceof Error ? error : new Error(safeStringify(error)),
         })
       }
     })()
@@ -277,7 +266,5 @@ export function useWebMCP<
     }
   }, [name, description, schemaKey, annotationsKey, enabled, detectTick])
 
-  return enabled
-    ? state
-    : { supported: state.supported, registered: false, error: null }
+  return enabled ? state : { supported: state.supported, registered: false, error: null }
 }

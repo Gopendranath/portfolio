@@ -17,9 +17,7 @@ describe('isAiEligible', () => {
   })
 
   it('rejects an account created 364 days ago', () => {
-    expect(isAiEligible(new Date(now.getTime() - 364 * DAY_MS), now)).toBe(
-      false,
-    )
+    expect(isAiEligible(new Date(now.getTime() - 364 * DAY_MS), now)).toBe(false)
   })
 
   it('allows an account created exactly 365 days ago', () => {
@@ -134,11 +132,7 @@ describe('resolveGitHubProfile', () => {
   it('rethrows when GitHub fails with no cache', async () => {
     const fetcher = vi.fn().mockRejectedValue(new Error('rate limited'))
     await expect(
-      resolveGitHubProfile(
-        { login: null, createdAt: null, checkedAt: null },
-        fetcher,
-        now,
-      ),
+      resolveGitHubProfile({ login: null, createdAt: null, checkedAt: null }, fetcher, now),
     ).rejects.toThrow('rate limited')
   })
 })
@@ -162,9 +156,7 @@ describe('fetchGitHubProfile', () => {
   })
 
   it('rejects a non-OK response', async () => {
-    const fetchImpl = vi
-      .fn()
-      .mockResolvedValue(new Response('nope', { status: 404 }))
+    const fetchImpl = vi.fn().mockResolvedValue(new Response('nope', { status: 404 }))
     await expect(fetchGitHubProfile('1', fetchImpl)).rejects.toMatchObject({
       code: 'UPSTREAM_ERROR',
     })

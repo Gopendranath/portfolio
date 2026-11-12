@@ -19,9 +19,7 @@ const conversations: AssistantConversationDTO[] = [
   },
 ]
 
-function setup(
-  overrides: Partial<Parameters<typeof AssistantHistoryDialog>[0]> = {},
-) {
+function setup(overrides: Partial<Parameters<typeof AssistantHistoryDialog>[0]> = {}) {
   const props = {
     open: true,
     conversations,
@@ -60,9 +58,10 @@ describe('AssistantHistoryDialog', () => {
 
     expect(screen.getByText('First chat')).toBeInTheDocument()
     expect(screen.getByText('Second chat')).toBeInTheDocument()
-    expect(
-      screen.getByRole('button', { name: 'Open chat First chat' }),
-    ).toHaveAttribute('aria-current', 'true')
+    expect(screen.getByRole('button', { name: 'Open chat First chat' })).toHaveAttribute(
+      'aria-current',
+      'true',
+    )
   })
 
   it('starts a new chat', async () => {
@@ -77,9 +76,7 @@ describe('AssistantHistoryDialog', () => {
     const user = userEvent.setup()
     const props = setup()
 
-    await user.click(
-      screen.getByRole('button', { name: 'Open chat Second chat' }),
-    )
+    await user.click(screen.getByRole('button', { name: 'Open chat Second chat' }))
     expect(props.onSelect).toHaveBeenCalledWith('conversation-2')
   })
 
@@ -88,9 +85,7 @@ describe('AssistantHistoryDialog', () => {
     const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
     const props = setup()
 
-    await user.click(
-      screen.getByRole('button', { name: 'Delete chat First chat' }),
-    )
+    await user.click(screen.getByRole('button', { name: 'Delete chat First chat' }))
     expect(confirm).toHaveBeenCalled()
     expect(props.onDelete).toHaveBeenCalledWith('conversation-1')
   })
@@ -100,9 +95,7 @@ describe('AssistantHistoryDialog', () => {
     vi.spyOn(window, 'confirm').mockReturnValue(false)
     const props = setup()
 
-    await user.click(
-      screen.getByRole('button', { name: 'Delete chat First chat' }),
-    )
+    await user.click(screen.getByRole('button', { name: 'Delete chat First chat' }))
     expect(props.onDelete).not.toHaveBeenCalled()
   })
 

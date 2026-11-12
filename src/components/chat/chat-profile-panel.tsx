@@ -25,18 +25,13 @@ export function ChatProfilePanel({
   onSignOut,
 }: ChatProfilePanelProps) {
   const profiles = isOwner ? [chatProfilesById.assistant] : chatProfiles
-  const badges =
-    !isOwner && ownerUnreadCount > 0 ? { owner: ownerUnreadCount } : undefined
+  const badges = !isOwner && ownerUnreadCount > 0 ? { owner: ownerUnreadCount } : undefined
 
   return (
     <div className="chat-profile-panel flex shrink-0 flex-col border-b border-line p-4 md:border-b-0 md:border-r">
       <div className="chat-profile-heading shrink-0">
-        <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-accent">
-          05 / Chat
-        </p>
-        <h1 className="mt-1 text-xl font-medium tracking-[-0.02em] text-ink">
-          Chat.
-        </h1>
+        <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-accent">05 / Chat</p>
+        <h1 className="mt-1 text-xl font-medium tracking-[-0.02em] text-ink">Chat.</h1>
       </div>
 
       <div className="chat-profile-list mt-4 space-y-2">

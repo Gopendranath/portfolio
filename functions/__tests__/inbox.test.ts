@@ -1,21 +1,8 @@
 import { randomUUID } from 'node:crypto'
 import { Pool } from 'pg'
-import {
-  afterAll,
-  afterEach,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-} from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { createMessage, getOrCreateConversation } from '../chat/conversations'
-import {
-  createOwnerReply,
-  listOwnerThreads,
-  markOwnerRead,
-  markOwnerUnread,
-} from '../chat/inbox'
+import { createOwnerReply, listOwnerThreads, markOwnerRead, markOwnerUnread } from '../chat/inbox'
 
 const hasDatabase = Boolean(process.env.TEST_DATABASE_URL)
 const pool = hasDatabase
@@ -34,19 +21,12 @@ function requirePool(): Pool {
 
 async function createUser(role: 'user' | 'owner'): Promise<string> {
   const authUserId = `test-inbox-${randomUUID()}`
-  const githubId = String(
-    4_000_000_000 + Math.floor(Math.random() * 600_000_000),
-  )
+  const githubId = String(4_000_000_000 + Math.floor(Math.random() * 600_000_000))
   const { rows } = await requirePool().query<{ id: string }>(
     `insert into app_users (auth_user_id, github_id, github_login, role)
      values ($1, $2, $3, $4)
      returning id`,
-    [
-      authUserId,
-      githubId,
-      role === 'owner' ? 'owner-test' : 'visitor-test',
-      role,
-    ],
+    [authUserId, githubId, role === 'owner' ? 'owner-test' : 'visitor-test', role],
   )
   const row = rows[0]
   if (!row) {
@@ -57,19 +37,13 @@ async function createUser(role: 'user' | 'owner'): Promise<string> {
 
 describe.skipIf(!hasDatabase)('owner inbox', () => {
   beforeAll(async () => {
-    await requirePool().query(
-      "delete from app_users where auth_user_id like 'test-inbox-%'",
-    )
+    await requirePool().query("delete from app_users where auth_user_id like 'test-inbox-%'")
   })
 
   beforeEach(async () => {
     ownerId = await createUser('owner')
     visitorId = await createUser('user')
-    const conversation = await getOrCreateConversation(
-      requirePool(),
-      visitorId,
-      'owner',
-    )
+    const conversation = await getOrCreateConversation(requirePool(), visitorId, 'owner')
     await createMessage(requirePool(), {
       conversationId: conversation.id,
       author: 'user',
@@ -79,10 +53,9 @@ describe.skipIf(!hasDatabase)('owner inbox', () => {
   })
 
   afterEach(async () => {
-    await requirePool().query(
-      'delete from app_users where id = any($1::uuid[])',
-      [[visitorId, ownerId]],
-    )
+    await requirePool().query('delete from app_users where id = any($1::uuid[])', [
+      [visitorId, ownerId],
+    ])
   })
 
   afterAll(async () => {
@@ -90,11 +63,7 @@ describe.skipIf(!hasDatabase)('owner inbox', () => {
   })
 
   it('lists owner threads only and counts unread visitor messages', async () => {
-    const assistant = await getOrCreateConversation(
-      requirePool(),
-      visitorId,
-      'assistant',
-    )
+    const assistant = await getOrCreateConversation(requirePool(), visitorId, 'assistant')
     await createMessage(requirePool(), {
       conversationId: assistant.id,
       author: 'user',
@@ -146,11 +115,7 @@ describe.skipIf(!hasDatabase)('owner inbox', () => {
 
   it('paginates owner threads', async () => {
     const secondVisitor = await createUser('user')
-    const second = await getOrCreateConversation(
-      requirePool(),
-      secondVisitor,
-      'owner',
-    )
+    const second = await getOrCreateConversation(requirePool(), secondVisitor, 'owner')
     await createMessage(requirePool(), {
       conversationId: second.id,
       author: 'user',
@@ -169,8 +134,6 @@ describe.skipIf(!hasDatabase)('owner inbox', () => {
     expect(next.threads).toHaveLength(1)
     expect(next.threads[0]?.userId).not.toBe(first.threads[0]?.userId)
 
-    await requirePool().query('delete from app_users where id = $1', [
-      secondVisitor,
-    ])
+    await requirePool().query('delete from app_users where id = $1', [secondVisitor])
   })
 })

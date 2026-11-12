@@ -13,10 +13,7 @@ export function getCorsHeaders(request: Request): Headers {
     headers.set('Access-Control-Allow-Origin', origin)
     headers.set('Vary', 'Origin')
     headers.set('Access-Control-Allow-Headers', 'authorization, content-type')
-    headers.set(
-      'Access-Control-Allow-Methods',
-      'GET, POST, PATCH, DELETE, OPTIONS',
-    )
+    headers.set('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS')
     headers.set('Access-Control-Max-Age', '86400')
   }
 

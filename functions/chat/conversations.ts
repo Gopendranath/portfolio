@@ -1,9 +1,5 @@
 import type { Pool } from 'pg'
-import {
-  type ChatAuthor,
-  type ChatMessageDTO,
-  PAGE_SIZE,
-} from '../../src/lib/chat/protocol'
+import { type ChatAuthor, type ChatMessageDTO, PAGE_SIZE } from '../../src/lib/chat/protocol'
 import { ApiError } from './errors'
 
 export interface MessageRow {

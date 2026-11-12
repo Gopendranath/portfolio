@@ -7,10 +7,7 @@ interface RegisteredTool {
   description: string
   inputSchema?: Record<string, unknown>
   annotations?: { readOnlyHint?: boolean }
-  execute: (
-    input: unknown,
-    options: { signal: AbortSignal },
-  ) => Promise<unknown>
+  execute: (input: unknown, options: { signal: AbortSignal }) => Promise<unknown>
 }
 
 afterEach(() => {
@@ -19,12 +16,10 @@ afterEach(() => {
 
 function installModelContext() {
   const tools = new Map<string, RegisteredTool>()
-  const registerTool = vi.fn(
-    (tool: RegisteredTool, options: { signal: AbortSignal }) => {
-      tools.set(tool.name, tool)
-      options.signal.addEventListener('abort', () => tools.delete(tool.name))
-    },
-  )
+  const registerTool = vi.fn((tool: RegisteredTool, options: { signal: AbortSignal }) => {
+    tools.set(tool.name, tool)
+    options.signal.addEventListener('abort', () => tools.delete(tool.name))
+  })
 
   Object.defineProperty(document, 'modelContext', {
     configurable: true,
@@ -73,10 +68,7 @@ it('registers agent-facing metadata and normalizes execution results', async () 
     required: ['slug'],
   })
 
-  const result = await profile?.execute(
-    {},
-    { signal: new AbortController().signal },
-  )
+  const result = await profile?.execute({}, { signal: new AbortController().signal })
 
   expect(result).toMatchObject({ content: [{ type: 'text' }] })
   expect(JSON.stringify(result)).toContain('Gopendranath Sasmal')

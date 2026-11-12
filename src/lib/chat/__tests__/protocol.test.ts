@@ -24,9 +24,7 @@ describe('normalizeBody', () => {
   })
 
   it('rejects bodies over the limit', () => {
-    expect(() => normalizeBody('x'.repeat(MAX_MESSAGE_LENGTH + 1))).toThrow(
-      /2000/,
-    )
+    expect(() => normalizeBody('x'.repeat(MAX_MESSAGE_LENGTH + 1))).toThrow(/2000/)
   })
 })
 
@@ -72,9 +70,7 @@ describe('assistant history schemas', () => {
   })
 
   it('rejects history pages over fifty', () => {
-    expect(assistantHistoryQuerySchema.safeParse({ limit: 51 }).success).toBe(
-      false,
-    )
+    expect(assistantHistoryQuerySchema.safeParse({ limit: 51 }).success).toBe(false)
   })
 
   it('accepts an optional conversation id on send', () => {
@@ -101,11 +97,10 @@ describe('assistant history schemas', () => {
   })
 
   it('requires a uuid conversation id on reads', () => {
-    expect(
-      assistantMessagesQuerySchema.safeParse({ limit: '10' }).success,
-    ).toBe(false)
-    expect(
-      assistantMessagesQuerySchema.parse({ limit: '10', conversationId }),
-    ).toEqual({ limit: 10, conversationId })
+    expect(assistantMessagesQuerySchema.safeParse({ limit: '10' }).success).toBe(false)
+    expect(assistantMessagesQuerySchema.parse({ limit: '10', conversationId })).toEqual({
+      limit: 10,
+      conversationId,
+    })
   })
 })

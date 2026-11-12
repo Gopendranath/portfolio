@@ -26,10 +26,7 @@ export function XIcon(props: IconProps) {
   )
 }
 
-function StrokeIcon({
-  children,
-  ...props
-}: IconProps & { children: ReactNode }) {
+function StrokeIcon({ children, ...props }: IconProps & { children: ReactNode }) {
   return (
     <svg
       viewBox="0 0 24 24"

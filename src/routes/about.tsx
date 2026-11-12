@@ -11,12 +11,7 @@ import { PortraitRipple } from '@/features/portrait-ripple'
 import { pageHead } from '@/lib/seo'
 
 export const Route = createFileRoute('/about')({
-  head: () =>
-    pageHead(
-      pageMeta.about.title,
-      pageMeta.about.description,
-      pageMeta.about.path,
-    ),
+  head: () => pageHead(pageMeta.about.title, pageMeta.about.description, pageMeta.about.path),
   component: AboutPage,
 })
 
@@ -33,10 +28,7 @@ function AboutPage() {
         <div>
           <PortraitRipple alt="Gopendranath Sasmal’s GitHub avatar" />
           <div className="cursor-target mt-5 w-fit">
-            <p
-              className="text-2xl font-medium tracking-[-0.03em] text-ink"
-              translate="no"
-            >
+            <p className="text-2xl font-medium tracking-[-0.03em] text-ink" translate="no">
               {profile.name}
             </p>
             <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.16em] text-muted">
@@ -53,10 +45,7 @@ function AboutPage() {
               <MapPinIcon className="size-3.5 shrink-0" />
               {profile.location}
             </a>
-            <StatusBadge
-              iconClassName="size-3.5"
-              label={profile.availability}
-            />
+            <StatusBadge iconClassName="size-3.5" label={profile.availability} />
           </div>
         </div>
 
@@ -83,19 +72,12 @@ function AboutPage() {
       <PageSection label="How I work" ariaLabel="Working principles">
         <div className="mt-8 grid gap-8 md:grid-cols-3">
           {principles.map((principle, index) => (
-            <div
-              key={principle.title}
-              className="cursor-target border-l border-line pl-5"
-            >
+            <div key={principle.title} className="cursor-target border-l border-line pl-5">
               <span className="font-mono text-[9px] tracking-[0.18em] text-muted">
                 {String(index + 1).padStart(2, '0')}
               </span>
-              <h2 className="mt-4 text-lg font-medium text-ink">
-                {principle.title}
-              </h2>
-              <p className="mt-2 text-sm leading-relaxed text-muted">
-                {principle.body}
-              </p>
+              <h2 className="mt-4 text-lg font-medium text-ink">{principle.title}</h2>
+              <p className="mt-2 text-sm leading-relaxed text-muted">{principle.body}</p>
             </div>
           ))}
         </div>

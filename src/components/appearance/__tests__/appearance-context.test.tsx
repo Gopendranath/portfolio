@@ -39,9 +39,7 @@ it('defaults to the target cursor and lime accent without writing storage', () =
   expect(result.current.accent).toBe('lime')
   expect(result.current.cursorStyle).toBe('target')
   expect(document.documentElement.dataset.accent).toBe('lime')
-  expect(
-    document.documentElement.style.getPropertyValue('--color-accent'),
-  ).toBe('#c7f464')
+  expect(document.documentElement.style.getPropertyValue('--color-accent')).toBe('#c7f464')
   expect(localStorage.getItem(PREFERENCES_STORAGE_KEY)).toBeNull()
 })
 
@@ -93,9 +91,7 @@ it('applies and persists accent and cursor changes', () => {
   expect(result.current.accent).toBe('cyan')
   expect(result.current.cursorStyle).toBe('crosshair')
   expect(document.documentElement.dataset.accent).toBe('cyan')
-  expect(
-    document.documentElement.style.getPropertyValue('--color-accent'),
-  ).toBe('#67e8f9')
+  expect(document.documentElement.style.getPropertyValue('--color-accent')).toBe('#67e8f9')
   expect(storedPreferences()).toMatchObject({
     accent: 'cyan',
     cursorStyle: 'crosshair',
@@ -107,12 +103,8 @@ it('applies the light variant of the selected accent', () => {
 
   renderHook(() => useAppearance(), { wrapper: Wrapper })
 
-  expect(
-    document.documentElement.style.getPropertyValue('--color-accent'),
-  ).toBe('#3f6212')
-  expect(
-    document.documentElement.style.getPropertyValue('--color-accent-ink'),
-  ).toBe('#f8f7f1')
+  expect(document.documentElement.style.getPropertyValue('--color-accent')).toBe('#3f6212')
+  expect(document.documentElement.style.getPropertyValue('--color-accent-ink')).toBe('#f8f7f1')
 })
 
 it('migrates legacy keys once and removes them', () => {

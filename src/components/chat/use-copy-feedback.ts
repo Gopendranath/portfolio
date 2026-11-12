@@ -12,8 +12,7 @@ export function useCopyFeedback(body: string) {
 
   // Feedback belongs to the body that was copied, so editing the message
   // clears the label without an extra render pass.
-  const copyStatus: CopyStatus =
-    feedback && feedback.body === body ? feedback.status : 'idle'
+  const copyStatus: CopyStatus = feedback && feedback.body === body ? feedback.status : 'idle'
 
   useEffect(() => {
     if (!feedback) {
@@ -35,18 +34,10 @@ export function useCopyFeedback(body: string) {
   }
 
   const copyLabel =
-    copyStatus === 'copied'
-      ? 'Copied'
-      : copyStatus === 'failed'
-        ? 'Copy failed'
-        : 'Copy'
+    copyStatus === 'copied' ? 'Copied' : copyStatus === 'failed' ? 'Copy failed' : 'Copy'
 
   const copyAnnouncement =
-    copyStatus === 'copied'
-      ? 'Message copied'
-      : copyStatus === 'failed'
-        ? 'Copy failed'
-        : ''
+    copyStatus === 'copied' ? 'Message copied' : copyStatus === 'failed' ? 'Copy failed' : ''
 
   return { copyLabel, copyAnnouncement, copyMessage }
 }

@@ -85,9 +85,7 @@ export function createCheckAvailabilityTool(
       locationUrl: profile.locationUrl,
       timezone: profile.timezone,
       resumeAvailable: profile.resumeAvailable,
-      note: profile.resumeAvailable
-        ? ''
-        : 'Resume is not published on this site.',
+      note: profile.resumeAvailable ? '' : 'Resume is not published on this site.',
     }),
   }
 }

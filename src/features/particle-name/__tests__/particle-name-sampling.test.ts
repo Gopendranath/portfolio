@@ -12,9 +12,7 @@ describe('collectTargets', () => {
     const image = {
       width: 2,
       height: 2,
-      data: new Uint8ClampedArray([
-        255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255,
-      ]),
+      data: new Uint8ClampedArray([255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 255]),
     }
 
     expect(collectTargets(image, 1, 'ink')).toEqual([
@@ -53,9 +51,7 @@ describe('particleBudget', () => {
   })
 
   it('lowers the budget on denser displays', () => {
-    expect(particleBudget(900, 190, 2)).toBeLessThan(
-      particleBudget(900, 190, 1),
-    )
+    expect(particleBudget(900, 190, 2)).toBeLessThan(particleBudget(900, 190, 1))
   })
 
   it('returns whole particles', () => {

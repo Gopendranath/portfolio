@@ -27,16 +27,10 @@ it('shows identity and theme control without a drawer trigger', () => {
     </ThemeProvider>,
   )
 
-  expect(
-    screen.getByRole('link', { name: new RegExp(profile.name) }),
-  ).toHaveClass('min-h-11')
-  expect(
-    screen.getByRole('link', { name: new RegExp(profile.name) }),
-  ).toHaveAttribute('href', '/')
+  expect(screen.getByRole('link', { name: new RegExp(profile.name) })).toHaveClass('min-h-11')
+  expect(screen.getByRole('link', { name: new RegExp(profile.name) })).toHaveAttribute('href', '/')
   expect(screen.getByRole('button', { name: /dark/i })).toHaveClass('min-h-11')
-  expect(
-    screen.queryByRole('button', { name: /open navigation/i }),
-  ).not.toBeInTheDocument()
+  expect(screen.queryByRole('button', { name: /open navigation/i })).not.toBeInTheDocument()
 })
 
 it('drops the bottom border once the page scrolls', () => {

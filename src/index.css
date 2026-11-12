@@ -42,11 +42,7 @@
     scrollbar-width: thin;
     scrollbar-color: var(--color-muted) transparent;
     /* Follow the active accent token instead of the default lime. */
-    -webkit-tap-highlight-color: color-mix(
-      in srgb,
-      var(--color-accent) 25%,
-      transparent
-    );
+    -webkit-tap-highlight-color: color-mix(in srgb, var(--color-accent) 25%, transparent);
   }
 
   @media (pointer: fine) {
@@ -73,11 +69,7 @@
     min-width: 320px;
     margin: 0;
     background-color: var(--color-canvas);
-    background-image: radial-gradient(
-      circle at 1px 1px,
-      var(--dot-color) 1px,
-      transparent 0
-    );
+    background-image: radial-gradient(circle at 1px 1px, var(--dot-color) 1px, transparent 0);
     background-size: 24px 24px;
     color: var(--color-ink);
     font-family: var(--font-sans);

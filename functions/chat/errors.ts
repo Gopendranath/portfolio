@@ -65,10 +65,7 @@ export function toApiError(error: unknown): ApiError {
   }
 
   if (error instanceof ZodError) {
-    return new ApiError(
-      'VALIDATION',
-      error.issues[0]?.message ?? 'Invalid request',
-    )
+    return new ApiError('VALIDATION', error.issues[0]?.message ?? 'Invalid request')
   }
 
   console.error('[api] unhandled error', error)

@@ -9,11 +9,7 @@ import { pageHead } from '@/lib/seo'
 
 export const Route = createFileRoute('/projects')({
   head: () =>
-    pageHead(
-      pageMeta.projects.title,
-      pageMeta.projects.description,
-      pageMeta.projects.path,
-    ),
+    pageHead(pageMeta.projects.title, pageMeta.projects.description, pageMeta.projects.path),
   component: ProjectsPage,
 })
 

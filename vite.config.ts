@@ -10,11 +10,7 @@ import { navItems } from './src/data/navigation.ts'
 import { pageMeta } from './src/data/pages.ts'
 import { profile } from './src/data/profile.ts'
 import { projects } from './src/data/projects.ts'
-import {
-  ACCENT_STORAGE_KEY,
-  accentPalettes,
-  DEFAULT_ACCENT,
-} from './src/lib/appearance.ts'
+import { ACCENT_STORAGE_KEY, accentPalettes, DEFAULT_ACCENT } from './src/lib/appearance.ts'
 import { PREFERENCES_STORAGE_KEY } from './src/lib/preferences.ts'
 import { SITE_DESCRIPTION, SITE_ORIGIN, SITE_TITLE } from './src/lib/seo.ts'
 import {
@@ -38,8 +34,7 @@ const agentTools = [
 function resolveSiteOrigin() {
   const configured = process.env.SITE_URL?.trim()
   const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim()
-  const value =
-    configured || (vercel ? `https://${vercel}` : LOCAL_PREVIEW_ORIGIN)
+  const value = configured || (vercel ? `https://${vercel}` : LOCAL_PREVIEW_ORIGIN)
   const withProtocol = /^https?:\/\//i.test(value) ? value : `https://${value}`
 
   return new URL(withProtocol).origin
@@ -126,11 +121,7 @@ const manifestEntries = [
 
 function agentManifestPlugin(): Plugin {
   const payload = (origin: string, catalog: boolean) =>
-    `${JSON.stringify(
-      catalog ? createSiteCatalog(origin) : createArdManifest(origin),
-      null,
-      2,
-    )}\n`
+    `${JSON.stringify(catalog ? createSiteCatalog(origin) : createArdManifest(origin), null, 2)}\n`
 
   return {
     name: 'agent-manifest',
@@ -139,9 +130,7 @@ function agentManifestPlugin(): Plugin {
 
       server.middlewares.use((request, response, next) => {
         const path = (request.url?.split('?')[0] ?? '').replace(/^\//, '')
-        const entry = manifestEntries.find(
-          (candidate) => candidate.fileName === path,
-        )
+        const entry = manifestEntries.find((candidate) => candidate.fileName === path)
 
         if (!entry) {
           next()

@@ -334,10 +334,7 @@ describe('useChatThread conversation scope', () => {
       await result.current.send('keep this text')
     })
 
-    expect(onConversationLost).toHaveBeenCalledWith(
-      conversationId,
-      'keep this text',
-    )
+    expect(onConversationLost).toHaveBeenCalledWith(conversationId, 'keep this text')
   })
 
   it('clears pending and streaming state on reset', async () => {
@@ -390,9 +387,7 @@ describe('useAssistantConversations', () => {
     })
 
     await waitFor(() => {
-      expect(chatFetch).toHaveBeenCalledWith(
-        '/api/conversations/assistant?limit=20',
-      )
+      expect(chatFetch).toHaveBeenCalledWith('/api/conversations/assistant?limit=20')
     })
   })
 })

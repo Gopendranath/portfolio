@@ -69,8 +69,6 @@ describe('writePreferences', () => {
   })
 
   it('does nothing without storage', () => {
-    expect(() =>
-      writePreferences(createDefaultPreferences(), null),
-    ).not.toThrow()
+    expect(() => writePreferences(createDefaultPreferences(), null)).not.toThrow()
   })
 })

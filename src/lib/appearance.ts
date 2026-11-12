@@ -102,14 +102,12 @@ export const cursorStyles: readonly CursorStyleOption[] = [
   {
     id: 'target',
     label: 'Target',
-    description:
-      'Reticle brackets that snap around links, buttons, cards, and text targets.',
+    description: 'Reticle brackets that snap around links, buttons, cards, and text targets.',
   },
   {
     id: 'crosshair',
     label: 'Crosshair',
-    description:
-      'A minimal reticle that follows the pointer without snapping to targets.',
+    description: 'A minimal reticle that follows the pointer without snapping to targets.',
   },
   {
     id: 'system',

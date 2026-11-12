@@ -2,10 +2,7 @@ import { useEffect, useState } from 'react'
 import { chatProfilesById } from '@/data/chat'
 import type { OwnerThreadDTO } from '@/lib/chat/protocol'
 import { useChatThread } from '@/lib/chat/use-chat-thread'
-import {
-  useMarkOwnerThreadRead,
-  useMarkOwnerThreadUnread,
-} from '@/lib/chat/use-owner-inbox'
+import { useMarkOwnerThreadRead, useMarkOwnerThreadUnread } from '@/lib/chat/use-owner-inbox'
 import { ChatAvatar } from './chat-avatar'
 import { ChatComposer } from './chat-composer'
 import { ChatHeader } from './chat-header'

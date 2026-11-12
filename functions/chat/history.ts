@@ -196,10 +196,7 @@ export async function listAssistantConversations(
   userId: string,
   options: { limit?: number; before?: string } = {},
 ): Promise<AssistantConversationPage> {
-  const limit = Math.min(
-    Math.max(options.limit ?? HISTORY_LIMIT, 1),
-    MAX_HISTORY_LIMIT,
-  )
+  const limit = Math.min(Math.max(options.limit ?? HISTORY_LIMIT, 1), MAX_HISTORY_LIMIT)
   const cursor = options.before ? decodeCursor(options.before) : null
 
   const { rows } = await pool.query<ConversationRow>(

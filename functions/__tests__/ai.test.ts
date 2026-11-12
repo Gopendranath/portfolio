@@ -1,14 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { Pool } from 'pg'
-import {
-  afterAll,
-  afterEach,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-} from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import {
   beginAssistantEdit,
   beginAssistantRetry,
@@ -35,9 +27,7 @@ function requirePool(): Pool {
 
 async function createTestUser(): Promise<string> {
   const authUserId = `test-ai-${randomUUID()}`
-  const githubId = String(
-    3_000_000_000 + Math.floor(Math.random() * 700_000_000),
-  )
+  const githubId = String(3_000_000_000 + Math.floor(Math.random() * 700_000_000))
   const { rows } = await requirePool().query<{ id: string }>(
     `insert into app_users (auth_user_id, github_id, github_login, github_created_at, github_checked_at)
      values ($1, $2, 'test-ai', now() - interval '2 years', now())
@@ -69,11 +59,7 @@ describe.skipIf(!hasDatabase)('assistant turns', () => {
 
   beforeEach(async () => {
     userId = await createTestUser()
-    const conversation = await getOrCreateConversation(
-      requirePool(),
-      userId,
-      'assistant',
-    )
+    const conversation = await getOrCreateConversation(requirePool(), userId, 'assistant')
     conversationId = conversation.id
   })
 
@@ -259,9 +245,7 @@ describe.skipIf(!hasDatabase)('assistant turns', () => {
       }),
     ).rejects.toMatchObject({ code: 'NOT_FOUND' })
 
-    await requirePool().query('delete from app_users where id = $1', [
-      otherUserId,
-    ])
+    await requirePool().query('delete from app_users where id = $1', [otherUserId])
   })
 
   it('retries a failed assistant message', async () => {
@@ -286,10 +270,9 @@ describe.skipIf(!hasDatabase)('assistant turns', () => {
     })
 
     expect(retry.assistantMessage.id).not.toBe(failed.id)
-    const { rows } = await requirePool().query(
-      'select status from messages where id = $1',
-      [failed.id],
-    )
+    const { rows } = await requirePool().query('select status from messages where id = $1', [
+      failed.id,
+    ])
     expect(rows[0]?.status).toBe('superseded')
   })
 
@@ -301,9 +284,7 @@ describe.skipIf(!hasDatabase)('assistant turns', () => {
     })
 
     expect(turn.conversationId).not.toBe(conversationId)
-    await expect(conversationTitle(turn.conversationId)).resolves.toBe(
-      'first chat question',
-    )
+    await expect(conversationTitle(turn.conversationId)).resolves.toBe('first chat question')
   })
 
   it('reuses an owned conversation', async () => {
@@ -319,11 +300,7 @@ describe.skipIf(!hasDatabase)('assistant turns', () => {
 
   it('rejects a conversation owned by another user', async () => {
     const otherUserId = await createTestUser()
-    const otherConversation = await getOrCreateConversation(
-      requirePool(),
-      otherUserId,
-      'assistant',
-    )
+    const otherConversation = await getOrCreateConversation(requirePool(), otherUserId, 'assistant')
 
     await expect(
       beginAssistantTurn(requirePool(), {
@@ -334,9 +311,7 @@ describe.skipIf(!hasDatabase)('assistant turns', () => {
       }),
     ).rejects.toMatchObject({ code: 'NOT_FOUND' })
 
-    await requirePool().query('delete from app_users where id = $1', [
-      otherUserId,
-    ])
+    await requirePool().query('delete from app_users where id = $1', [otherUserId])
   })
 
   it('rejects an owner conversation', async () => {
@@ -366,9 +341,7 @@ describe.skipIf(!hasDatabase)('assistant turns', () => {
       body: 'edited first question',
     })
 
-    await expect(conversationTitle(conversationId)).resolves.toBe(
-      'edited first question',
-    )
+    await expect(conversationTitle(conversationId)).resolves.toBe('edited first question')
   })
 
   it('does not retitle when a later user message is edited', async () => {
@@ -392,9 +365,7 @@ describe.skipIf(!hasDatabase)('assistant turns', () => {
       body: 'edited later question',
     })
 
-    await expect(conversationTitle(conversationId)).resolves.toBe(
-      'first question',
-    )
+    await expect(conversationTitle(conversationId)).resolves.toBe('first question')
   })
 
   it('does not retitle on retry', async () => {
@@ -418,9 +389,7 @@ describe.skipIf(!hasDatabase)('assistant turns', () => {
   })
 })
 
-async function conversationTitle(
-  conversationId: string,
-): Promise<string | null> {
+async function conversationTitle(conversationId: string): Promise<string | null> {
   const { rows } = await requirePool().query<{ title: string | null }>(
     'select title from conversations where id = $1',
     [conversationId],

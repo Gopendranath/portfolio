@@ -81,10 +81,7 @@ export function PortraitRipple({ alt, className = '' }: PortraitRippleProps) {
       {active ? (
         <RippleBoundary onError={handleUnavailable}>
           <Suspense fallback={null}>
-            <RippleCanvas
-              onReady={handleReady}
-              onUnavailable={handleUnavailable}
-            />
+            <RippleCanvas onReady={handleReady} onUnavailable={handleUnavailable} />
           </Suspense>
         </RippleBoundary>
       ) : null}

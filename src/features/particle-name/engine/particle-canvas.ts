@@ -130,12 +130,8 @@ export function createParticleCanvasEngine({
   }
 
   function measureParticleScale() {
-    const span = headingElement.querySelector<HTMLElement>(
-      '[data-particle-line]',
-    )
-    const fontSize = span
-      ? Number.parseFloat(window.getComputedStyle(span).fontSize) || 16
-      : 16
+    const span = headingElement.querySelector<HTMLElement>('[data-particle-line]')
+    const fontSize = span ? Number.parseFloat(window.getComputedStyle(span).fontSize) || 16 : 16
 
     return particleScaleForFontSize(fontSize)
   }
@@ -144,10 +140,7 @@ export function createParticleCanvasEngine({
     const nextWidth = Math.max(1, Math.round(width * dpr))
     const nextHeight = Math.max(1, Math.round(height * dpr))
 
-    if (
-      canvasElement.width !== nextWidth ||
-      canvasElement.height !== nextHeight
-    ) {
+    if (canvasElement.width !== nextWidth || canvasElement.height !== nextHeight) {
       canvasElement.width = nextWidth
       canvasElement.height = nextHeight
     }
@@ -249,10 +242,7 @@ export function createParticleCanvasEngine({
 
     const behavior = readBehavior()
     const interacting =
-      pointerClient !== null ||
-      pointer !== null ||
-      settling ||
-      elapsed < interactiveUntil
+      pointerClient !== null || pointer !== null || settling || elapsed < interactiveUntil
     const interval = interacting ? INTERACTIVE_FRAME_MS : AMBIENT_FRAME_MS
 
     if (lastRender !== 0 && now - lastRender < interval - 0.5) {
@@ -283,12 +273,7 @@ export function createParticleCanvasEngine({
     }
 
     if (settling || pointer || elapsed < interactiveUntil) {
-      stepParticles(
-        particles,
-        delta,
-        elapsed,
-        behavior.hover ? (pointer ?? undefined) : undefined,
-      )
+      stepParticles(particles, delta, elapsed, behavior.hover ? (pointer ?? undefined) : undefined)
 
       // The simulation stops when the formation has actually converged, not
       // when a timer runs out. A dropped frame therefore delays the finish
@@ -314,13 +299,7 @@ export function createParticleCanvasEngine({
   }
 
   function start() {
-    if (
-      running ||
-      reduced ||
-      !onScreen ||
-      !documentVisible ||
-      particles.length === 0
-    ) {
+    if (running || reduced || !onScreen || !documentVisible || particles.length === 0) {
       return
     }
 
@@ -368,10 +347,7 @@ export function createParticleCanvasEngine({
     sampledScale = particleScale
     sizeCanvas()
 
-    const targets = sampleTextTargets(
-      headingElement,
-      particleBudget(width, height, dpr),
-    )
+    const targets = sampleTextTargets(headingElement, particleBudget(width, height, dpr))
 
     if (targets.length === 0) {
       deactivate()
@@ -463,10 +439,7 @@ export function createParticleCanvasEngine({
     },
   }
 
-  const disconnectObservers = observeEnvironment(
-    headingElement,
-    observerCallbacks,
-  )
+  const disconnectObservers = observeEnvironment(headingElement, observerCallbacks)
 
   const destroyPointerTracker = createPointerTracker({
     heading: headingElement,

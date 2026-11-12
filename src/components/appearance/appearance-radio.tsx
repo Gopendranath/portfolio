@@ -24,9 +24,7 @@ export function AppearanceRadio({
   return (
     <label
       className={`cursor-target flex cursor-pointer border transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent ${
-        checked
-          ? 'border-accent bg-accent/5'
-          : 'border-line hover:border-muted/60'
+        checked ? 'border-accent bg-accent/5' : 'border-line hover:border-muted/60'
       } ${className}`.trim()}
     >
       <input

@@ -56,13 +56,7 @@ export const projects: readonly Project[] = [
     year: '2025',
     summary:
       'A full-stack RAG application for chatting with PDFs and images, pairing a Next.js interface with LangChain ingestion and vector search.',
-    stack: [
-      'Next.js',
-      'TypeScript',
-      'LangChain',
-      'Mistral AI',
-      'Gemini embeddings',
-    ],
+    stack: ['Next.js', 'TypeScript', 'LangChain', 'Mistral AI', 'Gemini embeddings'],
     links: [
       {
         label: 'Frontend',
@@ -81,16 +75,7 @@ export const projects: readonly Project[] = [
     year: '2026',
     summary:
       'A Chrome and Firefox extension that replaces npm commands on any webpage with pnpm, yarn, bun, deno, or bit. Published on the Chrome Web Store.',
-    stack: [
-      'JavaScript',
-      'Chrome Extension',
-      'Firefox',
-      'npm',
-      'pnpm',
-      'Bun',
-      'Deno',
-      'Bit',
-    ],
+    stack: ['JavaScript', 'Chrome Extension', 'Firefox', 'npm', 'pnpm', 'Bun', 'Deno', 'Bit'],
     links: [
       {
         label: 'Chrome Web Store',
@@ -103,8 +88,7 @@ export const projects: readonly Project[] = [
     slug: 'walmart-v1',
     title: 'Walmart_v1',
     year: '2025',
-    summary:
-      'An e-commerce storefront clone with Auth0 authentication and a shadcn/ui interface.',
+    summary: 'An e-commerce storefront clone with Auth0 authentication and a shadcn/ui interface.',
     stack: ['React', 'TypeScript', 'Auth0', 'shadcn/ui', 'Vercel'],
     links: [
       { label: 'Live', href: 'https://walmart-clone-v1.vercel.app/' },
@@ -116,6 +100,4 @@ export const projects: readonly Project[] = [
   },
 ]
 
-export const featuredProjects: readonly Project[] = projects.filter(
-  (project) => project.featured,
-)
+export const featuredProjects: readonly Project[] = projects.filter((project) => project.featured)

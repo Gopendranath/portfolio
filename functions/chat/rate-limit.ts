@@ -19,16 +19,11 @@ export interface UserRateLimitInput {
 const DAY_MS = 24 * 60 * 60 * 1000
 
 function startOfUtcDay(now: Date): Date {
-  return new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
-  )
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
 }
 
 function secondsUntilNextUtcDay(now: Date): number {
-  return Math.max(
-    1,
-    Math.ceil((startOfUtcDay(now).getTime() + DAY_MS - now.getTime()) / 1000),
-  )
+  return Math.max(1, Math.ceil((startOfUtcDay(now).getTime() + DAY_MS - now.getTime()) / 1000))
 }
 
 export async function consumeUserRateLimit(
@@ -40,9 +35,7 @@ export async function consumeUserRateLimit(
 
   try {
     await client.query('begin')
-    await client.query('select pg_advisory_xact_lock(hashtext($1)::bigint)', [
-      input.userId,
-    ])
+    await client.query('select pg_advisory_xact_lock(hashtext($1)::bigint)', [input.userId])
 
     await client.query(
       `delete from rate_limit_events
@@ -87,10 +80,7 @@ export async function consumeUserRateLimit(
       return {
         allowed: false,
         reason: 'minute',
-        retryAfterSeconds: Math.max(
-          1,
-          Math.ceil((oldest + 60_000 - now.getTime()) / 1000),
-        ),
+        retryAfterSeconds: Math.max(1, Math.ceil((oldest + 60_000 - now.getTime()) / 1000)),
       }
     }
 
@@ -126,9 +116,7 @@ export async function consumeGlobalAiLimit(
 
   try {
     await client.query('begin')
-    await client.query(
-      "select pg_advisory_xact_lock(hashtext('openrouter-global')::bigint)",
-    )
+    await client.query("select pg_advisory_xact_lock(hashtext('openrouter-global')::bigint)")
 
     const { rows } = await client.query<{
       window_kind: 'minute' | 'day'
@@ -176,10 +164,7 @@ export async function consumeGlobalAiLimit(
   }
 }
 
-export async function pruneRateLimits(
-  pool: Pool,
-  now = new Date(),
-): Promise<void> {
+export async function pruneRateLimits(pool: Pool, now = new Date()): Promise<void> {
   await pool.query(
     `delete from rate_limit_events
       where created_at < $1::timestamptz - interval '48 hours'`,

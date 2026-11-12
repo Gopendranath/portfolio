@@ -14,11 +14,7 @@ export interface CachedGitHubProfile {
   checkedAt: Date | null
 }
 
-export type AiReason =
-  | 'owner'
-  | 'eligible'
-  | 'account_too_new'
-  | 'github_check_unavailable'
+export type AiReason = 'owner' | 'eligible' | 'account_too_new' | 'github_check_unavailable'
 
 export interface AiAccess {
   eligible: boolean
@@ -27,10 +23,7 @@ export interface AiAccess {
 
 type Fetcher = () => Promise<GitHubProfile>
 
-export function isAiEligible(
-  createdAt: Date | null,
-  now = new Date(),
-): boolean {
+export function isAiEligible(createdAt: Date | null, now = new Date()): boolean {
   if (!createdAt) {
     return false
   }
@@ -62,10 +55,7 @@ export function isOwnerGithubId(githubId: string): boolean {
   return githubId === (process.env.OWNER_GITHUB_ID ?? '71755844')
 }
 
-export function isCacheFresh(
-  cached: CachedGitHubProfile,
-  now = new Date(),
-): boolean {
+export function isCacheFresh(cached: CachedGitHubProfile, now = new Date()): boolean {
   if (!cached.checkedAt || !cached.createdAt) {
     return false
   }
@@ -77,25 +67,17 @@ export async function fetchGitHubProfile(
   githubId: string,
   fetchImpl: typeof fetch = fetch,
 ): Promise<GitHubProfile> {
-  const response = await fetchImpl(
-    `https://api.github.com/user/${encodeURIComponent(githubId)}`,
-    {
-      headers: {
-        Accept: 'application/vnd.github+json',
-        'User-Agent': 'portfolio-chat',
-      },
-      cache: 'no-store',
-      signal: AbortSignal.timeout(3_000),
+  const response = await fetchImpl(`https://api.github.com/user/${encodeURIComponent(githubId)}`, {
+    headers: {
+      Accept: 'application/vnd.github+json',
+      'User-Agent': 'portfolio-chat',
     },
-  )
+    cache: 'no-store',
+    signal: AbortSignal.timeout(3_000),
+  })
 
   if (!response.ok) {
-    throw new ApiError(
-      'UPSTREAM_ERROR',
-      'Could not verify the GitHub account',
-      502,
-      true,
-    )
+    throw new ApiError('UPSTREAM_ERROR', 'Could not verify the GitHub account', 502, true)
   }
 
   const data = (await response.json()) as {
@@ -104,22 +86,12 @@ export async function fetchGitHubProfile(
   }
 
   if (typeof data.login !== 'string' || typeof data.created_at !== 'string') {
-    throw new ApiError(
-      'UPSTREAM_ERROR',
-      'GitHub returned an unexpected profile',
-      502,
-      true,
-    )
+    throw new ApiError('UPSTREAM_ERROR', 'GitHub returned an unexpected profile', 502, true)
   }
 
   const createdAt = new Date(data.created_at)
   if (Number.isNaN(createdAt.getTime())) {
-    throw new ApiError(
-      'UPSTREAM_ERROR',
-      'GitHub returned an invalid creation date',
-      502,
-      true,
-    )
+    throw new ApiError('UPSTREAM_ERROR', 'GitHub returned an invalid creation date', 502, true)
   }
 
   return { login: data.login, createdAt }

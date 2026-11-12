@@ -9,10 +9,7 @@ import {
 } from '@/components/ui/icons'
 import type { RoutePath } from '@/data/navigation'
 
-export const navIcons: Record<
-  RoutePath,
-  ComponentType<SVGProps<SVGSVGElement>>
-> = {
+export const navIcons: Record<RoutePath, ComponentType<SVGProps<SVGSVGElement>>> = {
   '/': HomeIcon,
   '/projects': FolderIcon,
   '/about': UserIcon,

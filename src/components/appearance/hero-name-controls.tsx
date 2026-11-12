@@ -9,20 +9,17 @@ const effectRows: readonly {
   {
     key: 'scan',
     label: 'Scan',
-    description:
-      'A band of accent light sweeps across the name every few seconds.',
+    description: 'A band of accent light sweeps across the name every few seconds.',
   },
   {
     key: 'dust',
     label: 'Dust drift',
-    description:
-      'Motes leave the letters and stream north-east with short trails.',
+    description: 'Motes leave the letters and stream north-east with short trails.',
   },
   {
     key: 'hover',
     label: 'Pointer interaction',
-    description:
-      'Particles part around the pointer and settle back when it leaves.',
+    description: 'Particles part around the pointer and settle back when it leaves.',
   },
 ]
 
@@ -31,12 +28,10 @@ export function HeroNameControls() {
 
   return (
     <div className="surface-tinted border border-line p-5 lg:col-span-2">
-      <h2 className="font-mono text-[10px] uppercase tracking-[0.18em] text-accent">
-        Hero name
-      </h2>
+      <h2 className="font-mono text-[10px] uppercase tracking-[0.18em] text-accent">Hero name</h2>
       <p className="mt-2 text-sm leading-relaxed text-muted">
-        Render the home page name as a live particle cloud. Off shows quiet
-        type, with no canvas or animation.
+        Render the home page name as a live particle cloud. Off shows quiet type, with no canvas or
+        animation.
       </p>
 
       <SwitchRow
@@ -86,9 +81,7 @@ function SwitchRow({
     >
       <span className="min-w-0">
         <span className="block text-sm text-ink">{label}</span>
-        <span className="mt-1 block text-xs leading-relaxed text-muted">
-          {description}
-        </span>
+        <span className="mt-1 block text-xs leading-relaxed text-muted">{description}</span>
       </span>
       <span
         aria-hidden="true"

@@ -35,10 +35,7 @@ export function OwnerInbox({ onBack }: OwnerInboxProps) {
   }
 
   return (
-    <section
-      aria-label="Owner inbox"
-      className="flex min-h-0 flex-1 flex-col overflow-hidden"
-    >
+    <section aria-label="Owner inbox" className="flex min-h-0 flex-1 flex-col overflow-hidden">
       <ChatHeader
         className="flex"
         level={1}
@@ -57,9 +54,7 @@ export function OwnerInbox({ onBack }: OwnerInboxProps) {
         ) : null}
 
         {!threadsQuery.isLoading && threads.length === 0 ? (
-          <p className="py-10 text-center text-sm text-muted">
-            No owner messages yet.
-          </p>
+          <p className="py-10 text-center text-sm text-muted">No owner messages yet.</p>
         ) : null}
 
         <div className="space-y-2">
@@ -85,9 +80,7 @@ export function OwnerInbox({ onBack }: OwnerInboxProps) {
                     {timeFormatter.format(new Date(item.lastMessageAt))}
                   </time>
                 </span>
-                <span className="mt-1 block truncate text-xs text-muted">
-                  {item.lastMessage}
-                </span>
+                <span className="mt-1 block truncate text-xs text-muted">{item.lastMessage}</span>
               </span>
               {item.unreadCount > 0 ? (
                 <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-accent font-mono text-[9px] text-accent-ink">

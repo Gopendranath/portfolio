@@ -118,16 +118,11 @@ export function ContributionHeatmap({
       >
         <div className="flex gap-[3px] pl-8" aria-hidden="true">
           {weeks.map((week, weekIndex) => (
-            <div
-              key={getWeekKey(week)}
-              className="relative h-3.5 min-w-0 flex-1"
-            >
+            <div key={getWeekKey(week)} className="relative h-3.5 min-w-0 flex-1">
               {monthLabels[weekIndex] ? (
                 <span
                   className={`whitespace-nowrap font-mono text-[8px] uppercase tracking-[0.12em] text-muted ${
-                    weekIndex === lastMonthLabelIndex
-                      ? 'absolute right-0 top-0'
-                      : 'block'
+                    weekIndex === lastMonthLabelIndex ? 'absolute right-0 top-0' : 'block'
                   }`}
                 >
                   {monthLabels[weekIndex]}
@@ -144,10 +139,7 @@ export function ContributionHeatmap({
             aria-hidden="true"
           >
             {weekdayRows.map((row) => (
-              <div
-                key={row.id}
-                className="flex items-center justify-end leading-none"
-              >
+              <div key={row.id} className="flex items-center justify-end leading-none">
                 {row.label}
               </div>
             ))}
@@ -204,10 +196,7 @@ export function ContributionHeatmap({
         <span>Less</span>
         <div className="flex gap-1" aria-hidden="true">
           {([0, 1, 2, 3, 4] as const).map((level) => (
-            <span
-              key={level}
-              className={`size-2.5 border border-line/50 ${levelClasses[level]}`}
-            />
+            <span key={level} className={`size-2.5 border border-line/50 ${levelClasses[level]}`} />
           ))}
         </div>
         <span>More</span>

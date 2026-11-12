@@ -4,11 +4,7 @@ interface StatusBadgeProps {
   iconClassName?: string
 }
 
-export function StatusBadge({
-  label,
-  className = '',
-  iconClassName = 'size-2',
-}: StatusBadgeProps) {
+export function StatusBadge({ label, className = '', iconClassName = 'size-2' }: StatusBadgeProps) {
   return (
     <span
       className={`inline-flex items-center gap-2 whitespace-nowrap font-mono text-[10px] uppercase tracking-[0.16em] text-ink ${className}`}

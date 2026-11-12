@@ -18,10 +18,7 @@ interface SpanSample {
   tone: ParticleTone
 }
 
-function captureSpan(
-  span: HTMLElement,
-  headingRect: DOMRect,
-): SpanSample | null {
+function captureSpan(span: HTMLElement, headingRect: DOMRect): SpanSample | null {
   const rect = span.getBoundingClientRect()
 
   if (rect.width < 1 || rect.height < 1) {
@@ -42,8 +39,7 @@ function captureSpan(
   }
 
   offscreenContext.font =
-    `${style.fontStyle} ${style.fontWeight} ` +
-    `${style.fontSize} ${style.fontFamily}`
+    `${style.fontStyle} ${style.fontWeight} ` + `${style.fontSize} ${style.fontFamily}`
   const spacedContext = offscreenContext as CanvasRenderingContext2D & {
     letterSpacing?: string
   }
@@ -62,12 +58,7 @@ function captureSpan(
   offscreenContext.fillStyle = '#ffffff'
   offscreenContext.fillText(text, 0, (offscreen.height + ascent - descent) / 2)
 
-  const image = offscreenContext.getImageData(
-    0,
-    0,
-    offscreen.width,
-    offscreen.height,
-  )
+  const image = offscreenContext.getImageData(0, 0, offscreen.width, offscreen.height)
 
   return {
     image,
@@ -78,10 +69,7 @@ function captureSpan(
   }
 }
 
-function collectAt(
-  spans: readonly SpanSample[],
-  stride: number,
-): PointTarget[] {
+function collectAt(spans: readonly SpanSample[], stride: number): PointTarget[] {
   const targets: PointTarget[] = []
 
   for (const span of spans) {
@@ -99,16 +87,11 @@ function collectAt(
   return targets
 }
 
-export function sampleTextTargets(
-  heading: HTMLElement,
-  budget = MAX_PARTICLES,
-): PointTarget[] {
+export function sampleTextTargets(heading: HTMLElement, budget = MAX_PARTICLES): PointTarget[] {
   const headingRect = heading.getBoundingClientRect()
   const spans: SpanSample[] = []
 
-  for (const span of heading.querySelectorAll<HTMLElement>(
-    '[data-particle-line]',
-  )) {
+  for (const span of heading.querySelectorAll<HTMLElement>('[data-particle-line]')) {
     const sample = captureSpan(span, headingRect)
 
     if (sample) {
@@ -130,11 +113,7 @@ export function sampleTextTargets(
   // look noisy. A slightly coarser grid stays evenly spaced.
   let targets = collectAt(spans, lowestStride)
 
-  for (
-    let extra = 1;
-    extra <= MAX_EXTRA_STRIDE && targets.length > budget;
-    extra += 1
-  ) {
+  for (let extra = 1; extra <= MAX_EXTRA_STRIDE && targets.length > budget; extra += 1) {
     targets = collectAt(spans, lowestStride + extra)
   }
 

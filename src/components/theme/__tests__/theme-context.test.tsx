@@ -69,9 +69,7 @@ it('toggles when the t key is pressed', () => {
 })
 
 it('animates the t shortcut from the viewport center', async () => {
-  const animate = vi.fn(
-    () => ({ finished: Promise.resolve() }) as unknown as Animation,
-  )
+  const animate = vi.fn(() => ({ finished: Promise.resolve() }) as unknown as Animation)
   const ready = Promise.resolve()
   const startViewTransition = vi.fn((callback: () => void) => {
     callback()
@@ -115,8 +113,7 @@ it('animates the t shortcut from the viewport center', async () => {
   expect(keyframes[0]?.clipPath).toContain('circle(0px at 500px 400px)')
 
   delete (document as unknown as Record<string, unknown>).startViewTransition
-  delete (document.documentElement as unknown as Record<string, unknown>)
-    .animate
+  delete (document.documentElement as unknown as Record<string, unknown>).animate
   window.matchMedia = originalMatchMedia
   Object.defineProperty(window, 'innerWidth', {
     configurable: true,
@@ -138,9 +135,7 @@ it('ignores the t shortcut while typing in a form field', () => {
   })
 
   act(() => {
-    input.dispatchEvent(
-      new KeyboardEvent('keydown', { key: 't', bubbles: true }),
-    )
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 't', bubbles: true }))
   })
 
   expect(result.current.theme).toBe('dark')
@@ -148,9 +143,7 @@ it('ignores the t shortcut while typing in a form field', () => {
 })
 
 it('reveals the new theme with a circular clip from the toggle origin', async () => {
-  const animate = vi.fn(
-    () => ({ finished: Promise.resolve() }) as unknown as Animation,
-  )
+  const animate = vi.fn(() => ({ finished: Promise.resolve() }) as unknown as Animation)
   const ready = Promise.resolve()
   const startViewTransition = vi.fn((callback: () => void) => {
     callback()
@@ -189,7 +182,6 @@ it('reveals the new theme with a circular clip from the toggle origin', async ()
   })
 
   delete (document as unknown as Record<string, unknown>).startViewTransition
-  delete (document.documentElement as unknown as Record<string, unknown>)
-    .animate
+  delete (document.documentElement as unknown as Record<string, unknown>).animate
   window.matchMedia = originalMatchMedia
 })

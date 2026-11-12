@@ -67,14 +67,7 @@ function buildSprite(color: RgbColor): HTMLCanvasElement {
     return sprite
   }
 
-  const gradient = context.createRadialGradient(
-    center,
-    center,
-    0,
-    center,
-    center,
-    center,
-  )
+  const gradient = context.createRadialGradient(center, center, 0, center, center, center)
   const rgb = `${color.r}, ${color.g}, ${color.b}`
 
   gradient.addColorStop(0, `rgba(${rgb}, 1)`)
@@ -138,10 +131,7 @@ export function buildStreaks(colors: ParticleColors): ParticleStreaks {
   }
 }
 
-export function drawFrame(
-  context: CanvasRenderingContext2D,
-  scene: FrameScene,
-): void {
+export function drawFrame(context: CanvasRenderingContext2D, scene: FrameScene): void {
   const {
     particles,
     dust,
@@ -165,8 +155,7 @@ export function drawFrame(
     reduced || !scan
       ? Number.NEGATIVE_INFINITY
       : -SCAN_BAND +
-        ((elapsed % SCAN_PERIOD_SECONDS) / SCAN_PERIOD_SECONDS) *
-          (width + SCAN_BAND * 2)
+        ((elapsed % SCAN_PERIOD_SECONDS) / SCAN_PERIOD_SECONDS) * (width + SCAN_BAND * 2)
 
   // Dust first: it is background texture and must never sit on top of the
   // glyphs it drifts away from.
@@ -193,26 +182,14 @@ export function drawFrame(
         context.translate(mote.x, mote.y)
         context.rotate(Math.atan2(mote.vy, mote.vx))
         context.globalAlpha = alpha * 0.6
-        context.drawImage(
-          streaks[mote.tone],
-          -length,
-          -thickness / 2,
-          length,
-          thickness,
-        )
+        context.drawImage(streaks[mote.tone], -length, -thickness / 2, length, thickness)
         context.restore()
       }
 
       // Dimmer than the name particles on purpose, so the dust never outshines
       // the glyphs.
       context.globalAlpha = alpha
-      context.drawImage(
-        sprites[mote.tone],
-        mote.x - core,
-        mote.y - core,
-        core * 2,
-        core * 2,
-      )
+      context.drawImage(sprites[mote.tone], mote.x - core, mote.y - core, core * 2, core * 2)
       context.globalAlpha = 1
     }
   }
@@ -220,20 +197,12 @@ export function drawFrame(
   for (const particle of particles) {
     // Neighbours share a phase so the formation breathes as one body. A random
     // per-particle phase jitters dots off a 2px grid, which shreds small type.
-    const sway = Math.sin(
-      elapsed * 0.8 + (particle.targetX + particle.targetY) * 0.012,
-    )
+    const sway = Math.sin(elapsed * 0.8 + (particle.targetX + particle.targetY) * 0.012)
     const x = particle.x + driftX * sway
     const y = particle.y + driftY * sway
     const size = particle.size * particleScale
 
-    context.drawImage(
-      sprites[particle.tone],
-      x - size,
-      y - size,
-      size * 2,
-      size * 2,
-    )
+    context.drawImage(sprites[particle.tone], x - size, y - size, size * 2, size * 2)
 
     if (reduced || !scan) {
       continue

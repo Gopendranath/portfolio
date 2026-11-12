@@ -8,10 +8,7 @@ const DUST_MAX_SPEED = 30
 const DUST_MIN_LIFE = 2.25
 const DUST_MAX_LIFE = 4.5
 
-export function createDust(
-  target: PointTarget,
-  random: () => number = Math.random,
-): DustParticle {
+export function createDust(target: PointTarget, random: () => number = Math.random): DustParticle {
   const angle = DUST_ANGLE + (random() * 2 - 1) * DUST_ANGLE_JITTER
   const speed = DUST_MIN_SPEED + random() * (DUST_MAX_SPEED - DUST_MIN_SPEED)
   const life = DUST_MIN_LIFE + random() * (DUST_MAX_LIFE - DUST_MIN_LIFE)

@@ -8,10 +8,7 @@ afterEach(() => {
 })
 
 it('renders the verified static fallback when GitHub is unavailable', async () => {
-  vi.stubGlobal(
-    'fetch',
-    vi.fn().mockRejectedValue(new Error('GitHub unavailable')),
-  )
+  vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('GitHub unavailable')))
 
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false, gcTime: 0 } },
@@ -35,10 +32,7 @@ it('renders the verified static fallback when GitHub is unavailable', async () =
 })
 
 it('announces snapshot source changes to screen readers', async () => {
-  vi.stubGlobal(
-    'fetch',
-    vi.fn().mockRejectedValue(new Error('GitHub unavailable')),
-  )
+  vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('GitHub unavailable')))
 
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false, gcTime: 0 } },

@@ -51,24 +51,14 @@ import {
   markOwnerUnread,
   markUserOwnerUnread,
 } from './chat/inbox'
-import {
-  createOpenRouterGateway,
-  type OpenRouterGateway,
-} from './chat/openrouter'
-import {
-  consumeGlobalAiLimit,
-  consumeUserRateLimit,
-  type RateLimitResult,
-} from './chat/rate-limit'
+import { createOpenRouterGateway, type OpenRouterGateway } from './chat/openrouter'
+import { consumeGlobalAiLimit, consumeUserRateLimit, type RateLimitResult } from './chat/rate-limit'
 import { resolveAppUser } from './chat/users'
 import { parseBody } from './chat/validation'
 
 const app = new Hono()
 
-function assertAllowedRateLimit(
-  context: Context,
-  result: RateLimitResult,
-): void {
+function assertAllowedRateLimit(context: Context, result: RateLimitResult): void {
   if (result.allowed) {
     return
   }
@@ -84,10 +74,7 @@ function assertAllowedRateLimit(
   )
 }
 
-function assertAiEligible(input: {
-  aiEligible: boolean
-  aiReason: string
-}): void {
+function assertAiEligible(input: { aiEligible: boolean; aiReason: string }): void {
   if (input.aiEligible) {
     return
   }
@@ -221,10 +208,7 @@ app.get('/api/health', (context) => context.json({ ok: true }))
 app.get('/api/me', async (context) => {
   const { authUserId } = await requireAuth(context.req.raw)
   const pool = getPool()
-  const { user, isOwner, aiEligible, aiReason } = await resolveAppUser(
-    pool,
-    authUserId,
-  )
+  const { user, isOwner, aiEligible, aiReason } = await resolveAppUser(pool, authUserId)
   const ownerUnreadCount = await countUserOwnerUnread(pool, user.id)
 
   return context.json({
@@ -340,11 +324,7 @@ app.get('/api/conversations/:kind/messages', async (context) => {
       before: context.req.query('before'),
       conversationId,
     })
-    const conversation = await getOwnedAssistantConversation(
-      pool,
-      user.id,
-      query.conversationId,
-    )
+    const conversation = await getOwnedAssistantConversation(pool, user.id, query.conversationId)
     const page = await listMessages(pool, conversation.id, {
       beforeSeq: query.before,
       limit: query.limit,
@@ -454,11 +434,8 @@ app.post('/api/chat/assistant', async (context) => {
   const conversationId =
     input.conversationId === undefined
       ? ((
-          (await findAssistantConversationByClientId(
-            pool,
-            user.id,
-            input.clientId,
-          )) ?? (await getLatestAssistantConversation(pool, user.id))
+          (await findAssistantConversationByClientId(pool, user.id, input.clientId)) ??
+          (await getLatestAssistantConversation(pool, user.id))
         )?.id ?? undefined)
       : (input.conversationId ?? undefined)
   if (conversationId) {
@@ -572,10 +549,7 @@ app.post('/api/conversations/:id/read', async (context) => {
 
 app.onError((error, context) => {
   const apiError = toApiError(error)
-  return context.json(
-    apiError.toJSON(),
-    apiError.status as ContentfulStatusCode,
-  )
+  return context.json(apiError.toJSON(), apiError.status as ContentfulStatusCode)
 })
 
 export default app

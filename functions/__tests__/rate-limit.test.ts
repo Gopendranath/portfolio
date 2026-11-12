@@ -1,19 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { Pool } from 'pg'
-import {
-  afterAll,
-  afterEach,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-} from 'vitest'
-import {
-  consumeGlobalAiLimit,
-  consumeUserRateLimit,
-  pruneRateLimits,
-} from '../chat/rate-limit'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { consumeGlobalAiLimit, consumeUserRateLimit, pruneRateLimits } from '../chat/rate-limit'
 
 const hasDatabase = Boolean(process.env.TEST_DATABASE_URL)
 const pool = hasDatabase
@@ -31,9 +19,7 @@ function requirePool(): Pool {
 
 async function createTestUser(): Promise<string> {
   const authUserId = `test-rate-${randomUUID()}`
-  const githubId = String(
-    2_000_000_000 + Math.floor(Math.random() * 800_000_000),
-  )
+  const githubId = String(2_000_000_000 + Math.floor(Math.random() * 800_000_000))
   const { rows } = await requirePool().query<{ id: string }>(
     `insert into app_users (auth_user_id, github_id)
      values ($1, $2)
@@ -58,9 +44,7 @@ describe.skipIf(!hasDatabase)('rate limits', () => {
 
   afterEach(async () => {
     await requirePool().query('delete from app_users where id = $1', [userId])
-    await requirePool().query(
-      "delete from global_ai_usage where window_start >= '2030-01-01'",
-    )
+    await requirePool().query("delete from global_ai_usage where window_start >= '2030-01-01'")
   })
 
   afterAll(async () => {

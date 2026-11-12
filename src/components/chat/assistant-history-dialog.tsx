@@ -56,9 +56,7 @@ function HistoryRow({
   return (
     <li
       className={`flex items-stretch border transition-colors ${
-        active
-          ? 'border-accent bg-surface'
-          : 'border-line bg-surface/40 hover:border-accent'
+        active ? 'border-accent bg-surface' : 'border-line bg-surface/40 hover:border-accent'
       }`}
     >
       <button
@@ -68,9 +66,7 @@ function HistoryRow({
         aria-current={active ? 'true' : undefined}
         className="min-w-0 flex-1 px-3 py-3 text-left"
       >
-        <span className="block truncate text-sm font-medium text-ink">
-          {conversation.title}
-        </span>
+        <span className="block truncate text-sm font-medium text-ink">{conversation.title}</span>
         <time
           dateTime={conversation.lastMessageAt}
           className="mt-1 block font-mono text-[9px] uppercase tracking-[0.14em] text-muted"
@@ -221,9 +217,7 @@ export function AssistantHistoryDialog({
         ) : null}
 
         {!isLoading && !error && conversations.length === 0 ? (
-          <p className="py-10 text-center text-sm text-muted">
-            No previous chats yet.
-          </p>
+          <p className="py-10 text-center text-sm text-muted">No previous chats yet.</p>
         ) : null}
 
         <ul className="space-y-2">

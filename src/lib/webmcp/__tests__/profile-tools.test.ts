@@ -21,9 +21,7 @@ describe('get-profile', () => {
     expect(result.timezone).toBe('IST (UTC+5:30)')
     expect(result.bio).toBe(profile.bio)
     expect(result.about).toEqual(profile.about)
-    expect(result.stack).toEqual(
-      profile.stack.map(({ title, items }) => ({ title, items })),
-    )
+    expect(result.stack).toEqual(profile.stack.map(({ title, items }) => ({ title, items })))
     expect(result.socials).toEqual([
       { label: 'GitHub', href: 'https://github.com/Gopendranath' },
       { label: 'LinkedIn', href: 'https://linkedin.com/in/gns99' },
@@ -55,9 +53,7 @@ describe('check-availability', () => {
   })
 
   it('reports availability when input is missing', () => {
-    expect(
-      createCheckAvailabilityTool(profile).execute(undefined, options),
-    ).toEqual({
+    expect(createCheckAvailabilityTool(profile).execute(undefined, options)).toEqual({
       availability: 'Open to work',
       openToWork: true,
       location: 'BTM Layout, Bengaluru, India',
@@ -89,8 +85,8 @@ describe('get-contact', () => {
   })
 
   it('returns contact details when input is missing', () => {
-    expect(
-      createGetContactTool(profile).execute(undefined, options).email,
-    ).toBe('gopendranathsasmal7@gmail.com')
+    expect(createGetContactTool(profile).execute(undefined, options).email).toBe(
+      'gopendranathsasmal7@gmail.com',
+    )
   })
 })

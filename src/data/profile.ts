@@ -46,15 +46,7 @@ export const profile: Profile = {
   stack: [
     {
       title: 'Frontend',
-      items: [
-        'React',
-        'Next.js',
-        'TypeScript',
-        'Tailwind CSS',
-        'shadcn/ui',
-        'Redux',
-        'Zustand',
-      ],
+      items: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS', 'shadcn/ui', 'Redux', 'Zustand'],
     },
     {
       title: 'Backend',
@@ -88,13 +80,7 @@ export const profile: Profile = {
     },
     {
       title: 'AI',
-      items: [
-        'LangChain',
-        'LangGraph',
-        'RAG',
-        'Mistral AI',
-        'Gemini embeddings',
-      ],
+      items: ['LangChain', 'LangGraph', 'RAG', 'Mistral AI', 'Gemini embeddings'],
     },
     {
       title: 'Cloud & DevOps',

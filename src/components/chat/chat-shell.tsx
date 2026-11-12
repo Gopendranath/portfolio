@@ -37,10 +37,7 @@ export function ChatShell() {
 
   const assistant = useAssistantChat({
     enabled: Boolean(session.token) && session.aiEligible,
-    historyEnabled:
-      activeView === 'assistant' &&
-      Boolean(session.token) &&
-      session.aiEligible,
+    historyEnabled: activeView === 'assistant' && Boolean(session.token) && session.aiEligible,
   })
   const ownerThread = useChatThread({
     kind: 'owner',

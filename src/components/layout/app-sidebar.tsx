@@ -49,9 +49,7 @@ export function AppSidebar() {
         </div>
 
         <div className="flex items-center justify-between gap-3">
-          <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted">
-            Theme
-          </span>
+          <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted">Theme</span>
           <ThemeToggle />
         </div>
 

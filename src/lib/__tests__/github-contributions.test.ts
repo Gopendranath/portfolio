@@ -47,9 +47,7 @@ describe('GITHUB_CONTRIBUTIONS_FALLBACK', () => {
 describe('groupContributionsIntoWeeks', () => {
   it('pads partial weeks starting on Sunday', () => {
     const days = Array.from({ length: 7 }, (_, index) => {
-      const date = new Date(Date.UTC(2025, 10, 3 + index))
-        .toISOString()
-        .slice(0, 10)
+      const date = new Date(Date.UTC(2025, 10, 3 + index)).toISOString().slice(0, 10)
       return makeDay(date)
     })
 
@@ -84,9 +82,7 @@ describe('groupContributionsIntoWeeks', () => {
 describe('getMonthLabels', () => {
   it('labels the first week and each week containing a month start', () => {
     const days = Array.from({ length: 35 }, (_, index) => {
-      const date = new Date(Date.UTC(2025, 10, 2 + index))
-        .toISOString()
-        .slice(0, 10)
+      const date = new Date(Date.UTC(2025, 10, 2 + index)).toISOString().slice(0, 10)
       return makeDay(date)
     })
 
@@ -130,10 +126,7 @@ describe('fetchGithubContributions', () => {
   })
 
   it('throws when the contributions API fails', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue({ ok: false, status: 503 }),
-    )
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 503 }))
 
     await expect(fetchGithubContributions()).rejects.toThrow(
       'GitHub contributions request failed with status 503',

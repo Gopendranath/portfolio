@@ -45,8 +45,8 @@ function buildCatalog(source: readonly Project[]): ProjectCatalog {
   return {
     projects,
     slugs: projects.map(({ slug }) => slug),
-    technologies: [...new Set(projects.flatMap(({ stack }) => stack))].sort(
-      (left, right) => left.localeCompare(right),
+    technologies: [...new Set(projects.flatMap(({ stack }) => stack))].sort((left, right) =>
+      left.localeCompare(right),
     ),
   }
 }
@@ -87,8 +87,7 @@ export function createListProjectsTool(
     execute: (input) => {
       const technology = input?.technology
       const rawFeaturedOnly = input?.featuredOnly
-      const featuredOnly =
-        rawFeaturedOnly === undefined ? false : rawFeaturedOnly
+      const featuredOnly = rawFeaturedOnly === undefined ? false : rawFeaturedOnly
 
       if (technology !== undefined && typeof technology !== 'string') {
         return {
@@ -110,9 +109,7 @@ export function createListProjectsTool(
         if (featuredOnly && !project.featured) return false
         if (query === '') return true
 
-        return project.stack.some((entry) =>
-          entry.toLowerCase().includes(query),
-        )
+        return project.stack.some((entry) => entry.toLowerCase().includes(query))
       })
 
       if (filtered.length === 0) {

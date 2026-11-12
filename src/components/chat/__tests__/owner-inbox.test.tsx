@@ -116,9 +116,7 @@ describe('OwnerInbox', () => {
 
     expect(markUnread).toHaveBeenCalledWith('visitor-1')
     await waitFor(() => {
-      expect(
-        screen.getByRole('heading', { name: 'Inbox.' }),
-      ).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: 'Inbox.' })).toBeInTheDocument()
     })
   })
 
@@ -126,16 +124,12 @@ describe('OwnerInbox', () => {
     const user = userEvent.setup()
     render(<OwnerInbox onBack={vi.fn()} />)
 
-    const inboxHeader = screen
-      .getByRole('heading', { name: 'Inbox.' })
-      .closest('header')
+    const inboxHeader = screen.getByRole('heading', { name: 'Inbox.' }).closest('header')
     expect(inboxHeader).toHaveClass('h-20')
 
     await user.click(screen.getByRole('button', { name: /gitgitgit127/i }))
 
-    const threadHeader = screen
-      .getByRole('heading', { name: 'gitgitgit127' })
-      .closest('header')
+    const threadHeader = screen.getByRole('heading', { name: 'gitgitgit127' }).closest('header')
     expect(threadHeader).toHaveClass('h-20')
   })
 

@@ -80,10 +80,9 @@ it('positions at top-right and bottom-left corners', async () => {
     </Tooltip>,
   )
   const topTrigger = screen.getByRole('button', { name: 'TR' })
-  vi.spyOn(
-    topTrigger.parentElement as HTMLSpanElement,
-    'getBoundingClientRect',
-  ).mockReturnValue(rect)
+  vi.spyOn(topTrigger.parentElement as HTMLSpanElement, 'getBoundingClientRect').mockReturnValue(
+    rect,
+  )
   await user.hover(topTrigger)
   expect(await screen.findByRole('tooltip')).toHaveStyle({
     left: '46px',
@@ -97,10 +96,9 @@ it('positions at top-right and bottom-left corners', async () => {
     </Tooltip>,
   )
   const bottomTrigger = screen.getByRole('button', { name: 'BL' })
-  vi.spyOn(
-    bottomTrigger.parentElement as HTMLSpanElement,
-    'getBoundingClientRect',
-  ).mockReturnValue(rect)
+  vi.spyOn(bottomTrigger.parentElement as HTMLSpanElement, 'getBoundingClientRect').mockReturnValue(
+    rect,
+  )
   await user.hover(bottomTrigger)
   expect(await screen.findByRole('tooltip')).toHaveStyle({
     left: '10px',

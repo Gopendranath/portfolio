@@ -83,9 +83,7 @@ export function MessageList({
       aria-relevant="additions"
       aria-label={`${profile.name} messages`}
       className={`min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain [scrollbar-gutter:stable] ${
-        topInset
-          ? 'px-4 pb-4 pt-14 sm:px-5 sm:pb-5 sm:pt-16 md:pt-5'
-          : 'p-4 sm:p-5'
+        topInset ? 'px-4 pb-4 pt-14 sm:px-5 sm:pb-5 sm:pt-16 md:pt-5' : 'p-4 sm:p-5'
       }`}
     >
       {hasMore ? (

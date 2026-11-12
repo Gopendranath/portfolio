@@ -8,9 +8,7 @@ export function MobileDock() {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   })
-  const activeIndex = navItems.findIndex((item) =>
-    isNavItemActive(pathname, item.to),
-  )
+  const activeIndex = navItems.findIndex((item) => isNavItemActive(pathname, item.to))
 
   return (
     <nav

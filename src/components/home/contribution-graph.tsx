@@ -26,19 +26,11 @@ export function ContributionGraph() {
     hasData: query.data !== undefined,
   })
 
-  const weeks = useMemo(
-    () => groupContributionsIntoWeeks(contributions.days),
-    [contributions.days],
-  )
+  const weeks = useMemo(() => groupContributionsIntoWeeks(contributions.days), [contributions.days])
   const monthLabels = useMemo(() => getMonthLabels(weeks), [weeks])
-  const lastMonthLabelIndex = monthLabels.findLastIndex(
-    (label) => label !== null,
-  )
+  const lastMonthLabelIndex = monthLabels.findLastIndex((label) => label !== null)
   const dayIndexByDate = useMemo(
-    () =>
-      new Map(
-        contributions.days.map((day, index) => [day.date, index] as const),
-      ),
+    () => new Map(contributions.days.map((day, index) => [day.date, index] as const)),
     [contributions.days],
   )
   const currentIndex = Math.min(activeIndex, contributions.days.length - 1)
@@ -54,18 +46,10 @@ export function ContributionGraph() {
   }, [contributions.days])
 
   return (
-    <section
-      aria-label="Contribution activity"
-      className="border-t border-line pt-10"
-    >
+    <section aria-label="Contribution activity" className="border-t border-line pt-10">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <SectionLabel className="min-w-[10rem] flex-1">
-          Contribution activity
-        </SectionLabel>
-        <span
-          role="status"
-          className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted"
-        >
+        <SectionLabel className="min-w-[10rem] flex-1">Contribution activity</SectionLabel>
+        <span role="status" className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted">
           {sourceLabel}
         </span>
       </div>
@@ -87,10 +71,7 @@ export function ContributionGraph() {
         </ExternalLink>
       </div>
 
-      <div
-        ref={scrollRef}
-        className="mt-8 overflow-x-auto overscroll-x-contain pb-2"
-      >
+      <div ref={scrollRef} className="mt-8 overflow-x-auto overscroll-x-contain pb-2">
         <div className="min-w-[640px]">
           <ContributionHeatmap
             total={contributions.total}

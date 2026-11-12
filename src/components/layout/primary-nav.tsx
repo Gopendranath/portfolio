@@ -20,9 +20,7 @@ export function PrimaryNav({ className = '', onNavigate }: PrimaryNavProps) {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   })
-  const activeIndex = navItems.findIndex((item) =>
-    isNavItemActive(pathname, item.to),
-  )
+  const activeIndex = navItems.findIndex((item) => isNavItemActive(pathname, item.to))
 
   useLayoutEffect(() => {
     const nav = navRef.current
@@ -96,11 +94,7 @@ export function PrimaryNav({ className = '', onNavigate }: PrimaryNavProps) {
                   >
                     {item.index}
                   </span>
-                  <span
-                    className={`text-[15px] ${
-                      isActive ? 'text-accent' : 'text-muted'
-                    }`}
-                  >
+                  <span className={`text-[15px] ${isActive ? 'text-accent' : 'text-muted'}`}>
                     {item.label}
                   </span>
                   <span

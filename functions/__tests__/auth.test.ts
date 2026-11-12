@@ -14,17 +14,15 @@ const mockedVerify = vi.mocked(jwtVerify)
 describe('requireAuth', () => {
   beforeEach(() => {
     vi.stubEnv('NEON_AUTH_BASE_URL', 'https://auth.example.com/neondb/auth')
-    vi.stubEnv(
-      'NEON_AUTH_JWKS_URL',
-      'https://auth.example.com/neondb/auth/.well-known/jwks.json',
-    )
+    vi.stubEnv('NEON_AUTH_JWKS_URL', 'https://auth.example.com/neondb/auth/.well-known/jwks.json')
     mockedVerify.mockReset()
   })
 
   it('rejects a request without a bearer token', async () => {
-    await expect(
-      requireAuth(new Request('https://api.example.com/api/me')),
-    ).rejects.toMatchObject({ code: 'UNAUTHORIZED', status: 401 })
+    await expect(requireAuth(new Request('https://api.example.com/api/me'))).rejects.toMatchObject({
+      code: 'UNAUTHORIZED',
+      status: 401,
+    })
   })
 
   it('rejects a malformed authorization header', async () => {

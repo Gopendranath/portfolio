@@ -14,20 +14,16 @@ describe('profile', () => {
   it('links every social entry to a real protocol', () => {
     expect(
       profile.socials.every(
-        (social) =>
-          social.href.startsWith('https://') ||
-          social.href.startsWith('mailto:'),
+        (social) => social.href.startsWith('https://') || social.href.startsWith('mailto:'),
       ),
     ).toBe(true)
   })
 
   it('groups the stack without empty groups', () => {
     expect(profile.stack.length).toBeGreaterThan(0)
-    expect(
-      profile.stack.every(
-        (group) => group.title.length > 0 && group.items.length > 0,
-      ),
-    ).toBe(true)
+    expect(profile.stack.every((group) => group.title.length > 0 && group.items.length > 0)).toBe(
+      true,
+    )
   })
 })
 
@@ -53,23 +49,17 @@ describe('navigation', () => {
 
 describe('projects', () => {
   it('uses unique slugs and non-empty copy', () => {
-    expect(new Set(projects.map((project) => project.slug)).size).toBe(
-      projects.length,
-    )
+    expect(new Set(projects.map((project) => project.slug)).size).toBe(projects.length)
     expect(
       projects.every(
         (project) =>
-          project.summary.length > 0 &&
-          project.stack.length > 0 &&
-          project.year.length === 4,
+          project.summary.length > 0 && project.stack.length > 0 && project.year.length === 4,
       ),
     ).toBe(true)
   })
 
   it('keeps the featured selection in sync with the project list', () => {
-    expect(featuredProjects).toEqual(
-      projects.filter((project) => project.featured),
-    )
+    expect(featuredProjects).toEqual(projects.filter((project) => project.featured))
     expect(featuredProjects.length).toBeGreaterThan(0)
   })
 

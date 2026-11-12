@@ -1,14 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { Pool } from 'pg'
-import {
-  afterAll,
-  afterEach,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-} from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { createMessage, getOrCreateConversation } from '../chat/conversations'
 import {
   createAssistantConversation,
@@ -38,9 +30,7 @@ function requirePool(): Pool {
 
 async function createTestUser(): Promise<string> {
   const authUserId = `test-history-${randomUUID()}`
-  const githubId = String(
-    5_000_000_000 + Math.floor(Math.random() * 900_000_000),
-  )
+  const githubId = String(5_000_000_000 + Math.floor(Math.random() * 900_000_000))
   const { rows } = await requirePool().query<{ id: string }>(
     `insert into app_users (auth_user_id, github_id, github_login, github_created_at, github_checked_at)
      values ($1, $2, 'test-history', now() - interval '2 years', now())
@@ -54,9 +44,7 @@ async function createTestUser(): Promise<string> {
   return row.id
 }
 
-async function conversationTitle(
-  conversationId: string,
-): Promise<string | null> {
+async function conversationTitle(conversationId: string): Promise<string | null> {
   const { rows } = await requirePool().query<{ title: string | null }>(
     'select title from conversations where id = $1',
     [conversationId],
@@ -95,21 +83,17 @@ describe.skipIf(!hasDatabase)('assistant history helpers', () => {
       `update conversations set last_message_at = now() - interval '1 hour' where id = $1`,
       [older.id],
     )
-    await requirePool().query(
-      `update conversations set last_message_at = now() where id = $1`,
-      [newer.id],
-    )
+    await requirePool().query(`update conversations set last_message_at = now() where id = $1`, [
+      newer.id,
+    ])
 
-    await expect(
-      getLatestAssistantConversation(requirePool(), userId),
-    ).resolves.toEqual({ id: newer.id })
+    await expect(getLatestAssistantConversation(requirePool(), userId)).resolves.toEqual({
+      id: newer.id,
+    })
   })
 
   it('finds a conversation by client id for retries', async () => {
-    const conversation = await createAssistantConversation(
-      requirePool(),
-      userId,
-    )
+    const conversation = await createAssistantConversation(requirePool(), userId)
     await createMessage(requirePool(), {
       conversationId: conversation.id,
       author: 'user',
@@ -118,18 +102,10 @@ describe.skipIf(!hasDatabase)('assistant history helpers', () => {
     })
 
     await expect(
-      findAssistantConversationByClientId(
-        requirePool(),
-        userId,
-        'history-client-0001',
-      ),
+      findAssistantConversationByClientId(requirePool(), userId, 'history-client-0001'),
     ).resolves.toEqual({ id: conversation.id })
     await expect(
-      findAssistantConversationByClientId(
-        requirePool(),
-        userId,
-        'history-client-missing',
-      ),
+      findAssistantConversationByClientId(requirePool(), userId, 'history-client-missing'),
     ).resolves.toBeNull()
   })
 
@@ -168,13 +144,8 @@ describe.skipIf(!hasDatabase)('assistant history helpers', () => {
 
     const page = await listAssistantConversations(requirePool(), userId)
 
-    expect(page.conversations.map((conversation) => conversation.id)).toEqual([
-      newer.id,
-      older.id,
-    ])
-    expect(
-      page.conversations.some((conversation) => conversation.id === empty.id),
-    ).toBe(false)
+    expect(page.conversations.map((conversation) => conversation.id)).toEqual([newer.id, older.id])
+    expect(page.conversations.some((conversation) => conversation.id === empty.id)).toBe(false)
   })
 
   it('paginates the history list', async () => {
@@ -197,10 +168,9 @@ describe.skipIf(!hasDatabase)('assistant history helpers', () => {
       `update conversations set last_message_at = now() - interval '1 hour' where id = $1`,
       [first.id],
     )
-    await requirePool().query(
-      `update conversations set last_message_at = now() where id = $1`,
-      [second.id],
-    )
+    await requirePool().query(`update conversations set last_message_at = now() where id = $1`, [
+      second.id,
+    ])
 
     const page = await listAssistantConversations(requirePool(), userId, {
       limit: 1,
@@ -264,30 +234,16 @@ describe.skipIf(!hasDatabase)('assistant history helpers', () => {
   })
 
   it('sets the title once from the first user message', async () => {
-    const conversation = await createAssistantConversation(
-      requirePool(),
-      userId,
-    )
+    const conversation = await createAssistantConversation(requirePool(), userId)
 
-    await setAssistantTitleIfEmpty(
-      requirePool(),
-      conversation.id,
-      'first question',
-    )
-    await setAssistantTitleIfEmpty(
-      requirePool(),
-      conversation.id,
-      'later question',
-    )
+    await setAssistantTitleIfEmpty(requirePool(), conversation.id, 'first question')
+    await setAssistantTitleIfEmpty(requirePool(), conversation.id, 'later question')
 
     expect(await conversationTitle(conversation.id)).toBe('first question')
   })
 
   it('retitles only when the earliest visible user message changes', async () => {
-    const conversation = await createAssistantConversation(
-      requirePool(),
-      userId,
-    )
+    const conversation = await createAssistantConversation(requirePool(), userId)
     const first = await createMessage(requirePool(), {
       conversationId: conversation.id,
       author: 'user',
@@ -300,35 +256,18 @@ describe.skipIf(!hasDatabase)('assistant history helpers', () => {
       body: 'second question',
       clientId: 'history-second-0001',
     })
-    await setAssistantTitleIfEmpty(
-      requirePool(),
-      conversation.id,
-      'first question',
-    )
+    await setAssistantTitleIfEmpty(requirePool(), conversation.id, 'first question')
 
-    await retitleAssistantConversation(
-      requirePool(),
-      conversation.id,
-      second.seq,
-      'edited second',
-    )
+    await retitleAssistantConversation(requirePool(), conversation.id, second.seq, 'edited second')
     expect(await conversationTitle(conversation.id)).toBe('first question')
 
-    await retitleAssistantConversation(
-      requirePool(),
-      conversation.id,
-      first.seq,
-      'edited first',
-    )
+    await retitleAssistantConversation(requirePool(), conversation.id, first.seq, 'edited first')
     expect(await conversationTitle(conversation.id)).toBe('edited first')
   })
 
   it('rejects reads and deletes from another user', async () => {
     const otherUserId = await createTestUser()
-    const conversation = await createAssistantConversation(
-      requirePool(),
-      otherUserId,
-    )
+    const conversation = await createAssistantConversation(requirePool(), otherUserId)
 
     await expect(
       getOwnedAssistantConversation(requirePool(), userId, conversation.id),
@@ -337,9 +276,7 @@ describe.skipIf(!hasDatabase)('assistant history helpers', () => {
       deleteAssistantConversation(requirePool(), userId, conversation.id),
     ).rejects.toMatchObject({ code: 'NOT_FOUND' })
 
-    await requirePool().query('delete from app_users where id = $1', [
-      otherUserId,
-    ])
+    await requirePool().query('delete from app_users where id = $1', [otherUserId])
   })
 
   it('rejects an owner conversation as assistant history', async () => {
@@ -351,10 +288,7 @@ describe.skipIf(!hasDatabase)('assistant history helpers', () => {
   })
 
   it('deletes messages and revisions but keeps usage records', async () => {
-    const conversation = await createAssistantConversation(
-      requirePool(),
-      userId,
-    )
+    const conversation = await createAssistantConversation(requirePool(), userId)
     const message = await createMessage(requirePool(), {
       conversationId: conversation.id,
       author: 'user',

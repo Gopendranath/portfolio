@@ -1,11 +1,5 @@
 import type { ComponentType, SVGProps } from 'react'
-import {
-  GitHubIcon,
-  GlobeIcon,
-  LinkedInIcon,
-  MailIcon,
-  XIcon,
-} from '@/components/ui/icons'
+import { GitHubIcon, GlobeIcon, LinkedInIcon, MailIcon, XIcon } from '@/components/ui/icons'
 import { profile } from '@/data/profile'
 import type { SocialId } from '@/data/types'
 import { Tooltip, TooltipLink } from './tooltip'
@@ -25,10 +19,7 @@ interface SocialLinksProps {
   showLabels?: boolean
 }
 
-export function SocialLinks({
-  className = '',
-  showLabels = false,
-}: SocialLinksProps) {
+export function SocialLinks({ className = '', showLabels = false }: SocialLinksProps) {
   return (
     <ul className={`flex flex-wrap items-center gap-1 ${className}`}>
       {profile.socials.map((social) => {

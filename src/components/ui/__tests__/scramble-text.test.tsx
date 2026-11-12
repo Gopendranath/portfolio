@@ -37,25 +37,17 @@ describe('ScrambleText', () => {
 
   it('replays the animation when a mouse hovers the text', () => {
     vi.useFakeTimers()
-    const { container } = render(
-      <ScrambleText text="FULL STACK" animateOnHover />,
-    )
+    const { container } = render(<ScrambleText text="FULL STACK" animateOnHover />)
     const wrapper = container.firstElementChild as HTMLElement
 
     act(() => vi.advanceTimersByTime(2000))
-    expect(container.querySelector('[data-scramble]')).toHaveTextContent(
-      'FULL STACK',
-    )
+    expect(container.querySelector('[data-scramble]')).toHaveTextContent('FULL STACK')
 
     fireEvent.pointerEnter(wrapper, { pointerType: 'mouse' })
-    expect(container.querySelector('[data-scramble]')).not.toHaveTextContent(
-      'FULL STACK',
-    )
+    expect(container.querySelector('[data-scramble]')).not.toHaveTextContent('FULL STACK')
 
     act(() => vi.advanceTimersByTime(2000))
-    expect(container.querySelector('[data-scramble]')).toHaveTextContent(
-      'FULL STACK',
-    )
+    expect(container.querySelector('[data-scramble]')).toHaveTextContent('FULL STACK')
   })
 
   it('skips the animation when reduced motion is requested', () => {
@@ -72,8 +64,6 @@ describe('ScrambleText', () => {
     const animated = container.querySelector('[data-scramble]')
 
     expect(animated).toHaveTextContent('FULL STACK')
-    expect(
-      screen.getByText('FULL STACK', { selector: '.sr-only' }),
-    ).toBeInTheDocument()
+    expect(screen.getByText('FULL STACK', { selector: '.sr-only' })).toBeInTheDocument()
   })
 })

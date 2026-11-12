@@ -65,11 +65,7 @@ export function CrosshairCursor() {
         className="absolute -translate-x-1/2 -translate-y-1/2"
         aria-hidden="true"
       >
-        <path
-          d="M12.5 1v6M12.5 18v6M1 12.5h6M18 12.5h6"
-          stroke="currentColor"
-          strokeWidth="1"
-        />
+        <path d="M12.5 1v6M12.5 18v6M1 12.5h6M18 12.5h6" stroke="currentColor" strokeWidth="1" />
         <circle cx="12.5" cy="12.5" r="1" fill="currentColor" />
       </svg>
     </div>,

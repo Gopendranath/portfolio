@@ -27,9 +27,7 @@ export function RootLayout() {
     <ThemeProvider>
       <AppearanceProvider>
         <WebMcpTools />
-        {shouldEnableAnalytics() ? (
-          <Analytics route={pathname} path={pathname} />
-        ) : null}
+        {shouldEnableAnalytics() ? <Analytics route={pathname} path={pathname} /> : null}
         <SkipLink />
         <AppSidebar />
         {/* Remount on navigation so scroll-edge state resets before the scroll event fires. */}

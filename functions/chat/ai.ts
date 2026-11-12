@@ -1,14 +1,6 @@
 import type { Pool } from 'pg'
-import {
-  type ChatMessageDTO,
-  MAX_AI_OUTPUT_CHARS,
-} from '../../src/lib/chat/protocol'
-import {
-  createMessage,
-  MESSAGE_COLUMNS,
-  type MessageRow,
-  toMessageDTO,
-} from './conversations'
+import { type ChatMessageDTO, MAX_AI_OUTPUT_CHARS } from '../../src/lib/chat/protocol'
+import { createMessage, MESSAGE_COLUMNS, type MessageRow, toMessageDTO } from './conversations'
 import { ApiError } from './errors'
 import {
   createAssistantConversation,
@@ -57,11 +49,7 @@ export async function beginAssistantTurn(
   },
 ): Promise<AssistantTurn> {
   const conversation = input.conversationId
-    ? await getOwnedAssistantConversation(
-        pool,
-        input.userId,
-        input.conversationId,
-      )
+    ? await getOwnedAssistantConversation(pool, input.userId, input.conversationId)
     : await createAssistantConversation(pool, input.userId)
   const userMessage = await createMessage(pool, {
     conversationId: conversation.id,
@@ -80,10 +68,7 @@ export async function beginAssistantTurn(
   )
 
   if (existing.rows[0]) {
-    throw new ApiError(
-      'DUPLICATE',
-      'This message already has an assistant reply',
-    )
+    throw new ApiError('DUPLICATE', 'This message already has an assistant reply')
   }
 
   let assistantMessage: ChatMessageDTO
@@ -98,10 +83,7 @@ export async function beginAssistantTurn(
     })
   } catch (error) {
     if ((error as { code?: string }).code === '23505') {
-      throw new ApiError(
-        'DUPLICATE',
-        'This message already has an assistant reply',
-      )
+      throw new ApiError('DUPLICATE', 'This message already has an assistant reply')
     }
     throw error
   }
@@ -207,11 +189,7 @@ export async function beginAssistantEdit(
       conversationId: existing.conversation_id,
       userMessage: toMessageDTO(editedRow),
       assistantMessage: toMessageDTO(assistantRow),
-      context: await loadContext(
-        pool,
-        existing.conversation_id,
-        Number(existing.seq),
-      ),
+      context: await loadContext(pool, existing.conversation_id, Number(existing.seq)),
     }
   } catch (error) {
     await client.query('rollback')
@@ -306,11 +284,7 @@ export async function beginAssistantRetry(
       conversationId: failed.conversation_id,
       userMessage: toMessageDTO(userMessage),
       assistantMessage: toMessageDTO(assistantRow),
-      context: await loadContext(
-        pool,
-        failed.conversation_id,
-        Number(userMessage.seq),
-      ),
+      context: await loadContext(pool, failed.conversation_id, Number(userMessage.seq)),
     }
   } catch (error) {
     await client.query('rollback')
@@ -363,14 +337,7 @@ async function finishMessage(
             error_code = $5,
             error_message = $6
       where id = $1`,
-    [
-      messageId,
-      input.body,
-      input.status,
-      input.outputTokens,
-      input.errorCode,
-      input.errorMessage,
-    ],
+    [messageId, input.body, input.status, input.outputTokens, input.errorCode, input.errorMessage],
   )
 }
 
@@ -409,9 +376,7 @@ export async function runAssistantTurn(input: {
       const next = body + delta.text
       if (Array.from(next).length > MAX_AI_OUTPUT_CHARS) {
         const remaining = MAX_AI_OUTPUT_CHARS - Array.from(body).length
-        const slice = Array.from(delta.text)
-          .slice(0, Math.max(0, remaining))
-          .join('')
+        const slice = Array.from(delta.text).slice(0, Math.max(0, remaining)).join('')
         if (slice) {
           body += slice
           await input.onDelta?.(slice)

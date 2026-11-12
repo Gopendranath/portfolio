@@ -44,9 +44,7 @@ export function normalizeBody(input: string): string {
   }
 
   if (Array.from(normalized).length > MAX_MESSAGE_LENGTH) {
-    throw new ChatValidationError(
-      `Message must be ${MAX_MESSAGE_LENGTH} characters or fewer`,
-    )
+    throw new ChatValidationError(`Message must be ${MAX_MESSAGE_LENGTH} characters or fewer`)
   }
 
   return normalized

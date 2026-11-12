@@ -16,9 +16,7 @@ export interface AppearanceContextValue {
   resetAppearance: () => void
 }
 
-export const AppearanceContext = createContext<AppearanceContextValue | null>(
-  null,
-)
+export const AppearanceContext = createContext<AppearanceContextValue | null>(null)
 
 export function useAppearance() {
   const context = useContext(AppearanceContext)

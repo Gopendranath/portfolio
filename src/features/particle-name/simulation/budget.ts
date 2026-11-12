@@ -49,19 +49,12 @@ export interface DustBudgetInput {
  * Dust motes are a fraction of the particle field, narrowed on small headings
  * but floored so the drift stays visible on phones instead of disappearing.
  */
-export function dustBudget({
-  particleCount,
-  particleScale,
-  width,
-}: DustBudgetInput): number {
+export function dustBudget({ particleCount, particleScale, width }: DustBudgetInput): number {
   if (particleCount <= 0) {
     return MIN_DUST
   }
 
-  const widthFactor = Math.min(
-    1,
-    Math.max(DUST_MIN_WIDTH_FACTOR, width / DUST_REFERENCE_WIDTH),
-  )
+  const widthFactor = Math.min(1, Math.max(DUST_MIN_WIDTH_FACTOR, width / DUST_REFERENCE_WIDTH))
   const proportional = particleCount * DUST_RATIO * particleScale * widthFactor
 
   return Math.min(MAX_DUST, Math.max(MIN_DUST, Math.round(proportional)))

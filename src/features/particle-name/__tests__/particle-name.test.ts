@@ -41,11 +41,7 @@ describe('createParticles', () => {
       { x: 100, y: 50, tone: 'ink' as const },
       { x: 200, y: 60, tone: 'muted' as const },
     ]
-    const particles = createParticles(
-      targets,
-      { width: 300, height: 100, padding: 20 },
-      () => 0.5,
-    )
+    const particles = createParticles(targets, { width: 300, height: 100, padding: 20 }, () => 0.5)
 
     expect(particles).toHaveLength(2)
     expect(particles[0]).toMatchObject({

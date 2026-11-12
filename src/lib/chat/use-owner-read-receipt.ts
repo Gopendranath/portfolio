@@ -11,23 +11,12 @@ export function useOwnerReadReceipt(input: {
   const queryClient = useQueryClient()
 
   useEffect(() => {
-    if (
-      !input.active ||
-      !input.token ||
-      input.isOwner ||
-      !input.latestMessageId
-    ) {
+    if (!input.active || !input.token || input.isOwner || !input.latestMessageId) {
       return
     }
 
     void chatFetch('/api/conversations/owner/read', { method: 'POST' })
       .then(() => queryClient.invalidateQueries({ queryKey: ['chat', 'me'] }))
       .catch(() => {})
-  }, [
-    input.active,
-    input.isOwner,
-    input.latestMessageId,
-    input.token,
-    queryClient,
-  ])
+  }, [input.active, input.isOwner, input.latestMessageId, input.token, queryClient])
 }

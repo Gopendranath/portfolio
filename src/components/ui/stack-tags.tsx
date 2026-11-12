@@ -6,11 +6,7 @@ interface StackTagsProps {
 
 export function StackTags({ items, className, hover }: StackTagsProps) {
   return (
-    <ul
-      className={['flex flex-wrap gap-1.5', className ?? '']
-        .filter(Boolean)
-        .join(' ')}
-    >
+    <ul className={['flex flex-wrap gap-1.5', className ?? ''].filter(Boolean).join(' ')}>
       {items.map((item) => (
         <li
           key={item}

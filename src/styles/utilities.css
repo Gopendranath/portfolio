@@ -26,19 +26,11 @@
 }
 
 .surface-tinted {
-  background-color: color-mix(
-    in oklab,
-    var(--color-accent) 5%,
-    var(--color-surface)
-  );
+  background-color: color-mix(in oklab, var(--color-accent) 5%, var(--color-surface));
 }
 
 html[data-theme="light"] .surface-tinted {
-  background-color: color-mix(
-    in oklab,
-    var(--color-accent) 4%,
-    var(--color-canvas)
-  );
+  background-color: color-mix(in oklab, var(--color-accent) 4%, var(--color-canvas));
 }
 
 .scroll-blur-top {
@@ -74,12 +66,7 @@ html[data-theme="light"] .surface-tinted {
   bottom: -50%;
   left: 0;
   width: 45%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgb(255 255 255 / 0.55),
-    transparent
-  );
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.55), transparent);
   opacity: 0;
   transform: translateX(-250%) rotate(18deg);
   pointer-events: none;

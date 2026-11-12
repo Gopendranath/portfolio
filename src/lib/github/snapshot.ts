@@ -38,14 +38,9 @@ export function toGithubSnapshot(
   }
 }
 
-export async function fetchGithubSnapshot(
-  signal?: AbortSignal,
-): Promise<GithubSnapshot> {
+export async function fetchGithubSnapshot(signal?: AbortSignal): Promise<GithubSnapshot> {
   const [user, repos] = await Promise.all([
-    fetchGithubJson<GithubUserResponse>(
-      `${GITHUB_API}/users/${GITHUB_USERNAME}`,
-      signal,
-    ),
+    fetchGithubJson<GithubUserResponse>(`${GITHUB_API}/users/${GITHUB_USERNAME}`, signal),
     fetchGithubJson<GithubRepoResponse[]>(
       `${GITHUB_API}/users/${GITHUB_USERNAME}/repos?per_page=100&type=owner`,
       signal,

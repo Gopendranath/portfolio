@@ -1,17 +1,5 @@
-import type {
-  AnchorHTMLAttributes,
-  ButtonHTMLAttributes,
-  ReactNode,
-} from 'react'
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useId,
-  useRef,
-  useState,
-} from 'react'
+import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 interface TooltipContextValue {
@@ -36,12 +24,7 @@ interface TooltipProps {
   children: ReactNode
 }
 
-export function Tooltip({
-  label,
-  placement = 'top',
-  className = '',
-  children,
-}: TooltipProps) {
+export function Tooltip({ label, placement = 'top', className = '', children }: TooltipProps) {
   const triggerRef = useRef<HTMLSpanElement>(null)
   const [isOpen, setIsOpen] = useState(false)
   const [position, setPosition] = useState<TooltipPosition | null>(null)
@@ -114,9 +97,7 @@ export function Tooltip({
   }, [isOpen])
 
   return (
-    <TooltipContext.Provider
-      value={{ describedBy: isOpen ? tooltipId : undefined }}
-    >
+    <TooltipContext.Provider value={{ describedBy: isOpen ? tooltipId : undefined }}>
       <span ref={triggerRef} className={`inline-flex ${className}`}>
         {children}
       </span>

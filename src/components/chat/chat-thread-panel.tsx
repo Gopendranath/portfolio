@@ -2,10 +2,7 @@ import type { ReactNode } from 'react'
 import { HistoryIcon } from '@/components/ui/icons'
 import { chatProfilesById } from '@/data/chat'
 import type { ChatProfile, ChatProfileId } from '@/data/types'
-import type {
-  ChatThreadController,
-  ViewMessage,
-} from '@/lib/chat/use-chat-thread'
+import type { ChatThreadController, ViewMessage } from '@/lib/chat/use-chat-thread'
 import { AiLockedPanel } from './ai-locked-panel'
 import { AuthPanel } from './auth-panel'
 import { ChatAvatar } from './chat-avatar'
@@ -83,11 +80,7 @@ function ChatThreadFrame({
   )
 }
 
-function canEditMessage(
-  message: ViewMessage,
-  view: ChatProfileId,
-  isOwner: boolean,
-): boolean {
+function canEditMessage(message: ViewMessage, view: ChatProfileId, isOwner: boolean): boolean {
   if (view === 'assistant') {
     return message.author === 'user'
   }
@@ -105,9 +98,7 @@ function handleEditMessage(
 ) {
   if (view === 'assistant') {
     const index = thread.messages.findIndex((message) => message.id === id)
-    const hasLater = thread.messages
-      .slice(index + 1)
-      .some((message) => message.status !== 'failed')
+    const hasLater = thread.messages.slice(index + 1).some((message) => message.status !== 'failed')
 
     if (hasLater) {
       const confirmed = window.confirm(
@@ -169,10 +160,7 @@ function SignedInThread({
     <>
       <ThreadError thread={thread} />
       {notice ? (
-        <p
-          role="status"
-          className="border-b border-line px-4 py-2 text-xs text-muted"
-        >
+        <p role="status" className="border-b border-line px-4 py-2 text-xs text-muted">
           {notice}
         </p>
       ) : null}
@@ -228,38 +216,22 @@ export function ChatThreadPanel({
 
   if (!signedIn) {
     return (
-      <ChatThreadFrame
-        profile={profile}
-        showHistory={false}
-        onOpenHistory={onOpenHistory}
-      >
-        <AuthPanel
-          isLoading={sessionLoading}
-          error={sessionError}
-          onSignIn={onSignIn}
-        />
+      <ChatThreadFrame profile={profile} showHistory={false} onOpenHistory={onOpenHistory}>
+        <AuthPanel isLoading={sessionLoading} error={sessionError} onSignIn={onSignIn} />
       </ChatThreadFrame>
     )
   }
 
   if (aiLocked) {
     return (
-      <ChatThreadFrame
-        profile={profile}
-        showHistory={false}
-        onOpenHistory={onOpenHistory}
-      >
+      <ChatThreadFrame profile={profile} showHistory={false} onOpenHistory={onOpenHistory}>
         <AiLockedPanel reason={aiReason} onOpenOwner={onOpenOwner} />
       </ChatThreadFrame>
     )
   }
 
   return (
-    <ChatThreadFrame
-      profile={profile}
-      showHistory={historyAvailable}
-      onOpenHistory={onOpenHistory}
-    >
+    <ChatThreadFrame profile={profile} showHistory={historyAvailable} onOpenHistory={onOpenHistory}>
       <SignedInThread
         view={view}
         isOwner={isOwner}

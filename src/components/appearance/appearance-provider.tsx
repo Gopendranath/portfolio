@@ -1,11 +1,4 @@
-import {
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useState,
-} from 'react'
+import { type ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import { useTheme } from '@/components/theme/theme-context'
 import {
   type AccentId,
@@ -46,26 +39,21 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
     [],
   )
 
-  const updatePreferences = useCallback(
-    (update: (current: Preferences) => Preferences) => {
-      setPreferences((current) => {
-        const next = update(current)
-        writePreferences(next)
-        return next
-      })
-    },
-    [],
-  )
+  const updatePreferences = useCallback((update: (current: Preferences) => Preferences) => {
+    setPreferences((current) => {
+      const next = update(current)
+      writePreferences(next)
+      return next
+    })
+  }, [])
 
   const setAccent = useCallback(
-    (next: AccentId) =>
-      updatePreferences((current) => ({ ...current, accent: next })),
+    (next: AccentId) => updatePreferences((current) => ({ ...current, accent: next })),
     [updatePreferences],
   )
 
   const setCursorStyle = useCallback(
-    (next: CursorStyleId) =>
-      updatePreferences((current) => ({ ...current, cursorStyle: next })),
+    (next: CursorStyleId) => updatePreferences((current) => ({ ...current, cursorStyle: next })),
     [updatePreferences],
   )
 
@@ -104,9 +92,5 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
     ],
   )
 
-  return (
-    <AppearanceContext.Provider value={value}>
-      {children}
-    </AppearanceContext.Provider>
-  )
+  return <AppearanceContext.Provider value={value}>{children}</AppearanceContext.Provider>
 }

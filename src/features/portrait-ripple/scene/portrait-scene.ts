@@ -243,10 +243,7 @@ export function mountPortraitRipple(
     }
 
     if (hasPointer) {
-      const distance = Math.hypot(
-        event.clientX - lastPointerX,
-        event.clientY - lastPointerY,
-      )
+      const distance = Math.hypot(event.clientX - lastPointerX, event.clientY - lastPointerY)
 
       if (distance < POINTER_STEP_PX) {
         return
@@ -256,22 +253,14 @@ export function mountPortraitRipple(
     lastPointerX = event.clientX
     lastPointerY = event.clientY
     hasPointer = true
-    spawnWave(
-      event.clientX,
-      event.clientY,
-      event.pointerType === 'touch' ? 1.25 : 1,
-    )
+    spawnWave(event.clientX, event.clientY, event.pointerType === 'touch' ? 1.25 : 1)
   }
 
   function handlePointerDown(event: PointerEvent) {
     lastPointerX = event.clientX
     lastPointerY = event.clientY
     hasPointer = true
-    spawnWave(
-      event.clientX,
-      event.clientY,
-      event.pointerType === 'touch' ? 1.3 : 1.1,
-    )
+    spawnWave(event.clientX, event.clientY, event.pointerType === 'touch' ? 1.3 : 1.1)
   }
 
   function handlePointerLeave() {

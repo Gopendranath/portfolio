@@ -14,9 +14,7 @@ const numberFormat = new Intl.NumberFormat('en-US')
 function SnapshotStat({ label, value }: SnapshotStatProps) {
   return (
     <div>
-      <dt className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted">
-        {label}
-      </dt>
+      <dt className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted">{label}</dt>
       <dd className="mt-2 font-mono text-2xl tabular-nums tracking-[-0.04em] text-ink sm:text-3xl">
         {numberFormat.format(value)}
       </dd>
@@ -25,8 +23,7 @@ function SnapshotStat({ label, value }: SnapshotStatProps) {
 }
 
 export function GithubSnapshot() {
-  const { data, isError, isFetching, isPlaceholderData } =
-    useQuery(githubSnapshotQuery)
+  const { data, isError, isFetching, isPlaceholderData } = useQuery(githubSnapshotQuery)
   const snapshot = data ?? GITHUB_FALLBACK
   const sourceLabel = querySourceLabel({
     isFetching,
@@ -41,13 +38,8 @@ export function GithubSnapshot() {
       className="border border-line bg-surface/60 p-5 content-auto [contain-intrinsic-size:auto_400px] sm:p-6"
     >
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <SectionLabel className="min-w-[10rem] flex-1">
-          GitHub snapshot
-        </SectionLabel>
-        <span
-          role="status"
-          className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted"
-        >
+        <SectionLabel className="min-w-[10rem] flex-1">GitHub snapshot</SectionLabel>
+        <span role="status" className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted">
           {sourceLabel}
         </span>
       </div>

@@ -68,16 +68,10 @@ function MessageBody({
   return (
     <p
       className={`whitespace-pre-wrap break-words border px-3.5 py-2.5 text-sm leading-relaxed ${
-        isUser
-          ? 'border-accent bg-accent text-accent-ink'
-          : 'border-line bg-surface/70 text-ink'
+        isUser ? 'border-accent bg-accent text-accent-ink' : 'border-line bg-surface/70 text-ink'
       }`}
     >
-      {message.status === 'streaming' ? (
-        <StreamingBody body={message.body} />
-      ) : (
-        message.body
-      )}
+      {message.status === 'streaming' ? <StreamingBody body={message.body} /> : message.body}
     </p>
   )
 }
@@ -117,9 +111,7 @@ function MessageMeta({
   const isFailed = message.status === 'failed'
   const isSending = message.status === 'sending'
   const isRetryable =
-    isFailed &&
-    (message.clientId !== null ||
-      /^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(message.id))
+    isFailed && (message.clientId !== null || /^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(message.id))
 
   return (
     <div
@@ -175,9 +167,7 @@ export function MessageBubble({
   const canEditMessage = canEdit ?? message.author === ownAuthor
   const actionsRef = useRef<HTMLDivElement>(null)
   const wasEditing = useRef(false)
-  const { copyLabel, copyAnnouncement, copyMessage } = useCopyFeedback(
-    message.body,
-  )
+  const { copyLabel, copyAnnouncement, copyMessage } = useCopyFeedback(message.body)
   const uiMessage: ChatMessage = {
     id: message.id,
     author: message.author,
@@ -189,9 +179,7 @@ export function MessageBubble({
 
   useEffect(() => {
     if (wasEditing.current && !editor.isEditing) {
-      actionsRef.current
-        ?.querySelector<HTMLButtonElement>('[data-message-action="edit"]')
-        ?.focus()
+      actionsRef.current?.querySelector<HTMLButtonElement>('[data-message-action="edit"]')?.focus()
     }
 
     wasEditing.current = editor.isEditing
@@ -202,14 +190,10 @@ export function MessageBubble({
       aria-label={isUser ? 'You' : (incomingLabel ?? profile.name)}
       className={`group flex items-end gap-2.5 ${isUser ? 'justify-end' : ''}`}
     >
-      {isUser ? null : (
-        <ChatAvatar profile={profile} label={incomingLabel} size="sm" />
-      )}
+      {isUser ? null : <ChatAvatar profile={profile} label={incomingLabel} size="sm" />}
       <div
         className={`min-w-0 ${
-          editor.isEditing
-            ? 'w-full max-w-[85%] md:max-w-[36rem]'
-            : 'max-w-[85%]'
+          editor.isEditing ? 'w-full max-w-[85%] md:max-w-[36rem]' : 'max-w-[85%]'
         }`}
       >
         {isUser ? null : (

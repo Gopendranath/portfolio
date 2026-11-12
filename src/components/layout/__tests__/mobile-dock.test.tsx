@@ -34,17 +34,9 @@ it('renders every destination and marks the active route', () => {
   const links = within(nav).getAllByRole('link')
 
   expect(links).toHaveLength(navItems.length)
-  expect(screen.getByRole('link', { name: 'Projects' })).toHaveAttribute(
-    'aria-current',
-    'page',
-  )
-  expect(screen.getByRole('link', { name: 'Projects' })).toHaveAttribute(
-    'href',
-    '/projects',
-  )
-  expect(screen.getByRole('link', { name: 'Home' })).not.toHaveAttribute(
-    'aria-current',
-  )
+  expect(screen.getByRole('link', { name: 'Projects' })).toHaveAttribute('aria-current', 'page')
+  expect(screen.getByRole('link', { name: 'Projects' })).toHaveAttribute('href', '/projects')
+  expect(screen.getByRole('link', { name: 'Home' })).not.toHaveAttribute('aria-current')
 
   const indicator = nav.querySelector('[data-dock-indicator]')
   expect(indicator).not.toBeNull()

@@ -31,11 +31,7 @@ export function ChatComposer({
   const length = Array.from(value).length
   const overLimit = length > MAX_MESSAGE_LENGTH
   const canSend =
-    value.trim().length > 0 &&
-    !overLimit &&
-    !isSending &&
-    !isStreaming &&
-    !disabledReason
+    value.trim().length > 0 && !overLimit && !isSending && !isStreaming && !disabledReason
   const showCounter = length >= MAX_MESSAGE_LENGTH - 200
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: the textarea height is derived from `value`, which is only read through the DOM node.
@@ -51,8 +47,7 @@ export function ChatComposer({
     const nextHeight = Math.min(contentHeight, MAX_COMPOSER_HEIGHT)
 
     textarea.style.height = `${Math.max(nextHeight, MIN_COMPOSER_HEIGHT)}px`
-    textarea.style.overflowY =
-      contentHeight > MAX_COMPOSER_HEIGHT ? 'auto' : 'hidden'
+    textarea.style.overflowY = contentHeight > MAX_COMPOSER_HEIGHT ? 'auto' : 'hidden'
   }, [value])
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -63,11 +58,7 @@ export function ChatComposer({
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
-    if (
-      event.key !== 'Enter' ||
-      event.shiftKey ||
-      event.nativeEvent.isComposing
-    ) {
+    if (event.key !== 'Enter' || event.shiftKey || event.nativeEvent.isComposing) {
       return
     }
 
@@ -128,15 +119,10 @@ export function ChatComposer({
       <div className="mt-2 flex min-h-4 items-center justify-between gap-3 font-mono text-[9px] uppercase tracking-[0.14em] text-muted">
         <span>
           {disabledReason ??
-            (isStreaming
-              ? 'Streaming response…'
-              : 'Enter sends · Shift+Enter newline')}
+            (isStreaming ? 'Streaming response…' : 'Enter sends · Shift+Enter newline')}
         </span>
         {showCounter ? (
-          <span
-            id="chat-composer-count"
-            className={overLimit ? 'text-red-400' : undefined}
-          >
+          <span id="chat-composer-count" className={overLimit ? 'text-red-400' : undefined}>
             {length} / {MAX_MESSAGE_LENGTH}
           </span>
         ) : null}

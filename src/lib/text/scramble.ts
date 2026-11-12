@@ -23,9 +23,7 @@ export function buildScrambledText(
 export function initialScramble(text: string): string {
   return Array.from(text)
     .map((character, index) =>
-      character === ' '
-        ? character
-        : SCRAMBLE_CHARS[(index * 7 + 3) % SCRAMBLE_CHARS.length],
+      character === ' ' ? character : SCRAMBLE_CHARS[(index * 7 + 3) % SCRAMBLE_CHARS.length],
     )
     .join('')
 }

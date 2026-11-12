@@ -11,12 +11,7 @@ import { profile } from '@/data/profile'
 import { pageHead } from '@/lib/seo'
 
 export const Route = createFileRoute('/contact')({
-  head: () =>
-    pageHead(
-      pageMeta.contact.title,
-      pageMeta.contact.description,
-      pageMeta.contact.path,
-    ),
+  head: () => pageHead(pageMeta.contact.title, pageMeta.contact.description, pageMeta.contact.path),
   component: ContactPage,
 })
 
@@ -60,8 +55,8 @@ function ContactPage() {
           </div>
 
           <p className="mt-6 max-w-md text-sm leading-relaxed text-muted">
-            Based in BTM Layout, Bengaluru, India and working across time zones.
-            Email is the best way to start a conversation.
+            Based in BTM Layout, Bengaluru, India and working across time zones. Email is the best
+            way to start a conversation.
           </p>
         </div>
 
