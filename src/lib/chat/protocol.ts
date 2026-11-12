@@ -111,6 +111,25 @@ export const threadPaginationSchema = z.object({
 
 export const chatKindSchema = z.enum(['owner', 'assistant'])
 
+export const assistantSendSchema = sendMessageSchema.extend({
+  conversationId: z.string().uuid().optional(),
+})
+
+export const assistantMessagesQuerySchema = paginationSchema.extend({
+  conversationId: z.string().uuid(),
+})
+
+export const assistantHistoryQuerySchema = z.object({
+  limit: z.preprocess(
+    (value) => (value === undefined || value === '' ? 20 : value),
+    z.coerce.number().int().min(1).max(50),
+  ),
+  before: z.preprocess(
+    (value) => (value === undefined || value === '' ? undefined : value),
+    z.string().min(1).max(512).optional(),
+  ),
+})
+
 export type ChatKind = z.infer<typeof chatKindSchema>
 export type SendMessageInput = z.infer<typeof sendMessageSchema>
 export type EditMessageInput = z.infer<typeof editMessageSchema>
@@ -151,6 +170,19 @@ export interface OwnerThreadDTO {
 
 export interface OwnerThreadPage {
   threads: OwnerThreadDTO[]
+  hasMore: boolean
+  nextCursor: string | null
+}
+
+export interface AssistantConversationDTO {
+  id: string
+  title: string
+  createdAt: string
+  lastMessageAt: string
+}
+
+export interface AssistantConversationPage {
+  conversations: AssistantConversationDTO[]
   hasMore: boolean
   nextCursor: string | null
 }

@@ -56,12 +56,27 @@ export async function getOrCreateConversation(
   userId: string,
   kind: 'owner' | 'assistant',
 ): Promise<{ id: string }> {
+  if (kind === 'assistant') {
+    const { rows } = await pool.query<{ id: string }>(
+      `insert into conversations (user_id, kind)
+       values ($1, 'assistant')
+       returning id`,
+      [userId],
+    )
+    const row = rows[0]
+    if (!row) {
+      throw new ApiError('INTERNAL', 'Could not create the conversation')
+    }
+    return row
+  }
+
   const { rows } = await pool.query<{ id: string }>(
     `insert into conversations (user_id, kind)
-     values ($1, $2)
-     on conflict (user_id, kind) do update set updated_at = now()
+     values ($1, 'owner')
+     on conflict (user_id) where kind = 'owner'
+     do update set updated_at = now()
      returning id`,
-    [userId, kind],
+    [userId],
   )
 
   const row = rows[0]
