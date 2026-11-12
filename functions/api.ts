@@ -1,7 +1,10 @@
 import { Hono } from 'hono'
+import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import { requireAuth } from './chat/auth'
 import { getCorsHeaders } from './chat/cors'
+import { getPool } from './chat/db'
 import { toApiError } from './chat/errors'
+import { resolveAppUser } from './chat/users'
 
 const app = new Hono()
 
@@ -21,12 +24,30 @@ app.get('/api/health', (context) => context.json({ ok: true }))
 
 app.get('/api/me', async (context) => {
   const { authUserId } = await requireAuth(context.req.raw)
-  return context.json({ user: { authUserId } })
+  const { user, isOwner, aiEligible, aiReason } = await resolveAppUser(
+    getPool(),
+    authUserId,
+  )
+
+  return context.json({
+    user: {
+      id: user.id,
+      githubLogin: user.githubLogin,
+      githubCreatedAt: user.githubCreatedAt?.toISOString() ?? null,
+      role: user.role,
+    },
+    isOwner,
+    aiEligible,
+    aiReason,
+  })
 })
 
 app.onError((error, context) => {
   const apiError = toApiError(error)
-  return context.json(apiError.toJSON(), apiError.status as 400)
+  return context.json(
+    apiError.toJSON(),
+    apiError.status as ContentfulStatusCode,
+  )
 })
 
 export default app
