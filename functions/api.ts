@@ -2,11 +2,8 @@ import { Hono } from 'hono'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import { z } from 'zod'
 import {
-  assistantEditSchema,
   assistantHistoryQuerySchema,
   assistantMessagesQuerySchema,
-  assistantRetrySchema,
-  assistantSendSchema,
   chatKindSchema,
   editMessageSchema,
   ownerRetrySchema,
@@ -14,11 +11,6 @@ import {
   sendMessageSchema,
   threadPaginationSchema,
 } from '../src/lib/chat/protocol'
-import {
-  beginAssistantEdit,
-  beginAssistantRetry,
-  beginAssistantTurn,
-} from './chat/ai'
 import { requireAuth } from './chat/auth'
 import {
   createMessage,
@@ -32,7 +24,6 @@ import { getPool } from './chat/db'
 import { ApiError, toApiError } from './chat/errors'
 import {
   deleteAssistantConversation,
-  findAssistantConversationByClientId,
   getLatestAssistantConversation,
   getOwnedAssistantConversation,
   listAssistantConversations,
@@ -45,19 +36,19 @@ import {
   markOwnerUnread,
   markUserOwnerUnread,
 } from './chat/inbox'
-import { createOpenRouterGateway } from './chat/openrouter'
 import { consumeUserRateLimit } from './chat/rate-limit'
-import { assertAiEligible, assertAiRateLimits, assertAllowedRateLimit, assertOwner } from './http/guards'
-import { streamTurn } from './http/sse'
+import { assertAiEligible, assertAllowedRateLimit, assertOwner } from './http/guards'
 import { resolveAppUser } from './chat/users'
 import { parseBody } from './chat/validation'
 import { healthRouter } from './routes/health'
 import { meRouter } from './routes/me'
+import { assistantRouter } from './routes/assistant'
 
 const app = new Hono()
 
 app.route('/', healthRouter)
 app.route('/', meRouter)
+app.route('/', assistantRouter)
 
 app.use('*', async (context, next) => {
   for (const [key, value] of getCorsHeaders(context.req.raw)) {
@@ -271,69 +262,7 @@ app.post('/api/owner/threads/:userId/unread', async (context) => {
   return context.json({ ok: true })
 })
 
-app.post('/api/chat/assistant', async (context) => {
-  const { authUserId } = await requireAuth(context.req.raw)
-  const input = await parseBody(assistantSendSchema, context.req.raw)
-  const pool = getPool()
-  const { user, aiEligible, aiReason } = await resolveAppUser(pool, authUserId)
-  assertAiEligible({ aiEligible, aiReason })
-  const conversationId =
-    input.conversationId === undefined
-      ? ((
-          (await findAssistantConversationByClientId(pool, user.id, input.clientId)) ??
-          (await getLatestAssistantConversation(pool, user.id))
-        )?.id ?? undefined)
-      : (input.conversationId ?? undefined)
-  if (conversationId) {
-    await getOwnedAssistantConversation(pool, user.id, conversationId)
-  }
-  await assertAiRateLimits(context, pool, user.id)
-
-  const gateway = createOpenRouterGateway()
-  const turn = await beginAssistantTurn(pool, {
-    userId: user.id,
-    body: input.body,
-    clientId: input.clientId,
-    conversationId,
-  })
-
-  return streamTurn(context, pool, turn, gateway)
-})
-
-app.post('/api/chat/assistant/edit', async (context) => {
-  const { authUserId } = await requireAuth(context.req.raw)
-  const input = await parseBody(assistantEditSchema, context.req.raw)
-  const pool = getPool()
-  const { user, aiEligible, aiReason } = await resolveAppUser(pool, authUserId)
-  assertAiEligible({ aiEligible, aiReason })
-  await assertAiRateLimits(context, pool, user.id)
-
-  const gateway = createOpenRouterGateway()
-  const turn = await beginAssistantEdit(pool, {
-    userId: user.id,
-    messageId: input.messageId,
-    body: input.body,
-  })
-
-  return streamTurn(context, pool, turn, gateway)
-})
-
-app.post('/api/chat/assistant/retry', async (context) => {
-  const { authUserId } = await requireAuth(context.req.raw)
-  const input = await parseBody(assistantRetrySchema, context.req.raw)
-  const pool = getPool()
-  const { user, aiEligible, aiReason } = await resolveAppUser(pool, authUserId)
-  assertAiEligible({ aiEligible, aiReason })
-  await assertAiRateLimits(context, pool, user.id)
-
-  const gateway = createOpenRouterGateway()
-  const turn = await beginAssistantRetry(pool, {
-    userId: user.id,
-    assistantMessageId: input.assistantMessageId,
-  })
-
-  return streamTurn(context, pool, turn, gateway)
-})
+app.route('/', assistantRouter)
 
 app.patch('/api/messages/:id', async (context) => {
   const { authUserId } = await requireAuth(context.req.raw)
