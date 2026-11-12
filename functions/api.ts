@@ -1,6 +1,4 @@
-import type { Context } from 'hono'
 import { Hono } from 'hono'
-import { streamSSE } from 'hono/streaming'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import { z } from 'zod'
 import {
@@ -17,12 +15,9 @@ import {
   threadPaginationSchema,
 } from '../src/lib/chat/protocol'
 import {
-  type AssistantTurn,
   beginAssistantEdit,
   beginAssistantRetry,
   beginAssistantTurn,
-  markAssistantFailed,
-  runAssistantTurn,
 } from './chat/ai'
 import { requireAuth } from './chat/auth'
 import {
@@ -51,145 +46,14 @@ import {
   markOwnerUnread,
   markUserOwnerUnread,
 } from './chat/inbox'
-import { createOpenRouterGateway, type OpenRouterGateway } from './chat/openrouter'
-import { consumeGlobalAiLimit, consumeUserRateLimit, type RateLimitResult } from './chat/rate-limit'
+import { createOpenRouterGateway } from './chat/openrouter'
+import { consumeUserRateLimit } from './chat/rate-limit'
+import { assertAiEligible, assertAiRateLimits, assertAllowedRateLimit, assertOwner } from './http/guards'
+import { streamTurn } from './http/sse'
 import { resolveAppUser } from './chat/users'
 import { parseBody } from './chat/validation'
 
 const app = new Hono()
-
-function assertAllowedRateLimit(context: Context, result: RateLimitResult): void {
-  if (result.allowed) {
-    return
-  }
-
-  context.header('Retry-After', String(result.retryAfterSeconds))
-  throw new ApiError(
-    'RATE_LIMITED',
-    result.reason === 'minute'
-      ? 'Too many messages. Try again in a minute.'
-      : 'Daily message limit reached. Try again tomorrow.',
-    429,
-    true,
-  )
-}
-
-function assertAiEligible(input: { aiEligible: boolean; aiReason: string }): void {
-  if (input.aiEligible) {
-    return
-  }
-
-  throw new ApiError(
-    'AI_LOCKED',
-    input.aiReason === 'account_too_new'
-      ? 'Your GitHub account must be at least one year old to use the assistant.'
-      : 'We could not verify your GitHub account age. Try again later.',
-    403,
-  )
-}
-
-function assertOwner(isOwner: boolean): void {
-  if (!isOwner) {
-    throw new ApiError('FORBIDDEN', 'Owner access only', 403)
-  }
-}
-
-async function assertAiRateLimits(
-  context: Context,
-  pool: ReturnType<typeof getPool>,
-  userId: string,
-): Promise<void> {
-  assertAllowedRateLimit(
-    context,
-    await consumeUserRateLimit(pool, {
-      userId,
-      action: 'assistant_send',
-      perMinute: 5,
-      perDay: 30,
-    }),
-  )
-  assertAllowedRateLimit(context, await consumeGlobalAiLimit(pool))
-}
-
-async function streamTurn(
-  context: Context,
-  pool: ReturnType<typeof getPool>,
-  turn: AssistantTurn,
-  gateway: OpenRouterGateway,
-): Promise<Response> {
-  return streamSSE(context, async (stream) => {
-    const controller = new AbortController()
-    const heartbeat = setInterval(() => {
-      void stream.write(': ping\n\n').catch(() => {})
-    }, 15_000)
-
-    stream.onAbort(() => controller.abort())
-
-    try {
-      await stream.writeSSE({
-        event: 'meta',
-        data: JSON.stringify({
-          conversationId: turn.conversationId,
-          userMessageId: turn.userMessage.id,
-          assistantMessageId: turn.assistantMessage.id,
-        }),
-      })
-
-      const result = await runAssistantTurn({
-        pool,
-        assistantMessageId: turn.assistantMessage.id,
-        context: turn.context,
-        gateway,
-        signal: controller.signal,
-        onDelta: async (text) => {
-          await stream.writeSSE({
-            event: 'delta',
-            data: JSON.stringify({ text }),
-          })
-        },
-      })
-
-      if (result.status === 'complete') {
-        await stream.writeSSE({
-          event: 'done',
-          data: JSON.stringify({
-            assistantMessageId: turn.assistantMessage.id,
-            finishReason: result.finishReason,
-            truncated: result.truncated,
-            outputTokens: result.outputTokens,
-          }),
-        })
-      } else {
-        await stream.writeSSE({
-          event: 'error',
-          data: JSON.stringify({
-            code: result.errorCode ?? 'UPSTREAM_ERROR',
-            message:
-              result.errorCode === 'ABORTED'
-                ? 'Response stopped.'
-                : 'The assistant is temporarily unavailable.',
-            retryable: true,
-          }),
-        })
-      }
-    } catch (error) {
-      console.error('[sse] stream failed', error)
-      await markAssistantFailed(pool, turn.assistantMessage.id)
-      await stream
-        .writeSSE({
-          event: 'error',
-          data: JSON.stringify({
-            code: 'UPSTREAM_ERROR',
-            message: 'The assistant is temporarily unavailable.',
-            retryable: true,
-          }),
-        })
-        .catch(() => {})
-    } finally {
-      clearInterval(heartbeat)
-    }
-  })
-}
 
 app.use('*', async (context, next) => {
   for (const [key, value] of getCorsHeaders(context.req.raw)) {
