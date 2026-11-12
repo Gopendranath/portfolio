@@ -135,6 +135,44 @@ describe('ChatShell', () => {
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
   })
 
+  it('shows the history triggers for an eligible assistant', () => {
+    render(<ChatShell />)
+
+    expect(
+      screen.getAllByRole('button', { name: 'Chat history' }).length,
+    ).toBeGreaterThan(0)
+  })
+
+  it('hides the history triggers when the assistant is locked', () => {
+    setup({ aiEligible: false, aiReason: 'account_too_new' })
+
+    render(<ChatShell />)
+
+    expect(
+      screen.queryByRole('button', { name: 'Chat history' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('hides the history triggers in the owner inbox', async () => {
+    const user = userEvent.setup()
+    setup({
+      isOwner: true,
+      user: {
+        id: 'user-1',
+        githubLogin: 'visitor',
+        githubCreatedAt: '2020-01-01T00:00:00.000Z',
+        role: 'owner',
+      },
+    })
+
+    render(<ChatShell />)
+    await user.click(screen.getByRole('button', { name: /inbox/i }))
+
+    expect(
+      screen.queryByRole('button', { name: 'Chat history' }),
+    ).not.toBeInTheDocument()
+  })
+
   it('shows the owner inbox in the same nav grid as the assistant', () => {
     setup({
       isOwner: true,

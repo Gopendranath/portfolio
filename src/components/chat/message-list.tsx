@@ -11,6 +11,7 @@ interface MessageListProps {
   hasMore: boolean
   isFetchingOlder: boolean
   isLoading: boolean
+  topInset?: boolean
   canEditMessage: (message: ViewMessage) => boolean
   onLoadOlder: () => Promise<void>
   onEditMessage: (id: string, body: string) => void
@@ -26,6 +27,7 @@ export function MessageList({
   hasMore,
   isFetchingOlder,
   isLoading,
+  topInset = false,
   canEditMessage,
   onLoadOlder,
   onEditMessage,
@@ -80,7 +82,11 @@ export function MessageList({
       aria-live="polite"
       aria-relevant="additions"
       aria-label={`${profile.name} messages`}
-      className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain p-4 [scrollbar-gutter:stable] sm:p-5"
+      className={`min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain [scrollbar-gutter:stable] ${
+        topInset
+          ? 'px-4 pb-4 pt-14 sm:px-5 sm:pb-5 sm:pt-16 md:pt-5'
+          : 'p-4 sm:p-5'
+      }`}
     >
       {hasMore ? (
         <div className="flex justify-center">

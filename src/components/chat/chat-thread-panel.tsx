@@ -7,6 +7,7 @@ import type {
 } from '@/lib/chat/use-chat-thread'
 import { AiLockedPanel } from './ai-locked-panel'
 import { AuthPanel } from './auth-panel'
+import { HistoryIcon } from '@/components/ui/icons'
 import { ChatAvatar } from './chat-avatar'
 import { ChatComposer } from './chat-composer'
 import { ChatHeader } from './chat-header'
@@ -22,24 +23,31 @@ interface ChatThreadPanelProps {
   aiReason: string
   thread: ChatThreadController
   draft: string
+  notice: string | null
+  showHistory: boolean
   onDraftChange: (value: string) => void
   onSend: () => void
   onSignIn: () => Promise<void>
   onOpenOwner: () => void
+  onOpenHistory: () => void
 }
 
 function ChatThreadFrame({
   profile,
+  showHistory,
+  onOpenHistory,
   children,
 }: {
   profile: ChatProfile
+  showHistory: boolean
+  onOpenHistory: () => void
   children: ReactNode
 }) {
   return (
     <section
       id="chat-thread"
       aria-labelledby="chat-thread-title"
-      className="flex min-h-0 flex-1 flex-col overflow-hidden"
+      className="relative flex min-h-0 flex-1 flex-col overflow-hidden"
     >
       <ChatHeader
         className="chat-thread-header hidden md:flex"
@@ -47,7 +55,29 @@ function ChatThreadFrame({
         title={profile.name}
         subtitle={profile.role}
         avatar={<ChatAvatar profile={profile} />}
+        actions={
+          showHistory ? (
+            <button
+              type="button"
+              aria-label="Chat history"
+              onClick={onOpenHistory}
+              className="flex size-8 items-center justify-center border border-line text-muted transition-colors hover:border-accent hover:text-accent"
+            >
+              <HistoryIcon className="size-4" />
+            </button>
+          ) : undefined
+        }
       />
+      {showHistory ? (
+        <button
+          type="button"
+          aria-label="Chat history"
+          onClick={onOpenHistory}
+          className="absolute left-3 top-3 z-10 flex size-9 items-center justify-center border border-line bg-canvas/90 text-muted shadow-sm backdrop-blur transition-colors hover:border-accent hover:text-accent md:hidden"
+        >
+          <HistoryIcon className="size-4" />
+        </button>
+      ) : null}
       {children}
     </section>
   )
@@ -121,6 +151,7 @@ function SignedInThread({
   isOwner,
   thread,
   draft,
+  notice,
   onDraftChange,
   onSend,
 }: {
@@ -128,6 +159,7 @@ function SignedInThread({
   isOwner: boolean
   thread: ChatThreadController
   draft: string
+  notice: string | null
   onDraftChange: (value: string) => void
   onSend: () => void
 }) {
@@ -136,12 +168,21 @@ function SignedInThread({
   return (
     <>
       <ThreadError thread={thread} />
+      {notice ? (
+        <p
+          role="status"
+          className="border-b border-line px-4 py-2 text-xs text-muted"
+        >
+          {notice}
+        </p>
+      ) : null}
       <MessageList
         messages={thread.messages}
         profile={profile}
         hasMore={thread.hasMore}
         isFetchingOlder={thread.isFetchingOlder}
         isLoading={thread.isLoading}
+        topInset={view === 'assistant'}
         canEditMessage={(message) => canEditMessage(message, view, isOwner)}
         onLoadOlder={thread.loadOlder}
         onEditMessage={(id, body) => handleEditMessage(view, thread, id, body)}
@@ -173,17 +214,25 @@ export function ChatThreadPanel({
   aiReason,
   thread,
   draft,
+  notice,
+  showHistory,
   onDraftChange,
   onSend,
   onSignIn,
   onOpenOwner,
+  onOpenHistory,
 }: ChatThreadPanelProps) {
   const profile = chatProfilesById[view]
   const aiLocked = view === 'assistant' && !aiEligible
+  const historyAvailable = showHistory && signedIn && !aiLocked
 
   if (!signedIn) {
     return (
-      <ChatThreadFrame profile={profile}>
+      <ChatThreadFrame
+        profile={profile}
+        showHistory={false}
+        onOpenHistory={onOpenHistory}
+      >
         <AuthPanel
           isLoading={sessionLoading}
           error={sessionError}
@@ -195,19 +244,28 @@ export function ChatThreadPanel({
 
   if (aiLocked) {
     return (
-      <ChatThreadFrame profile={profile}>
+      <ChatThreadFrame
+        profile={profile}
+        showHistory={false}
+        onOpenHistory={onOpenHistory}
+      >
         <AiLockedPanel reason={aiReason} onOpenOwner={onOpenOwner} />
       </ChatThreadFrame>
     )
   }
 
   return (
-    <ChatThreadFrame profile={profile}>
+    <ChatThreadFrame
+      profile={profile}
+      showHistory={historyAvailable}
+      onOpenHistory={onOpenHistory}
+    >
       <SignedInThread
         view={view}
         isOwner={isOwner}
         thread={thread}
         draft={draft}
+        notice={notice}
         onDraftChange={onDraftChange}
         onSend={onSend}
       />

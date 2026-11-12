@@ -4,6 +4,7 @@ import type { ChatProfileId } from '@/data/types'
 import { chatFetch } from '@/lib/chat/api-client'
 import { useChatSession } from '@/lib/chat/session'
 import { useChatThread } from '@/lib/chat/use-chat-thread'
+import { AssistantHistoryDialog } from './assistant-history-dialog'
 import { ChatProfilePanel } from './chat-profile-panel'
 import { ChatThreadPanel } from './chat-thread-panel'
 import { OwnerInbox } from './owner-inbox'
@@ -33,6 +34,7 @@ export function ChatShell() {
   const session = useChatSession()
   const queryClient = useQueryClient()
   const [activeView, setActiveView] = useState<ChatView>('assistant')
+  const [historyOpen, setHistoryOpen] = useState(false)
   const [drafts, setDrafts] = useState<Record<ChatProfileId, string>>({
     assistant: '',
     owner: '',
@@ -111,6 +113,8 @@ export function ChatShell() {
         aiReason={session.aiReason}
         thread={activeThread}
         draft={activeDraft}
+        notice={null}
+        showHistory={threadView === 'assistant'}
         onDraftChange={(value) =>
           setDrafts((current) => ({ ...current, [threadView]: value }))
         }
@@ -120,6 +124,23 @@ export function ChatShell() {
         }}
         onSignIn={session.signIn}
         onOpenOwner={() => setActiveView('owner')}
+        onOpenHistory={() => setHistoryOpen(true)}
+      />
+
+      <AssistantHistoryDialog
+        open={historyOpen}
+        conversations={[]}
+        activeId={null}
+        isLoading={false}
+        error={null}
+        hasMore={false}
+        isFetchingMore={false}
+        onClose={() => setHistoryOpen(false)}
+        onNew={() => setHistoryOpen(false)}
+        onSelect={() => setHistoryOpen(false)}
+        onDelete={() => {}}
+        onLoadMore={() => {}}
+        onRetry={() => {}}
       />
     </section>
   )
