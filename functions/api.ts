@@ -4,7 +4,10 @@ import { streamSSE } from 'hono/streaming'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import {
   assistantEditSchema,
+  assistantHistoryQuerySchema,
+  assistantMessagesQuerySchema,
   assistantRetrySchema,
+  assistantSendSchema,
   chatKindSchema,
   editMessageSchema,
   ownerRetrySchema,
@@ -31,6 +34,11 @@ import {
 import { getCorsHeaders } from './chat/cors'
 import { getPool } from './chat/db'
 import { ApiError, toApiError } from './chat/errors'
+import {
+  deleteAssistantConversation,
+  getOwnedAssistantConversation,
+  listAssistantConversations,
+} from './chat/history'
 import {
   countUserOwnerUnread,
   createOwnerReply,
@@ -280,15 +288,46 @@ app.post('/api/chat/owner/retry', async (context) => {
   return context.json({ message })
 })
 
-app.get('/api/conversations/:kind/messages', async (context) => {
+app.get('/api/conversations/assistant', async (context) => {
   const { authUserId } = await requireAuth(context.req.raw)
-  const kind = chatKindSchema.parse(context.req.param('kind'))
-  const query = paginationSchema.parse({
+  const query = assistantHistoryQuerySchema.parse({
     limit: context.req.query('limit'),
     before: context.req.query('before'),
   })
   const pool = getPool()
   const { user } = await resolveAppUser(pool, authUserId)
+  const page = await listAssistantConversations(pool, user.id, query)
+  return context.json(page)
+})
+
+app.get('/api/conversations/:kind/messages', async (context) => {
+  const { authUserId } = await requireAuth(context.req.raw)
+  const kind = chatKindSchema.parse(context.req.param('kind'))
+  const pool = getPool()
+  const { user } = await resolveAppUser(pool, authUserId)
+
+  if (kind === 'assistant') {
+    const query = assistantMessagesQuerySchema.parse({
+      limit: context.req.query('limit'),
+      before: context.req.query('before'),
+      conversationId: context.req.query('conversationId'),
+    })
+    const conversation = await getOwnedAssistantConversation(
+      pool,
+      user.id,
+      query.conversationId,
+    )
+    const page = await listMessages(pool, conversation.id, {
+      beforeSeq: query.before,
+      limit: query.limit,
+    })
+    return context.json(page)
+  }
+
+  const query = paginationSchema.parse({
+    limit: context.req.query('limit'),
+    before: context.req.query('before'),
+  })
   const conversation = await getOrCreateConversation(pool, user.id, kind)
   const page = await listMessages(pool, conversation.id, {
     beforeSeq: query.before,
@@ -296,6 +335,18 @@ app.get('/api/conversations/:kind/messages', async (context) => {
   })
 
   return context.json(page)
+})
+
+app.delete('/api/conversations/:id', async (context) => {
+  const { authUserId } = await requireAuth(context.req.raw)
+  const pool = getPool()
+  const { user } = await resolveAppUser(pool, authUserId)
+  await deleteAssistantConversation(
+    pool,
+    user.id,
+    context.req.param('id'),
+  )
+  return context.json({ ok: true })
 })
 
 app.get('/api/owner/threads', async (context) => {
@@ -370,7 +421,7 @@ app.post('/api/owner/threads/:userId/unread', async (context) => {
 
 app.post('/api/chat/assistant', async (context) => {
   const { authUserId } = await requireAuth(context.req.raw)
-  const input = await parseBody(sendMessageSchema, context.req.raw)
+  const input = await parseBody(assistantSendSchema, context.req.raw)
   const pool = getPool()
   const { user, aiEligible, aiReason } = await resolveAppUser(pool, authUserId)
   assertAiEligible({ aiEligible, aiReason })
@@ -381,6 +432,7 @@ app.post('/api/chat/assistant', async (context) => {
     userId: user.id,
     body: input.body,
     clientId: input.clientId,
+    conversationId: input.conversationId,
   })
 
   return streamTurn(context, pool, turn, gateway)

@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
+  assistantHistoryQuerySchema,
+  assistantMessagesQuerySchema,
+  assistantSendSchema,
   MAX_MESSAGE_LENGTH,
   normalizeBody,
   paginationSchema,
@@ -58,5 +61,44 @@ describe('paginationSchema', () => {
 
   it('coerces query-string limits', () => {
     expect(paginationSchema.parse({ limit: '5' })).toEqual({ limit: 5 })
+  })
+})
+
+describe('assistant history schemas', () => {
+  const conversationId = '6f1c5a8e-3f7e-4c1e-9a0e-2d4b6c8d0e2f'
+
+  it('defaults the history page size to twenty', () => {
+    expect(assistantHistoryQuerySchema.parse({})).toEqual({ limit: 20 })
+  })
+
+  it('rejects history pages over fifty', () => {
+    expect(
+      assistantHistoryQuerySchema.safeParse({ limit: 51 }).success,
+    ).toBe(false)
+  })
+
+  it('accepts an optional conversation id on send', () => {
+    expect(
+      assistantSendSchema.safeParse({
+        body: 'hello',
+        clientId: 'client-test-0001',
+      }).success,
+    ).toBe(true)
+    expect(
+      assistantSendSchema.safeParse({
+        body: 'hello',
+        clientId: 'client-test-0001',
+        conversationId,
+      }).success,
+    ).toBe(true)
+  })
+
+  it('requires a uuid conversation id on reads', () => {
+    expect(
+      assistantMessagesQuerySchema.safeParse({ limit: '10' }).success,
+    ).toBe(false)
+    expect(
+      assistantMessagesQuerySchema.parse({ limit: '10', conversationId }),
+    ).toEqual({ limit: 10, conversationId })
   })
 })
