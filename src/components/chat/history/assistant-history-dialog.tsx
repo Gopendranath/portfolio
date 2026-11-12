@@ -1,0 +1,141 @@
+import { useEffect, useRef } from 'react'
+import { CloseIcon, HistoryIcon } from '@/components/ui/icons'
+import type { AssistantConversationDTO } from '@/lib/chat/protocol'
+import { AssistantHistoryContent } from './assistant-history-content'
+
+interface AssistantHistoryDialogProps {
+  open: boolean
+  conversations: readonly AssistantConversationDTO[]
+  activeId: string | null
+  isLoading: boolean
+  error: string | null
+  hasMore: boolean
+  isFetchingMore: boolean
+  onClose: () => void
+  onNew: () => void
+  onSelect: (conversationId: string) => void
+  onDelete: (conversationId: string) => void
+  onLoadMore: () => void
+  onRetry: () => void
+}
+
+export function AssistantHistoryDialog({
+  open,
+  conversations,
+  activeId,
+  isLoading,
+  error,
+  hasMore,
+  isFetchingMore,
+  onClose,
+  onNew,
+  onSelect,
+  onDelete,
+  onLoadMore,
+  onRetry,
+}: AssistantHistoryDialogProps) {
+  const dialogRef = useRef<HTMLDialogElement>(null)
+  const newChatRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    const dialog = dialogRef.current
+    if (!dialog) {
+      return
+    }
+
+    if (open && !dialog.open) {
+      dialog.showModal()
+      newChatRef.current?.focus()
+    } else if (!open && dialog.open) {
+      dialog.close()
+    }
+  }, [open])
+
+  useEffect(() => {
+    const dialog = dialogRef.current
+    if (!dialog || 'closedBy' in HTMLDialogElement.prototype) {
+      return
+    }
+    const element = dialog
+
+    function handleBackdropClick(event: globalThis.MouseEvent) {
+      if (event.target !== element) {
+        return
+      }
+
+      const rect = element.getBoundingClientRect()
+      const inside =
+        event.clientX >= rect.left &&
+        event.clientX <= rect.right &&
+        event.clientY >= rect.top &&
+        event.clientY <= rect.bottom
+      if (!inside) {
+        onClose()
+      }
+    }
+
+    element.addEventListener('click', handleBackdropClick)
+    return () => {
+      element.removeEventListener('click', handleBackdropClick)
+    }
+  }, [onClose])
+
+  return (
+    <dialog
+      ref={dialogRef}
+      aria-labelledby="assistant-history-title"
+      onClose={onClose}
+      className="m-0 h-dvh max-h-none w-full max-w-none overflow-hidden overscroll-contain border-0 bg-canvas p-0 text-ink backdrop:overflow-hidden backdrop:bg-black/50 backdrop:overscroll-contain backdrop:backdrop-blur-[2px] open:flex open:flex-col md:ml-auto md:w-80"
+      {...({ closedby: 'any' } as Record<string, string>)}
+    >
+      <header className="flex h-20 shrink-0 items-center gap-3 border-b border-line px-4">
+        <span className="flex size-9 shrink-0 items-center justify-center border border-line text-accent">
+          <HistoryIcon className="size-4" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <h2
+            id="assistant-history-title"
+            className="truncate text-xl font-medium tracking-[-0.02em] text-ink"
+          >
+            Chats.
+          </h2>
+          <p className="mt-0.5 font-mono text-[9px] uppercase tracking-[0.14em] text-muted">
+            Assistant history
+          </p>
+        </div>
+        <button
+          type="button"
+          aria-label="Close chat history"
+          onClick={onClose}
+          className="flex size-8 shrink-0 items-center justify-center border border-line text-muted transition-colors hover:border-accent hover:text-accent"
+        >
+          <CloseIcon className="size-4" />
+        </button>
+      </header>
+
+      <div className="shrink-0 border-b border-line p-4">
+        <button
+          ref={newChatRef}
+          type="button"
+          onClick={onNew}
+          className="w-full bg-accent px-3 py-2.5 font-mono text-[10px] uppercase tracking-[0.16em] text-accent-ink transition-colors hover:bg-ink"
+        >
+          New chat
+        </button>
+      </div>
+
+      <AssistantHistoryContent
+        conversations={conversations}
+        activeId={activeId}
+        isLoading={isLoading}
+        error={error}
+        hasMore={hasMore}
+        isFetchingMore={isFetchingMore}
+        onSelect={onSelect}
+        onDelete={onDelete}
+        onLoadMore={onLoadMore}
+        onRetry={onRetry}
+      />
+    </dialog>
+  )
+}
