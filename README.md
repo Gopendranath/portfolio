@@ -179,7 +179,7 @@ Set `VITE_NEON_AUTH_URL` and `VITE_CHAT_API_URL` in `.env.local`. All server sec
 Deploy:
 
 ```bash
-npx neon deploy --env .env.local
+pnpm deploy:functions
 npx neon functions get api
 ```
 

@@ -17,7 +17,8 @@
     "typecheck": "tsc -b",
     "test:watch": "vitest",
     "preview": "vite preview",
-    "db:migrate": "node --env-file=.env.local scripts/migrate.mjs"
+    "db:migrate": "node --env-file=.env.local scripts/migrate.mjs",
+    "deploy:functions": "node scripts/neon-deploy.mjs"
   },
   "dependencies": {
     "@fontsource-variable/geist": "5.3.0",
