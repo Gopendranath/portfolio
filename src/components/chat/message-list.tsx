@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef } from 'react'
+import { MessageBubble } from '@/components/chat/message/message-bubble'
 import type { ChatProfile } from '@/data/types'
 import type { ViewMessage } from '@/lib/chat/use-chat-thread'
-import { MessageBubble } from './message-bubble'
 
 interface MessageListProps {
   messages: readonly ViewMessage[]
