@@ -3,17 +3,21 @@ name: Deploy Neon Function
 on:
   push:
     branches: [main]
+    # Function source plus its exact build/deploy dependencies.
+    # Keep in sync with tsconfig.functions.json and neon.ts.
     paths:
       - functions/**
-      - db/**
+      - '!functions/__tests__/**'
       - neon.ts
-      - src/data/**
+      - src/data/about.ts
+      - src/data/profile.ts
+      - src/data/projects.ts
+      - src/data/site.ts
+      - src/data/types.ts
       - src/lib/chat/protocol.ts
       - package.json
       - pnpm-lock.yaml
-      - pnpm-workspace.yaml
       - tsconfig.functions.json
-      - .github/workflows/deploy-neon.yml
   workflow_dispatch:
 
 concurrency:
