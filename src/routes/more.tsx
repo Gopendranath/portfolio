@@ -26,7 +26,7 @@ function MorePage() {
       <PageHeader
         eyebrow="06 / More"
         title="About this site."
-        description="How the portfolio is built, what it can do, how to tune the look, and where the chat and SSH access are heading."
+        description="How the portfolio is built, what it can do, how to tune the look, and how the live chat backend works."
       />
 
       <section
@@ -35,14 +35,16 @@ function MorePage() {
       >
         <div className="space-y-5 text-base leading-relaxed text-muted sm:text-lg">
           <p>
-            This is the personal portfolio of Gopendranath Sasmal. It is a
-            static, client-rendered React application: no server runtime, no
-            database, and no tracking scripts.
+            This is the personal portfolio of Gopendranath Sasmal. The site is a
+            client-rendered React application on Vercel, backed by Neon
+            Postgres, Neon Auth, and a Neon Function for chat. No tracking
+            scripts run.
           </p>
           <p>
             Content lives in typed data files, routes are file-based, and the
-            production build ships as static assets. The only runtime network
-            call is the public GitHub API used for the home-page snapshot.
+            production build ships as static assets. The chat backend uses the
+            same GitHub identity as the rest of the site. The public GitHub API
+            supplies the home-page snapshot outside chat.
           </p>
         </div>
 
@@ -80,17 +82,17 @@ function MorePage() {
             </h2>
             <span className="inline-flex items-center gap-2 border border-line px-2.5 py-1.5 font-mono text-[9px] uppercase tracking-[0.16em] text-muted">
               <span className="size-1.5 bg-muted" aria-hidden="true" />
-              Planned
+              Not available
             </span>
           </div>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted">
-            The chat backend is planned to expose a real SSH endpoint, so the
-            conversation can start from any terminal. Sessions will be tied to
-            the GitHub identity used on the web.
+            The chat backend is live on Neon Functions at `/chat`. SSH access is
+            not implemented yet; when it exists, sessions will use the same
+            GitHub identity as the web chat.
           </p>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">
             There is no public SSH endpoint today. The host and exact command
-            will be published here once the backend is live; this page will not
+            will be published here once it is available; this page will not
             invent one.
           </p>
         </div>
@@ -109,7 +111,7 @@ function MorePage() {
             to="/chat"
             className="group inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.14em] text-muted transition-colors hover:text-accent"
           >
-            Open chat preview
+            Open chat
             <ArrowRightIcon className="size-3.5 transition-transform duration-150 ease-out group-hover:translate-x-1" />
           </Link>
         </div>

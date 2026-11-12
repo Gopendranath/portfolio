@@ -45,6 +45,6 @@ export const pageMeta = {
     path: '/more',
     title: 'More — Gopendranath Sasmal',
     description:
-      'How this portfolio is built, the features it ships, and the planned SSH access to its chat backend.',
+      'How this portfolio is built, the features it ships, and how the live chat backend works.',
   },
 } as const satisfies Record<string, PageMeta>

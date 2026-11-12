@@ -1,7 +1,7 @@
 export const siteFacts = [
-  { label: 'Type', value: 'Static single-page app' },
+  { label: 'Type', value: 'Static SPA + Neon backend' },
   { label: 'Rendering', value: 'Client-side React' },
-  { label: 'Hosting', value: 'Vercel' },
+  { label: 'Hosting', value: 'Vercel + Neon' },
   { label: 'Tracking', value: 'None' },
 ] as const
 
@@ -25,6 +25,10 @@ export const siteFeatures = [
   {
     title: 'WebMCP tools',
     body: 'Five read-only tools expose profile, project, availability, and contact data to browser agents in supported Chromium builds.',
+  },
+  {
+    title: 'Live chat backend',
+    body: 'GitHub sign-in, a private owner thread, an owner inbox, and a streaming portfolio assistant backed by Neon Functions and Postgres.',
   },
   {
     title: 'Agent-readable summary',
