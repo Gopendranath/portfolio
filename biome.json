@@ -10,6 +10,7 @@
       "src/**/*.ts",
       "src/**/*.tsx",
       "src/**/*.css",
+      "functions/**/*.ts",
       "vite.config.ts",
       "vitest.config.ts",
       "!src/routeTree.gen.ts"
@@ -69,6 +70,16 @@
         "src/lib/webmcp/profile-tools.ts",
         "src/lib/webmcp/project-tools.ts"
       ],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["functions/**/*.ts"],
       "linter": {
         "rules": {
           "style": {
