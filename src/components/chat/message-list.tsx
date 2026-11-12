@@ -6,6 +6,8 @@ import { MessageBubble } from './message-bubble'
 interface MessageListProps {
   messages: readonly ViewMessage[]
   profile: ChatProfile
+  ownAuthor?: 'user' | 'owner'
+  incomingLabel?: string
   hasMore: boolean
   isFetchingOlder: boolean
   isLoading: boolean
@@ -19,6 +21,8 @@ interface MessageListProps {
 export function MessageList({
   messages,
   profile,
+  ownAuthor = 'user',
+  incomingLabel,
   hasMore,
   isFetchingOlder,
   isLoading,
@@ -112,6 +116,8 @@ export function MessageList({
           key={message.id}
           message={message}
           profile={profile}
+          ownAuthor={ownAuthor}
+          incomingLabel={incomingLabel}
           canEdit={canEditMessage(message)}
           onEdit={onEditMessage}
           onRetry={onRetryMessage}

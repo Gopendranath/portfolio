@@ -75,6 +75,8 @@ export function OwnerInbox({ onBack }: OwnerInboxProps) {
         <MessageList
           messages={thread.messages}
           profile={chatProfilesById.owner}
+          ownAuthor="owner"
+          incomingLabel={selected.githubLogin ?? 'Visitor'}
           hasMore={thread.hasMore}
           isFetchingOlder={thread.isFetchingOlder}
           isLoading={thread.isLoading}

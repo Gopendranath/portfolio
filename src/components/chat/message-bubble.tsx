@@ -11,6 +11,8 @@ import { useMessageEditing } from './use-message-editing'
 interface MessageBubbleProps {
   message: ViewMessage
   profile: ChatProfile
+  ownAuthor?: 'user' | 'owner'
+  incomingLabel?: string
   canEdit?: boolean
   canRetry?: boolean
   onEdit: (id: string, body: string) => void
@@ -21,13 +23,15 @@ interface MessageBubbleProps {
 export function MessageBubble({
   message,
   profile,
-  canEdit = message.author === 'user',
+  ownAuthor = 'user',
+  incomingLabel,
+  canEdit = message.author === ownAuthor,
   canRetry = false,
   onEdit,
   onRetry,
   onStop,
 }: MessageBubbleProps) {
-  const isUser = message.author === 'user'
+  const isUser = message.author === ownAuthor
   const actionsRef = useRef<HTMLDivElement>(null)
   const wasEditing = useRef(false)
   const { copyLabel, copyAnnouncement, copyMessage } = useCopyFeedback(
@@ -62,10 +66,12 @@ export function MessageBubble({
 
   return (
     <article
-      aria-label={isUser ? 'You' : profile.name}
+      aria-label={isUser ? 'You' : (incomingLabel ?? profile.name)}
       className={`group flex items-end gap-2.5 ${isUser ? 'justify-end' : ''}`}
     >
-      {isUser ? null : <ChatAvatar profile={profile} size="sm" />}
+      {isUser ? null : (
+        <ChatAvatar profile={profile} label={incomingLabel} size="sm" />
+      )}
       <div
         className={`min-w-0 ${
           editor.isEditing
@@ -75,7 +81,7 @@ export function MessageBubble({
       >
         {isUser ? null : (
           <p className="mb-1 font-mono text-[9px] uppercase tracking-[0.14em] text-muted">
-            {profile.name}
+            {incomingLabel ?? profile.name}
           </p>
         )}
 
