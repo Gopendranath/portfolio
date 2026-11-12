@@ -14,6 +14,15 @@ Live: <https://gopendra.is-a.dev>
 - Biome
 - Vitest + Testing Library
 
+## Development tooling
+
+- **React Doctor** — React codebase health checks and diagnostics.
+- **Chrome DevTools MCP server** — browser inspection and interaction during development, including named sessions.
+- **Neon CLI** — link the project, run the chat function locally, and deploy it.
+- **Vercel CLI** — deployment and project management.
+- **GitHub CLI (`gh`)** — repository, issue, and pull-request workflows.
+- **Lighthouse CLI** — performance, accessibility, best-practices, and SEO audits.
+
 ## Requirements
 
 - Node.js `^22.22.2`, `^24.15.0`, or `>=26`
