@@ -108,31 +108,28 @@ export async function beginAssistantEdit(
 ): Promise<AssistantTurn> {
   const now = new Date()
 
-  const { conversationId, seq, edited, assistant } = await withTransaction(
-    pool,
-    async (client) => {
-      const message = await lockMessageForUpdate(client, input.messageId)
+  const { conversationId, seq, edited, assistant } = await withTransaction(pool, async (client) => {
+    const message = await lockMessageForUpdate(client, input.messageId)
 
-      if (
-        !message ||
-        message.userId !== input.userId ||
-        message.kind !== 'assistant' ||
-        message.author !== 'user'
-      ) {
-        throw new ApiError('NOT_FOUND', 'Message not found')
-      }
+    if (
+      !message ||
+      message.userId !== input.userId ||
+      message.kind !== 'assistant' ||
+      message.author !== 'user'
+    ) {
+      throw new ApiError('NOT_FOUND', 'Message not found')
+    }
 
-      const { edited, assistant } = await writeAssistantEdit(client, {
-        message,
-        body: input.body,
-        editorUserId: input.userId,
-        now,
-        model: OPENROUTER_MODEL,
-      })
+    const { edited, assistant } = await writeAssistantEdit(client, {
+      message,
+      body: input.body,
+      editorUserId: input.userId,
+      now,
+      model: OPENROUTER_MODEL,
+    })
 
-      return { conversationId: message.conversationId, seq: message.seq, edited, assistant }
-    },
-  )
+    return { conversationId: message.conversationId, seq: message.seq, edited, assistant }
+  })
 
   await retitleAssistantConversation(pool, conversationId, seq, input.body)
 
@@ -150,23 +147,21 @@ export async function beginAssistantRetry(
 ): Promise<AssistantTurn> {
   const now = new Date()
 
-  const { conversationId, userMessage, assistant } = await withTransaction(
-    pool,
-    async (client) => {
-      const failed = await lockRetryTarget(client, input.assistantMessageId)
+  const { conversationId, userMessage, assistant } = await withTransaction(pool, async (client) => {
+    const failed = await lockRetryTarget(client, input.assistantMessageId)
 
-      if (
-        !failed ||
-        failed.userId !== input.userId ||
-        failed.kind !== 'assistant' ||
-        failed.author !== 'assistant' ||
-        failed.status !== 'failed'
-      ) {
-        throw new ApiError('NOT_FOUND', 'Failed assistant message not found')
-      }
+    if (
+      !failed ||
+      failed.userId !== input.userId ||
+      failed.kind !== 'assistant' ||
+      failed.author !== 'assistant' ||
+      failed.status !== 'failed'
+    ) {
+      throw new ApiError('NOT_FOUND', 'Failed assistant message not found')
+    }
 
-      const userRows = await client.query<MessageRow>(
-        `select ${MESSAGE_COLUMNS}
+    const userRows = await client.query<MessageRow>(
+      `select ${MESSAGE_COLUMNS}
            from messages
           where conversation_id = $1
             and seq < $2
@@ -174,24 +169,23 @@ export async function beginAssistantRetry(
             and deleted_at is null
           order by seq desc
           limit 1`,
-        [failed.conversationId, failed.seq],
-      )
+      [failed.conversationId, failed.seq],
+    )
 
-      const userMessage = userRows.rows[0]
-      if (!userMessage) {
-        throw new ApiError('CONFLICT', 'No user message to retry')
-      }
+    const userMessage = userRows.rows[0]
+    if (!userMessage) {
+      throw new ApiError('CONFLICT', 'No user message to retry')
+    }
 
-      const assistant = await writeAssistantRetry(client, {
-        failed,
-        userMessage,
-        now,
-        model: OPENROUTER_MODEL,
-      })
+    const assistant = await writeAssistantRetry(client, {
+      failed,
+      userMessage,
+      now,
+      model: OPENROUTER_MODEL,
+    })
 
-      return { conversationId: failed.conversationId, userMessage, assistant }
-    },
-  )
+    return { conversationId: failed.conversationId, userMessage, assistant }
+  })
 
   return {
     conversationId,
