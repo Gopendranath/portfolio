@@ -153,6 +153,43 @@ describe('useChatThread conversation scope', () => {
     )
   })
 
+  it('refreshes the created conversation after a draft stream completes', async () => {
+    vi.mocked(streamChat).mockImplementation(async (_path, _body, handlers) => {
+      handlers.onMeta?.({
+        conversationId: 'c-new',
+        userMessageId: 'u1',
+        assistantMessageId: 'a1',
+      })
+      handlers.onDone?.({
+        assistantMessageId: 'a1',
+        finishReason: 'stop',
+        truncated: false,
+        outputTokens: 1,
+      })
+    })
+    const client = createClient()
+    const invalidate = vi.spyOn(client, 'invalidateQueries')
+    const { result } = renderHook(
+      () =>
+        useChatThread({
+          kind: 'assistant',
+          conversationId: null,
+          enabled: true,
+        }),
+      { wrapper: wrapperFor(client) },
+    )
+
+    await act(async () => {
+      await result.current.send('hello')
+    })
+
+    await waitFor(() => {
+      expect(invalidate).toHaveBeenCalledWith({
+        queryKey: ['chat', 'messages', 'assistant', 'c-new'],
+      })
+    })
+  })
+
   it('reports a lost conversation on NOT_FOUND', async () => {
     vi.mocked(streamChat).mockImplementation(async (_path, _body, handlers) => {
       handlers.onError?.({

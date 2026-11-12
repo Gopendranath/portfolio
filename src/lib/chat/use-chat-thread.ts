@@ -83,6 +83,7 @@ export function useChatThread({
   const [isStreaming, setIsStreaming] = useState(false)
   const [forkedAtSeq, setForkedAtSeq] = useState<number | null>(null)
   const abortRef = useRef<AbortController | null>(null)
+  const streamedConversationRef = useRef<string | null>(null)
 
   const isOwnerInbox = Boolean(ownerThreadUserId)
   const assistantConversationId =
@@ -178,6 +179,7 @@ export function useChatThread({
     ) => {
       const controller = new AbortController()
       abortRef.current = controller
+      streamedConversationRef.current = conversationId ?? null
       setIsStreaming(true)
       setStreaming({
         id: existingAssistantId ?? 'streaming-assistant',
@@ -193,9 +195,19 @@ export function useChatThread({
       })
 
       let receivedMeta = false
+      const refreshMessages = () => {
+        void queryClient.invalidateQueries({ queryKey })
+        const streamedConversationId = streamedConversationRef.current
+        if (kind === 'assistant' && streamedConversationId) {
+          void queryClient.invalidateQueries({
+            queryKey: ['chat', 'messages', 'assistant', streamedConversationId],
+          })
+        }
+      }
       const handlers: StreamHandlers = {
         onMeta: (meta) => {
           receivedMeta = true
+          streamedConversationRef.current = meta.conversationId
           if (kind === 'assistant' && !conversationId) {
             onConversationStarted?.(meta.conversationId)
           }
@@ -230,9 +242,7 @@ export function useChatThread({
           setStreaming(null)
           setPending([])
           setIsStreaming(false)
-          void queryClient.invalidateQueries({
-            queryKey,
-          })
+          refreshMessages()
         },
         onError: (error) => {
           if (
@@ -271,9 +281,7 @@ export function useChatThread({
           if (receivedMeta || error.code === 'DUPLICATE') {
             setStreaming(null)
             setPending([])
-            void queryClient.invalidateQueries({
-              queryKey,
-            })
+            refreshMessages()
           }
         },
       }
@@ -308,9 +316,7 @@ export function useChatThread({
         if (receivedMeta) {
           setStreaming(null)
           setPending([])
-          void queryClient.invalidateQueries({
-            queryKey,
-          })
+          refreshMessages()
         }
       } finally {
         abortRef.current = null
@@ -567,6 +573,7 @@ export function useChatThread({
 
   const reset = useCallback(() => {
     abortRef.current?.abort()
+    streamedConversationRef.current = null
     setPending([])
     setStreaming(null)
     setIsSending(false)
