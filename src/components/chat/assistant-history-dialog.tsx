@@ -1,6 +1,6 @@
-import { type MouseEvent, useEffect, useRef } from 'react'
-import type { AssistantConversationDTO } from '@/lib/chat/protocol'
+import { useEffect, useRef } from 'react'
 import { CloseIcon, HistoryIcon, TrashIcon } from '@/components/ui/icons'
+import type { AssistantConversationDTO } from '@/lib/chat/protocol'
 
 interface AssistantHistoryDialogProps {
   open: boolean
@@ -110,33 +110,40 @@ export function AssistantHistoryDialog({
     }
   }, [open])
 
-  function handleBackdropClick(event: MouseEvent<HTMLDialogElement>) {
-    if ('closedBy' in HTMLDialogElement.prototype) {
-      return
-    }
-
+  useEffect(() => {
     const dialog = dialogRef.current
-    if (!dialog || event.target !== dialog) {
+    if (!dialog || 'closedBy' in HTMLDialogElement.prototype) {
       return
     }
+    const element = dialog
 
-    const rect = dialog.getBoundingClientRect()
-    const inside =
-      event.clientX >= rect.left &&
-      event.clientX <= rect.right &&
-      event.clientY >= rect.top &&
-      event.clientY <= rect.bottom
-    if (!inside) {
-      onClose()
+    function handleBackdropClick(event: globalThis.MouseEvent) {
+      if (event.target !== element) {
+        return
+      }
+
+      const rect = element.getBoundingClientRect()
+      const inside =
+        event.clientX >= rect.left &&
+        event.clientX <= rect.right &&
+        event.clientY >= rect.top &&
+        event.clientY <= rect.bottom
+      if (!inside) {
+        onClose()
+      }
     }
-  }
+
+    element.addEventListener('click', handleBackdropClick)
+    return () => {
+      element.removeEventListener('click', handleBackdropClick)
+    }
+  }, [onClose])
 
   return (
     <dialog
       ref={dialogRef}
       aria-labelledby="assistant-history-title"
       onClose={onClose}
-      onClick={handleBackdropClick}
       className="m-0 h-dvh max-h-none w-full max-w-none overflow-hidden overscroll-contain border-0 bg-canvas p-0 text-ink backdrop:overflow-hidden backdrop:bg-black/50 backdrop:overscroll-contain backdrop:backdrop-blur-[2px] open:flex open:flex-col md:ml-auto md:w-80"
       {...({ closedby: 'any' } as Record<string, string>)}
     >

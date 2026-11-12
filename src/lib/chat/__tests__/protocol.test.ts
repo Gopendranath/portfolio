@@ -72,9 +72,9 @@ describe('assistant history schemas', () => {
   })
 
   it('rejects history pages over fifty', () => {
-    expect(
-      assistantHistoryQuerySchema.safeParse({ limit: 51 }).success,
-    ).toBe(false)
+    expect(assistantHistoryQuerySchema.safeParse({ limit: 51 }).success).toBe(
+      false,
+    )
   })
 
   it('accepts an optional conversation id on send', () => {
@@ -89,6 +89,13 @@ describe('assistant history schemas', () => {
         body: 'hello',
         clientId: 'client-test-0001',
         conversationId,
+      }).success,
+    ).toBe(true)
+    expect(
+      assistantSendSchema.safeParse({
+        body: 'hello',
+        clientId: 'client-test-0001',
+        conversationId: null,
       }).success,
     ).toBe(true)
   })

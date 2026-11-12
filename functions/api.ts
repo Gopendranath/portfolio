@@ -35,7 +35,9 @@ import { getCorsHeaders } from './chat/cors'
 import { getPool } from './chat/db'
 import { ApiError, toApiError } from './chat/errors'
 import {
+  createAssistantConversation,
   deleteAssistantConversation,
+  getLatestAssistantConversation,
   getOwnedAssistantConversation,
   listAssistantConversations,
 } from './chat/history'
@@ -307,16 +309,17 @@ app.get('/api/conversations/:kind/messages', async (context) => {
   const { user } = await resolveAppUser(pool, authUserId)
 
   if (kind === 'assistant') {
+    const conversationId = context.req.query('conversationId')
     const query = assistantMessagesQuerySchema.parse({
       limit: context.req.query('limit'),
       before: context.req.query('before'),
-      conversationId: context.req.query('conversationId'),
+      conversationId: conversationId ?? undefined,
     })
-    const conversation = await getOwnedAssistantConversation(
-      pool,
-      user.id,
-      query.conversationId,
-    )
+    // Rolling deploy: older clients read the assistant thread without an id.
+    const conversation = conversationId
+      ? await getOwnedAssistantConversation(pool, user.id, query.conversationId)
+      : ((await getLatestAssistantConversation(pool, user.id)) ??
+        (await createAssistantConversation(pool, user.id)))
     const page = await listMessages(pool, conversation.id, {
       beforeSeq: query.before,
       limit: query.limit,
@@ -341,11 +344,7 @@ app.delete('/api/conversations/:id', async (context) => {
   const { authUserId } = await requireAuth(context.req.raw)
   const pool = getPool()
   const { user } = await resolveAppUser(pool, authUserId)
-  await deleteAssistantConversation(
-    pool,
-    user.id,
-    context.req.param('id'),
-  )
+  await deleteAssistantConversation(pool, user.id, context.req.param('id'))
   return context.json({ ok: true })
 })
 
@@ -425,6 +424,13 @@ app.post('/api/chat/assistant', async (context) => {
   const pool = getPool()
   const { user, aiEligible, aiReason } = await resolveAppUser(pool, authUserId)
   assertAiEligible({ aiEligible, aiReason })
+  const conversationId =
+    input.conversationId === undefined
+      ? ((await getLatestAssistantConversation(pool, user.id))?.id ?? undefined)
+      : (input.conversationId ?? undefined)
+  if (conversationId) {
+    await getOwnedAssistantConversation(pool, user.id, conversationId)
+  }
   await assertAiRateLimits(context, pool, user.id)
 
   const gateway = createOpenRouterGateway()
@@ -432,7 +438,7 @@ app.post('/api/chat/assistant', async (context) => {
     userId: user.id,
     body: input.body,
     clientId: input.clientId,
-    conversationId: input.conversationId,
+    conversationId,
   })
 
   return streamTurn(context, pool, turn, gateway)

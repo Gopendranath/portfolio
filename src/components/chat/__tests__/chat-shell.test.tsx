@@ -42,11 +42,11 @@ vi.mock('@/lib/chat/use-owner-inbox', () => ({
   useMarkOwnerThreadRead: vi.fn(() => vi.fn()),
 }))
 
+import { useChatSession } from '@/lib/chat/session'
 import {
   useAssistantConversations,
   useDeleteAssistantConversation,
 } from '@/lib/chat/use-assistant-history'
-import { useChatSession } from '@/lib/chat/session'
 import { useChatThread } from '@/lib/chat/use-chat-thread'
 
 const sessionBase: ChatSessionState = {
@@ -393,17 +393,14 @@ describe('ChatShell', () => {
 
   it('opens the newest chat automatically', () => {
     const latest = conversation()
-    setup(
-      {},
-      [
-        latest,
-        conversation({
-          id: 'conversation-2',
-          title: 'Second chat',
-          lastMessageAt: '2026-11-11T09:00:00.000Z',
-        }),
-      ],
-    )
+    setup({}, [
+      latest,
+      conversation({
+        id: 'conversation-2',
+        title: 'Second chat',
+        lastMessageAt: '2026-11-11T09:00:00.000Z',
+      }),
+    ])
 
     render(<ChatShell />)
 

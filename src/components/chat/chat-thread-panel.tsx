@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { HistoryIcon } from '@/components/ui/icons'
 import { chatProfilesById } from '@/data/chat'
 import type { ChatProfile, ChatProfileId } from '@/data/types'
 import type {
@@ -7,7 +8,6 @@ import type {
 } from '@/lib/chat/use-chat-thread'
 import { AiLockedPanel } from './ai-locked-panel'
 import { AuthPanel } from './auth-panel'
-import { HistoryIcon } from '@/components/ui/icons'
 import { ChatAvatar } from './chat-avatar'
 import { ChatComposer } from './chat-composer'
 import { ChatHeader } from './chat-header'

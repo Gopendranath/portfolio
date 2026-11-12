@@ -25,10 +25,9 @@ function createClient() {
 }
 
 function wrapperFor(client: QueryClient) {
+  // biome-ignore lint/correctness/noComponentHookFactories: renderHook needs a per-test QueryClient wrapper.
   return function Wrapper({ children }: { children: ReactNode }) {
-    return (
-      <QueryClientProvider client={client}>{children}</QueryClientProvider>
-    )
+    return <QueryClientProvider client={client}>{children}</QueryClientProvider>
   }
 }
 
@@ -77,21 +76,19 @@ describe('useChatThread conversation scope', () => {
   })
 
   it('includes the conversation id when sending to an existing chat', async () => {
-    vi.mocked(streamChat).mockImplementation(
-      async (_path, _body, handlers) => {
-        handlers.onMeta?.({
-          conversationId: 'c1',
-          userMessageId: 'u1',
-          assistantMessageId: 'a1',
-        })
-        handlers.onDone?.({
-          assistantMessageId: 'a1',
-          finishReason: 'stop',
-          truncated: false,
-          outputTokens: 1,
-        })
-      },
-    )
+    vi.mocked(streamChat).mockImplementation(async (_path, _body, handlers) => {
+      handlers.onMeta?.({
+        conversationId: 'c1',
+        userMessageId: 'u1',
+        assistantMessageId: 'a1',
+      })
+      handlers.onDone?.({
+        assistantMessageId: 'a1',
+        finishReason: 'stop',
+        truncated: false,
+        outputTokens: 1,
+      })
+    })
     const client = createClient()
     const conversationId = '6f1c5a8e-3f7e-4c1e-9a0e-2d4b6c8d0e2f'
     const { result } = renderHook(
@@ -117,21 +114,19 @@ describe('useChatThread conversation scope', () => {
   })
 
   it('reports the new conversation id from meta on a draft send', async () => {
-    vi.mocked(streamChat).mockImplementation(
-      async (_path, _body, handlers) => {
-        handlers.onMeta?.({
-          conversationId: 'c-new',
-          userMessageId: 'u1',
-          assistantMessageId: 'a1',
-        })
-        handlers.onDone?.({
-          assistantMessageId: 'a1',
-          finishReason: 'stop',
-          truncated: false,
-          outputTokens: 1,
-        })
-      },
-    )
+    vi.mocked(streamChat).mockImplementation(async (_path, _body, handlers) => {
+      handlers.onMeta?.({
+        conversationId: 'c-new',
+        userMessageId: 'u1',
+        assistantMessageId: 'a1',
+      })
+      handlers.onDone?.({
+        assistantMessageId: 'a1',
+        finishReason: 'stop',
+        truncated: false,
+        outputTokens: 1,
+      })
+    })
     const client = createClient()
     const onConversationStarted = vi.fn()
     const { result } = renderHook(
@@ -152,22 +147,20 @@ describe('useChatThread conversation scope', () => {
     expect(onConversationStarted).toHaveBeenCalledWith('c-new')
     expect(streamChat).toHaveBeenCalledWith(
       '/api/chat/assistant',
-      { body: 'hello', clientId: expect.any(String) },
+      { body: 'hello', clientId: expect.any(String), conversationId: null },
       expect.anything(),
       expect.anything(),
     )
   })
 
   it('reports a lost conversation on NOT_FOUND', async () => {
-    vi.mocked(streamChat).mockImplementation(
-      async (_path, _body, handlers) => {
-        handlers.onError?.({
-          code: 'NOT_FOUND',
-          message: 'Conversation not found',
-          retryable: false,
-        })
-      },
-    )
+    vi.mocked(streamChat).mockImplementation(async (_path, _body, handlers) => {
+      handlers.onError?.({
+        code: 'NOT_FOUND',
+        message: 'Conversation not found',
+        retryable: false,
+      })
+    })
     const client = createClient()
     const onConversationLost = vi.fn()
     const conversationId = '6f1c5a8e-3f7e-4c1e-9a0e-2d4b6c8d0e2f'

@@ -13,8 +13,8 @@ import { ApiError } from './errors'
 import {
   createAssistantConversation,
   getOwnedAssistantConversation,
+  retitleAssistantConversation,
   setAssistantTitleIfEmpty,
-  titleFromBody,
 } from './history'
 import type { OpenRouterGateway } from './openrouter'
 import { OPENROUTER_MODEL } from './openrouter'
@@ -166,23 +166,6 @@ export async function beginAssistantEdit(
     )
 
     await client.query(
-      `update conversations c
-          set title = $3, updated_at = now()
-        where c.id = $1
-          and c.kind = 'assistant'
-          and not exists (
-            select 1
-              from messages m
-             where m.conversation_id = c.id
-               and m.author = 'user'
-               and m.deleted_at is null
-               and m.status <> 'superseded'
-               and m.seq < $2
-          )`,
-      [existing.conversation_id, existing.seq, titleFromBody(input.body)],
-    )
-
-    await client.query(
       `update messages
           set status = 'superseded', deleted_at = $3
         where conversation_id = $1
@@ -212,6 +195,13 @@ export async function beginAssistantEdit(
     if (!editedRow || !assistantRow) {
       throw new ApiError('INTERNAL', 'Could not edit the message')
     }
+
+    await retitleAssistantConversation(
+      pool,
+      existing.conversation_id,
+      Number(existing.seq),
+      input.body,
+    )
 
     return {
       conversationId: existing.conversation_id,

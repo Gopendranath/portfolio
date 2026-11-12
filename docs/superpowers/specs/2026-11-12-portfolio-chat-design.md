@@ -133,12 +133,13 @@ All application tables live in `public`, separate from `neon_auth`.
 | `id` | `uuid` PK | |
 | `kind` | `text` not null | `owner` or `assistant` |
 | `user_id` | `uuid` not null references `app_users` | visitor |
+| `title` | `text` | assistant history title, max 80 chars |
 | `user_last_read_at` | `timestamptz` | unread calculation |
 | `owner_last_read_at` | `timestamptz` | unread calculation |
-| `last_message_at` | `timestamptz` | inbox ordering |
+| `last_message_at` | `timestamptz` | inbox and history ordering |
 | `created_at`, `updated_at` | `timestamptz` | |
 
-Unique `(user_id, kind)`: one owner thread and one assistant thread per user.
+Partial unique index `(user_id)` where `kind = 'owner'`: one owner thread per user. Assistant users may have many conversations, ordered by `last_message_at desc, id desc`.
 
 ### `messages`
 
@@ -255,10 +256,15 @@ Base path: `/api` on the Neon Function.
 
 ### Messages
 
-- `GET /api/conversations/:kind/messages?limit=10&before=<cursor>` → newest 10 ascending, `hasMore`, `nextCursor`.
-  - `kind` is `owner` or `assistant`.
+- `GET /api/conversations/assistant` → assistant history page, ordered by recent activity.
+  - `limit` defaults to 20, maximum 50; `before` is an opaque cursor.
+  - Empty and fully superseded conversations are excluded.
+- `DELETE /api/conversations/:id` → hard-delete an owned assistant conversation. Messages and revisions cascade; usage and rate-limit rows are untouched.
+- `GET /api/conversations/assistant/messages?conversationId=<uuid>&limit=10&before=<cursor>` → newest 10 ascending, `hasMore`, `nextCursor`.
+  - The conversation must be owned by the caller and have `kind = 'assistant'`; otherwise `404`.
   - `before` is the `seq` of the oldest loaded message. Results are ordered by `seq`.
   - Only non-deleted, non-superseded messages are returned to the client.
+- `GET /api/conversations/owner/messages?limit=10&before=<cursor>` → the caller's single owner thread.
 - `PATCH /api/messages/:id` → edit an owner-thread message or an owner reply. Body `{ body }`.
   - Only the author may edit.
   - Writes `message_revisions`, sets `edited_at`, returns the message.
@@ -270,15 +276,18 @@ Base path: `/api` on the Neon Function.
 
 ### AI
 
-- `POST /api/chat/assistant` → stream a new exchange. Body `{ body, clientId }`.
+- `POST /api/chat/assistant` → stream a new exchange. Body `{ body, clientId, conversationId? }`.
   - Requires AI eligibility.
+  - Omitting `conversationId` creates a new assistant conversation; a present id must belong to the caller.
   - Creates the user message and an assistant placeholder in one transaction.
-  - Returns `text/event-stream`.
+  - Sets `conversations.title` from the first user message, normalized and truncated to 80 characters.
+  - Returns `text/event-stream`; `meta.conversationId` identifies the conversation.
 - `POST /api/chat/assistant/edit` → edit an earlier user message and regenerate. Body `{ messageId, body }`.
   - Only the author may edit.
   - Rejects if the message is not in the caller's assistant conversation.
   - Soft-deletes later messages (`deleted_at`, `status = 'superseded'`).
   - Writes a revision, updates the body, sets `edited_at`.
+  - Retitles the conversation when the edited message is the earliest visible user message.
   - Streams a new assistant reply.
 - `POST /api/chat/assistant/retry` → retry a failed assistant message. Body `{ assistantMessageId }`.
   - Reuses the preceding user message.

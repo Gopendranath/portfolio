@@ -13,6 +13,7 @@ import { createMessage, getOrCreateConversation } from '../chat/conversations'
 import {
   createAssistantConversation,
   deleteAssistantConversation,
+  getLatestAssistantConversation,
   getOwnedAssistantConversation,
   listAssistantConversations,
   retitleAssistantConversation,
@@ -52,7 +53,9 @@ async function createTestUser(): Promise<string> {
   return row.id
 }
 
-async function conversationTitle(conversationId: string): Promise<string | null> {
+async function conversationTitle(
+  conversationId: string,
+): Promise<string | null> {
   const { rows } = await requirePool().query<{ title: string | null }>(
     'select title from conversations where id = $1',
     [conversationId],
@@ -84,17 +87,26 @@ describe.skipIf(!hasDatabase)('assistant history helpers', () => {
     expect(second.id).not.toBe(first.id)
   })
 
+  it('finds the latest assistant conversation for legacy clients', async () => {
+    const older = await createAssistantConversation(requirePool(), userId)
+    const newer = await createAssistantConversation(requirePool(), userId)
+    await requirePool().query(
+      `update conversations set last_message_at = now() - interval '1 hour' where id = $1`,
+      [older.id],
+    )
+    await requirePool().query(
+      `update conversations set last_message_at = now() where id = $1`,
+      [newer.id],
+    )
+
+    await expect(
+      getLatestAssistantConversation(requirePool(), userId),
+    ).resolves.toEqual({ id: newer.id })
+  })
+
   it('keeps one owner conversation per user', async () => {
-    const first = await getOrCreateConversation(
-      requirePool(),
-      userId,
-      'owner',
-    )
-    const second = await getOrCreateConversation(
-      requirePool(),
-      userId,
-      'owner',
-    )
+    const first = await getOrCreateConversation(requirePool(), userId, 'owner')
+    const second = await getOrCreateConversation(requirePool(), userId, 'owner')
 
     expect(second.id).toBe(first.id)
   })
@@ -183,7 +195,10 @@ describe.skipIf(!hasDatabase)('assistant history helpers', () => {
   })
 
   it('sets the title once from the first user message', async () => {
-    const conversation = await createAssistantConversation(requirePool(), userId)
+    const conversation = await createAssistantConversation(
+      requirePool(),
+      userId,
+    )
 
     await setAssistantTitleIfEmpty(
       requirePool(),
@@ -200,7 +215,10 @@ describe.skipIf(!hasDatabase)('assistant history helpers', () => {
   })
 
   it('retitles only when the earliest visible user message changes', async () => {
-    const conversation = await createAssistantConversation(requirePool(), userId)
+    const conversation = await createAssistantConversation(
+      requirePool(),
+      userId,
+    )
     const first = await createMessage(requirePool(), {
       conversationId: conversation.id,
       author: 'user',
@@ -256,11 +274,7 @@ describe.skipIf(!hasDatabase)('assistant history helpers', () => {
   })
 
   it('rejects an owner conversation as assistant history', async () => {
-    const owner = await getOrCreateConversation(
-      requirePool(),
-      userId,
-      'owner',
-    )
+    const owner = await getOrCreateConversation(requirePool(), userId, 'owner')
 
     await expect(
       getOwnedAssistantConversation(requirePool(), userId, owner.id),
@@ -268,7 +282,10 @@ describe.skipIf(!hasDatabase)('assistant history helpers', () => {
   })
 
   it('deletes messages and revisions but keeps usage records', async () => {
-    const conversation = await createAssistantConversation(requirePool(), userId)
+    const conversation = await createAssistantConversation(
+      requirePool(),
+      userId,
+    )
     const message = await createMessage(requirePool(), {
       conversationId: conversation.id,
       author: 'user',

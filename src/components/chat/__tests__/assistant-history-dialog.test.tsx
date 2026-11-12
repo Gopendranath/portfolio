@@ -19,7 +19,9 @@ const conversations: AssistantConversationDTO[] = [
   },
 ]
 
-function setup(overrides: Partial<Parameters<typeof AssistantHistoryDialog>[0]> = {}) {
+function setup(
+  overrides: Partial<Parameters<typeof AssistantHistoryDialog>[0]> = {},
+) {
   const props = {
     open: true,
     conversations,

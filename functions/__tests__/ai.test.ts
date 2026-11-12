@@ -340,11 +340,7 @@ describe.skipIf(!hasDatabase)('assistant turns', () => {
   })
 
   it('rejects an owner conversation', async () => {
-    const owner = await getOrCreateConversation(
-      requirePool(),
-      userId,
-      'owner',
-    )
+    const owner = await getOrCreateConversation(requirePool(), userId, 'owner')
 
     await expect(
       beginAssistantTurn(requirePool(), {
@@ -418,13 +414,13 @@ describe.skipIf(!hasDatabase)('assistant turns', () => {
       assistantMessageId: turn.assistantMessage.id,
     })
 
-    await expect(conversationTitle(conversationId)).resolves.toBe(
-      'retry title',
-    )
+    await expect(conversationTitle(conversationId)).resolves.toBe('retry title')
   })
 })
 
-async function conversationTitle(conversationId: string): Promise<string | null> {
+async function conversationTitle(
+  conversationId: string,
+): Promise<string | null> {
   const { rows } = await requirePool().query<{ title: string | null }>(
     'select title from conversations where id = $1',
     [conversationId],

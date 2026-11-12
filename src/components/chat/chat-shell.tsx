@@ -49,9 +49,9 @@ export function ChatShell() {
     type: 'auto',
   })
   const [ownerDraft, setOwnerDraft] = useState('')
-  const [assistantDrafts, setAssistantDrafts] = useState<Record<string, string>>(
-    {},
-  )
+  const [assistantDrafts, setAssistantDrafts] = useState<
+    Record<string, string>
+  >({})
   const [notice, setNotice] = useState<string | null>(null)
 
   const historyEnabled = Boolean(session.token) && session.aiEligible
@@ -126,9 +126,7 @@ export function ChatShell() {
     threadView === 'assistant' ? assistantThread : ownerThread
   const draftKey = activeConversationId ?? 'new'
   const activeDraft =
-    threadView === 'assistant'
-      ? (assistantDrafts[draftKey] ?? '')
-      : ownerDraft
+    threadView === 'assistant' ? (assistantDrafts[draftKey] ?? '') : ownerDraft
   const historyError =
     historyQuery.error instanceof Error
       ? historyQuery.error.message

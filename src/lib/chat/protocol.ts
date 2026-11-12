@@ -112,7 +112,7 @@ export const threadPaginationSchema = z.object({
 export const chatKindSchema = z.enum(['owner', 'assistant'])
 
 export const assistantSendSchema = sendMessageSchema.extend({
-  conversationId: z.string().uuid().optional(),
+  conversationId: z.string().uuid().nullish(),
 })
 
 export const assistantMessagesQuerySchema = paginationSchema.extend({

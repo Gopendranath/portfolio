@@ -152,6 +152,7 @@ The site is a static client-side SPA on Vercel. The chat backend is a Neon Funct
 - Database: Neon Postgres, migrations under `db/migrations`.
 - AI: OpenRouter `openrouter/free`, 1,200 output tokens, `$0` credit-limit key with no automatic expiration.
 - AI eligibility: GitHub account at least 365 days old. Checked server-side and cached for 7 days.
+- Assistant history: multiple private chats per visitor, newest activity first. Titles come from the first user message. Conversations are created lazily on first send and can be deleted; the owner inbox is a separate one-thread-per-visitor channel.
 - Rate limits: AI 5/min and 30/day per user; owner 10/min and 60/day; global 20/min and 1,000/day.
 
 Local setup:

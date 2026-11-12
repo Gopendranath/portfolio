@@ -70,20 +70,48 @@ export async function getOrCreateConversation(
     return row
   }
 
-  const { rows } = await pool.query<{ id: string }>(
-    `insert into conversations (user_id, kind)
-     values ($1, 'owner')
-     on conflict (user_id) where kind = 'owner'
-     do update set updated_at = now()
-     returning id`,
+  const existing = await pool.query<{ id: string }>(
+    `select id
+       from conversations
+      where user_id = $1
+        and kind = 'owner'
+      limit 1`,
     [userId],
   )
-
-  const row = rows[0]
-  if (!row) {
-    throw new ApiError('INTERNAL', 'Could not create the conversation')
+  if (existing.rows[0]) {
+    return existing.rows[0]
   }
-  return row
+
+  try {
+    const { rows } = await pool.query<{ id: string }>(
+      `insert into conversations (user_id, kind)
+       values ($1, 'owner')
+       returning id`,
+      [userId],
+    )
+
+    const row = rows[0]
+    if (!row) {
+      throw new ApiError('INTERNAL', 'Could not create the conversation')
+    }
+    return row
+  } catch (error) {
+    if ((error as { code?: string }).code === '23505') {
+      const raced = await pool.query<{ id: string }>(
+        `select id
+           from conversations
+          where user_id = $1
+            and kind = 'owner'
+          limit 1`,
+        [userId],
+      )
+      const row = raced.rows[0]
+      if (row) {
+        return row
+      }
+    }
+    throw error
+  }
 }
 
 export async function createMessage(

@@ -78,6 +78,22 @@ export async function createAssistantConversation(
   return row
 }
 
+export async function getLatestAssistantConversation(
+  pool: Pool,
+  userId: string,
+): Promise<{ id: string } | null> {
+  const { rows } = await pool.query<{ id: string }>(
+    `select id
+       from conversations
+      where user_id = $1
+        and kind = 'assistant'
+      order by last_message_at desc, id desc
+      limit 1`,
+    [userId],
+  )
+  return rows[0] ?? null
+}
+
 export async function getOwnedAssistantConversation(
   pool: Pool,
   userId: string,
@@ -99,19 +115,30 @@ export async function getOwnedAssistantConversation(
   return row
 }
 
+function isMissingTitleColumn(error: unknown): boolean {
+  return (error as { code?: string }).code === '42703'
+}
+
 export async function setAssistantTitleIfEmpty(
   pool: Pool,
   conversationId: string,
   body: string,
 ): Promise<void> {
-  await pool.query(
-    `update conversations
-        set title = $2
-      where id = $1
+  try {
+    await pool.query(
+      `update conversations
+          set title = $2
+        where id = $1
         and kind = 'assistant'
         and title is null`,
-    [conversationId, titleFromBody(body)],
-  )
+      [conversationId, titleFromBody(body)],
+    )
+  } catch (error) {
+    // Rolling deploy: the new function can run before migration 004.
+    if (!isMissingTitleColumn(error)) {
+      throw error
+    }
+  }
 }
 
 export async function retitleAssistantConversation(
@@ -120,22 +147,28 @@ export async function retitleAssistantConversation(
   messageSeq: number,
   body: string,
 ): Promise<void> {
-  await pool.query(
-    `update conversations c
-        set title = $3
-      where c.id = $1
-        and c.kind = 'assistant'
-        and not exists (
-          select 1
-            from messages m
-           where m.conversation_id = c.id
-             and m.author = 'user'
-             and m.deleted_at is null
-             and m.status <> 'superseded'
-             and m.seq < $2
-        )`,
-    [conversationId, messageSeq, titleFromBody(body)],
-  )
+  try {
+    await pool.query(
+      `update conversations c
+          set title = $3
+        where c.id = $1
+          and c.kind = 'assistant'
+          and not exists (
+            select 1
+              from messages m
+             where m.conversation_id = c.id
+               and m.author = 'user'
+               and m.deleted_at is null
+               and m.status <> 'superseded'
+               and m.seq < $2
+          )`,
+      [conversationId, messageSeq, titleFromBody(body)],
+    )
+  } catch (error) {
+    if (!isMissingTitleColumn(error)) {
+      throw error
+    }
+  }
 }
 
 export async function listAssistantConversations(
@@ -167,12 +200,7 @@ export async function listAssistantConversations(
         )
       order by c.last_message_at desc, c.id desc
       limit $4`,
-    [
-      userId,
-      cursor?.lastMessageAt ?? null,
-      cursor?.id ?? null,
-      limit + 1,
-    ],
+    [userId, cursor?.lastMessageAt ?? null, cursor?.id ?? null, limit + 1],
   )
 
   const hasMore = rows.length > limit

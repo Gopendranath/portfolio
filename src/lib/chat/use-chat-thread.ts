@@ -117,8 +117,7 @@ export function useChatThread({
     initialPageParam: undefined as number | undefined,
     getNextPageParam: (last) => last.nextCursor ?? undefined,
     enabled:
-      enabled &&
-      (kind === 'owner' || isOwnerInbox || Boolean(conversationId)),
+      enabled && (kind === 'owner' || isOwnerInbox || Boolean(conversationId)),
     staleTime: 0,
     refetchOnWindowFocus: false,
     refetchInterval: pollMs ?? false,
@@ -322,7 +321,6 @@ export function useChatThread({
       kind,
       onConversationLost,
       onConversationStarted,
-      ownerThreadUserId,
       queryClient,
       queryKey,
     ],
@@ -345,7 +343,7 @@ export function useChatThread({
           {
             body: trimmed,
             clientId,
-            ...(conversationId ? { conversationId } : {}),
+            conversationId: conversationId ?? null,
           },
           clientId,
           optimistic,
