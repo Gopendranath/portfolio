@@ -1,23 +1,31 @@
 import type { Pool } from 'pg'
 import { ApiError } from './errors'
 
+export async function createAssistantConversation(
+  pool: Pool,
+  userId: string,
+): Promise<{ id: string }> {
+  const { rows } = await pool.query<{ id: string }>(
+    `insert into conversations (user_id, kind)
+     values ($1, 'assistant')
+     returning id`,
+    [userId],
+  )
+
+  const row = rows[0]
+  if (!row) {
+    throw new ApiError('INTERNAL', 'Could not create the conversation')
+  }
+  return row
+}
+
 export async function getOrCreateConversation(
   pool: Pool,
   userId: string,
   kind: 'owner' | 'assistant',
 ): Promise<{ id: string }> {
   if (kind === 'assistant') {
-    const { rows } = await pool.query<{ id: string }>(
-      `insert into conversations (user_id, kind)
-       values ($1, 'assistant')
-       returning id`,
-      [userId],
-    )
-    const row = rows[0]
-    if (!row) {
-      throw new ApiError('INTERNAL', 'Could not create the conversation')
-    }
-    return row
+    return createAssistantConversation(pool, userId)
   }
 
   const existing = await pool.query<{ id: string }>(

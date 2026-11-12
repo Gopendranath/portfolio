@@ -1,10 +1,5 @@
 import type { Pool } from 'pg'
-import {
-  type ChatMessageDTO,
-  type OwnerThreadDTO,
-  type OwnerThreadPage,
-  PAGE_SIZE,
-} from '../../src/lib/chat/protocol'
+import type { ChatMessageDTO, OwnerThreadDTO, OwnerThreadPage } from '../../src/lib/chat/protocol'
 import { getConversationForUser, markRead, markUnread } from './conversations'
 import { ApiError } from './errors'
 import { getMessagePage } from './message-page'
@@ -175,5 +170,3 @@ export async function markUserOwnerUnread(pool: Pool, userId: string): Promise<v
   const conversation = await getConversationForUser(pool, userId, 'owner')
   await markUnread(pool, conversation.id, 'user')
 }
-
-export { PAGE_SIZE }

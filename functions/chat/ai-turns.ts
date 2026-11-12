@@ -1,13 +1,13 @@
 import type { Pool } from 'pg'
-import type { ChatMessageDTO } from '../../src/lib/chat/protocol'
+import { AI_CONTEXT_MESSAGE_LIMIT, type ChatMessageDTO } from '../../src/lib/chat/protocol'
+import { createAssistantConversation } from './conversations'
+import { withTransaction } from './db'
 import { ApiError } from './errors'
 import {
-  createAssistantConversation,
   getOwnedAssistantConversation,
   retitleAssistantConversation,
   setAssistantTitleIfEmpty,
 } from './history'
-import { withTransaction } from './db'
 import { MESSAGE_COLUMNS, type MessageRow, toMessageDTO } from './message-rows'
 import {
   lockMessageForUpdate,
@@ -31,8 +31,8 @@ async function loadContext(
         and deleted_at is null
         and ($2::bigint is null or seq <= $2)
       order by seq desc
-      limit 20`,
-    [conversationId, maxSeq ?? null],
+      limit $3`,
+    [conversationId, maxSeq ?? null, AI_CONTEXT_MESSAGE_LIMIT],
   )
 
   return rows.reverse().map(toMessageDTO)
