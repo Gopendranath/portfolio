@@ -7,7 +7,14 @@ import {
   retitleAssistantConversation,
   setAssistantTitleIfEmpty,
 } from './history'
+import { withTransaction } from './db'
 import { MESSAGE_COLUMNS, type MessageRow, toMessageDTO } from './message-rows'
+import {
+  lockMessageForUpdate,
+  lockRetryTarget,
+  writeAssistantEdit,
+  writeAssistantRetry,
+} from './message-writes'
 import { createMessage } from './messages'
 import { OPENROUTER_MODEL } from './openrouter'
 
@@ -99,102 +106,41 @@ export async function beginAssistantEdit(
   pool: Pool,
   input: { userId: string; messageId: string; body: string },
 ): Promise<AssistantTurn> {
-  const client = await pool.connect()
   const now = new Date()
 
-  try {
-    await client.query('begin')
-    const { rows } = await client.query<{
-      id: string
-      body: string
-      author: string
-      conversation_id: string
-      seq: string
-      user_id: string
-      kind: string
-    }>(
-      `select m.id, m.body, m.author, m.conversation_id, m.seq, c.user_id, c.kind
-         from messages m
-         join conversations c on c.id = m.conversation_id
-        where m.id = $1
-          and m.deleted_at is null
-        for update`,
-      [input.messageId],
-    )
+  const { conversationId, seq, edited, assistant } = await withTransaction(
+    pool,
+    async (client) => {
+      const message = await lockMessageForUpdate(client, input.messageId)
 
-    const existing = rows[0]
-    if (
-      !existing ||
-      existing.user_id !== input.userId ||
-      existing.kind !== 'assistant' ||
-      existing.author !== 'user'
-    ) {
-      throw new ApiError('NOT_FOUND', 'Message not found')
-    }
+      if (
+        !message ||
+        message.userId !== input.userId ||
+        message.kind !== 'assistant' ||
+        message.author !== 'user'
+      ) {
+        throw new ApiError('NOT_FOUND', 'Message not found')
+      }
 
-    await client.query(
-      `insert into message_revisions (message_id, body, edited_by_user_id, edited_at)
-       values ($1, $2, $3, $4)`,
-      [existing.id, existing.body, input.userId, now],
-    )
+      const { edited, assistant } = await writeAssistantEdit(client, {
+        message,
+        body: input.body,
+        editorUserId: input.userId,
+        now,
+        model: OPENROUTER_MODEL,
+      })
 
-    const edited = await client.query<MessageRow>(
-      `update messages
-          set body = $2, edited_at = $3
-        where id = $1
-        returning ${MESSAGE_COLUMNS}`,
-      [existing.id, input.body, now],
-    )
+      return { conversationId: message.conversationId, seq: message.seq, edited, assistant }
+    },
+  )
 
-    await client.query(
-      `update messages
-          set status = 'superseded', deleted_at = $3
-        where conversation_id = $1
-          and seq > $2
-          and deleted_at is null`,
-      [existing.conversation_id, existing.seq, now],
-    )
+  await retitleAssistantConversation(pool, conversationId, seq, input.body)
 
-    const assistant = await client.query<MessageRow>(
-      `insert into messages (
-         conversation_id, author, body, status, reply_to_id, model
-       )
-       values ($1, 'assistant', '', 'streaming', $2, $3)
-       returning ${MESSAGE_COLUMNS}`,
-      [existing.conversation_id, existing.id, OPENROUTER_MODEL],
-    )
-
-    await client.query(
-      `update conversations set updated_at = now(), last_message_at = $2 where id = $1`,
-      [existing.conversation_id, now],
-    )
-
-    await client.query('commit')
-
-    const editedRow = edited.rows[0]
-    const assistantRow = assistant.rows[0]
-    if (!editedRow || !assistantRow) {
-      throw new ApiError('INTERNAL', 'Could not edit the message')
-    }
-
-    await retitleAssistantConversation(
-      pool,
-      existing.conversation_id,
-      Number(existing.seq),
-      input.body,
-    )
-
-    return {
-      conversationId: existing.conversation_id,
-      userMessage: toMessageDTO(editedRow),
-      assistantMessage: toMessageDTO(assistantRow),
-      context: await loadContext(pool, existing.conversation_id, Number(existing.seq)),
-    }
-  } catch (error) {
-    await client.query('rollback')
-    throw error
-  } finally {
-    client.release()
+  return {
+    conversationId,
+    userMessage: toMessageDTO(edited),
+    assistantMessage: toMessageDTO(assistant),
+    context: await loadContext(pool, conversationId, seq),
   }
 }
 
@@ -202,93 +148,55 @@ export async function beginAssistantRetry(
   pool: Pool,
   input: { userId: string; assistantMessageId: string },
 ): Promise<AssistantTurn> {
-  const client = await pool.connect()
+  const now = new Date()
 
-  try {
-    await client.query('begin')
-    const { rows } = await client.query<{
-      id: string
-      seq: string
-      conversation_id: string
-      status: string
-      user_id: string
-      kind: string
-      author: string
-    }>(
-      `select m.id, m.seq, m.conversation_id, m.status, m.author, c.user_id, c.kind
-         from messages m
-         join conversations c on c.id = m.conversation_id
-        where m.id = $1
-        for update`,
-      [input.assistantMessageId],
-    )
+  const { conversationId, userMessage, assistant } = await withTransaction(
+    pool,
+    async (client) => {
+      const failed = await lockRetryTarget(client, input.assistantMessageId)
 
-    const failed = rows[0]
-    if (
-      !failed ||
-      failed.user_id !== input.userId ||
-      failed.kind !== 'assistant' ||
-      failed.author !== 'assistant' ||
-      failed.status !== 'failed'
-    ) {
-      throw new ApiError('NOT_FOUND', 'Failed assistant message not found')
-    }
+      if (
+        !failed ||
+        failed.userId !== input.userId ||
+        failed.kind !== 'assistant' ||
+        failed.author !== 'assistant' ||
+        failed.status !== 'failed'
+      ) {
+        throw new ApiError('NOT_FOUND', 'Failed assistant message not found')
+      }
 
-    const userRows = await client.query<MessageRow>(
-      `select ${MESSAGE_COLUMNS}
-         from messages
-        where conversation_id = $1
-          and seq < $2
-          and author = 'user'
-          and deleted_at is null
-        order by seq desc
-        limit 1`,
-      [failed.conversation_id, failed.seq],
-    )
+      const userRows = await client.query<MessageRow>(
+        `select ${MESSAGE_COLUMNS}
+           from messages
+          where conversation_id = $1
+            and seq < $2
+            and author = 'user'
+            and deleted_at is null
+          order by seq desc
+          limit 1`,
+        [failed.conversationId, failed.seq],
+      )
 
-    const userMessage = userRows.rows[0]
-    if (!userMessage) {
-      throw new ApiError('CONFLICT', 'No user message to retry')
-    }
+      const userMessage = userRows.rows[0]
+      if (!userMessage) {
+        throw new ApiError('CONFLICT', 'No user message to retry')
+      }
 
-    await client.query(
-      `update messages
-          set status = 'superseded', deleted_at = now()
-        where id = $1`,
-      [failed.id],
-    )
+      const assistant = await writeAssistantRetry(client, {
+        failed,
+        userMessage,
+        now,
+        model: OPENROUTER_MODEL,
+      })
 
-    const assistant = await client.query<MessageRow>(
-      `insert into messages (
-         conversation_id, author, body, status, reply_to_id, model
-       )
-       values ($1, 'assistant', '', 'streaming', $2, $3)
-       returning ${MESSAGE_COLUMNS}`,
-      [failed.conversation_id, userMessage.id, OPENROUTER_MODEL],
-    )
+      return { conversationId: failed.conversationId, userMessage, assistant }
+    },
+  )
 
-    await client.query(
-      `update conversations set updated_at = now(), last_message_at = now() where id = $1`,
-      [failed.conversation_id],
-    )
-
-    await client.query('commit')
-
-    const assistantRow = assistant.rows[0]
-    if (!assistantRow) {
-      throw new ApiError('INTERNAL', 'Could not create the retry message')
-    }
-
-    return {
-      conversationId: failed.conversation_id,
-      userMessage: toMessageDTO(userMessage),
-      assistantMessage: toMessageDTO(assistantRow),
-      context: await loadContext(pool, failed.conversation_id, Number(userMessage.seq)),
-    }
-  } catch (error) {
-    await client.query('rollback')
-    throw error
-  } finally {
-    client.release()
+  return {
+    conversationId,
+    userMessage: toMessageDTO(userMessage),
+    assistantMessage: toMessageDTO(assistant),
+    context: await loadContext(pool, conversationId, Number(userMessage.seq)),
   }
 }
