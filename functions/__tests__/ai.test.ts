@@ -7,7 +7,8 @@ import {
   beginAssistantTurn,
   runAssistantTurn,
 } from '../chat/ai'
-import { createMessage, getOrCreateConversation } from '../chat/conversations'
+import { createMessage } from '../chat/messages'
+import { getOrCreateConversation } from '../chat/conversations'
 import type { OpenRouterGateway } from '../chat/openrouter'
 
 const hasDatabase = Boolean(process.env.TEST_DATABASE_URL)

@@ -1,7 +1,8 @@
 import { randomUUID } from 'node:crypto'
 import { Pool } from 'pg'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import { createMessage, getOrCreateConversation } from '../chat/conversations'
+import { createMessage } from '../chat/messages'
+import { getOrCreateConversation } from '../chat/conversations'
 import {
   createAssistantConversation,
   deleteAssistantConversation,

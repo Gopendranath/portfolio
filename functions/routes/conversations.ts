@@ -8,12 +8,8 @@ import {
   paginationSchema,
 } from '../../src/lib/chat/protocol'
 import { requireAuth } from '../chat/auth'
-import {
-  editMessage,
-  getOrCreateConversation,
-  listMessages,
-  markRead,
-} from '../chat/conversations'
+import { editMessage, listMessages } from '../chat/messages'
+import { getOrCreateConversation, markRead } from '../chat/conversations'
 import { getPool } from '../chat/db'
 import { ApiError } from '../chat/errors'
 import {

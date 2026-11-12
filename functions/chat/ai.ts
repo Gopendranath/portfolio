@@ -1,6 +1,6 @@
 import type { Pool } from 'pg'
 import { type ChatMessageDTO, MAX_AI_OUTPUT_CHARS } from '../../src/lib/chat/protocol'
-import { createMessage, MESSAGE_COLUMNS, type MessageRow, toMessageDTO } from './conversations'
+import { createMessage, MESSAGE_COLUMNS, type MessageRow, toMessageDTO } from './messages'
 import { ApiError } from './errors'
 import {
   createAssistantConversation,
