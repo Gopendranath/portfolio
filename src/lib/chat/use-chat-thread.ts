@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import {
   ChatApiError,
   chatFetch,
@@ -96,21 +96,6 @@ export function useChatThread({
     refetchInterval: pollMs ?? false,
     retry: false,
   })
-
-  const threadKey = `${kind}:${ownerThreadUserId ?? 'me'}`
-
-  useEffect(() => {
-    if (!threadKey) {
-      return
-    }
-    setPending([])
-    setStreaming(null)
-    setIsSending(false)
-    setIsStreaming(false)
-    setForkedAtSeq(null)
-    abortRef.current?.abort()
-    abortRef.current = null
-  }, [threadKey])
 
   const persisted = useMemo(
     () =>

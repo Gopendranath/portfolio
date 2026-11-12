@@ -62,4 +62,33 @@ describe('requireAuth', () => {
       code: 'UNAUTHORIZED',
     })
   })
+
+  it('reports a malformed JWKS URL as an internal error', async () => {
+    vi.stubEnv('NEON_AUTH_JWKS_URL', 'not a url')
+
+    const request = new Request('https://api.example.com/api/me', {
+      headers: { authorization: 'Bearer valid-token' },
+    })
+
+    await expect(requireAuth(request)).rejects.toMatchObject({
+      code: 'INTERNAL',
+    })
+    expect(mockedVerify).not.toHaveBeenCalled()
+  })
+
+  it('reports a malformed auth base URL as an internal error', async () => {
+    vi.stubEnv('NEON_AUTH_BASE_URL', 'not a url')
+    mockedVerify.mockResolvedValue({
+      payload: { sub: 'auth-user-1' },
+      protectedHeader: { alg: 'EdDSA' },
+    } as never)
+
+    const request = new Request('https://api.example.com/api/me', {
+      headers: { authorization: 'Bearer valid-token' },
+    })
+
+    await expect(requireAuth(request)).rejects.toMatchObject({
+      code: 'INTERNAL',
+    })
+  })
 })

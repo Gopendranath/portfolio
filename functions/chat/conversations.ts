@@ -255,11 +255,16 @@ export async function markRead(
   side: 'user' | 'owner',
   now = new Date(),
 ): Promise<void> {
-  const column = side === 'user' ? 'user_last_read_at' : 'owner_last_read_at'
-  await pool.query(
-    `update conversations set ${column} = $2, updated_at = now() where id = $1`,
-    [conversationId, now],
-  )
+  const statement =
+    side === 'user'
+      ? `update conversations
+            set user_last_read_at = $2, updated_at = now()
+          where id = $1`
+      : `update conversations
+            set owner_last_read_at = $2, updated_at = now()
+          where id = $1`
+
+  await pool.query(statement, [conversationId, now])
 }
 
 export async function markUnread(
@@ -267,23 +272,34 @@ export async function markUnread(
   conversationId: string,
   side: 'user' | 'owner',
 ): Promise<void> {
-  const column = side === 'user' ? 'user_last_read_at' : 'owner_last_read_at'
-  const incomingAuthor = side === 'user' ? 'owner' : 'user'
-  await pool.query(
-    `update conversations c
-        set ${column} = (
-              select m.created_at - interval '1 microsecond'
-                from messages m
-               where m.conversation_id = c.id
-                 and m.author = $2
-                 and m.deleted_at is null
-               order by m.created_at desc
-               limit 1
-            ),
-            updated_at = now()
-      where c.id = $1`,
-    [conversationId, incomingAuthor],
-  )
+  const statement =
+    side === 'user'
+      ? `update conversations c
+            set user_last_read_at = (
+                  select m.created_at - interval '1 microsecond'
+                    from messages m
+                   where m.conversation_id = c.id
+                     and m.author = 'owner'
+                     and m.deleted_at is null
+                   order by m.created_at desc
+                   limit 1
+                ),
+                updated_at = now()
+          where c.id = $1`
+      : `update conversations c
+            set owner_last_read_at = (
+                  select m.created_at - interval '1 microsecond'
+                    from messages m
+                   where m.conversation_id = c.id
+                     and m.author = 'user'
+                     and m.deleted_at is null
+                   order by m.created_at desc
+                   limit 1
+                ),
+                updated_at = now()
+          where c.id = $1`
+
+  await pool.query(statement, [conversationId])
 }
 
 export async function getConversationForUser(
