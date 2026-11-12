@@ -135,6 +135,17 @@ export async function listMessages(
   nextCursor: number | null
 }> {
   const limit = Math.min(options.limit ?? PAGE_SIZE, PAGE_SIZE)
+  await pool.query(
+    `update messages
+        set status = 'failed',
+            error_code = coalesce(error_code, 'STALE_STREAM'),
+            error_message = coalesce(error_message, 'The response was interrupted.')
+      where conversation_id = $1
+        and status = 'streaming'
+        and created_at < now() - interval '2 minutes'`,
+    [conversationId],
+  )
+
   const { rows } = await pool.query<MessageRow>(
     `select ${MESSAGE_COLUMNS}
        from messages

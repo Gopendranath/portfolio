@@ -17,6 +17,7 @@ import {
   beginAssistantEdit,
   beginAssistantRetry,
   beginAssistantTurn,
+  markAssistantFailed,
   runAssistantTurn,
 } from './chat/ai'
 import { requireAuth } from './chat/auth'
@@ -173,6 +174,7 @@ async function streamTurn(
       }
     } catch (error) {
       console.error('[sse] stream failed', error)
+      await markAssistantFailed(pool, turn.assistantMessage.id)
       await stream
         .writeSSE({
           event: 'error',
@@ -291,10 +293,6 @@ app.get('/api/conversations/:kind/messages', async (context) => {
     limit: query.limit,
   })
 
-  if (kind === 'owner') {
-    await markRead(pool, conversation.id, 'user')
-  }
-
   return context.json(page)
 })
 
@@ -367,13 +365,14 @@ app.post('/api/chat/assistant', async (context) => {
   assertAiEligible({ aiEligible, aiReason })
   await assertAiRateLimits(context, pool, user.id)
 
+  const gateway = createOpenRouterGateway()
   const turn = await beginAssistantTurn(pool, {
     userId: user.id,
     body: input.body,
     clientId: input.clientId,
   })
 
-  return streamTurn(context, pool, turn, createOpenRouterGateway())
+  return streamTurn(context, pool, turn, gateway)
 })
 
 app.post('/api/chat/assistant/edit', async (context) => {
@@ -384,13 +383,14 @@ app.post('/api/chat/assistant/edit', async (context) => {
   assertAiEligible({ aiEligible, aiReason })
   await assertAiRateLimits(context, pool, user.id)
 
+  const gateway = createOpenRouterGateway()
   const turn = await beginAssistantEdit(pool, {
     userId: user.id,
     messageId: input.messageId,
     body: input.body,
   })
 
-  return streamTurn(context, pool, turn, createOpenRouterGateway())
+  return streamTurn(context, pool, turn, gateway)
 })
 
 app.post('/api/chat/assistant/retry', async (context) => {
@@ -401,12 +401,13 @@ app.post('/api/chat/assistant/retry', async (context) => {
   assertAiEligible({ aiEligible, aiReason })
   await assertAiRateLimits(context, pool, user.id)
 
+  const gateway = createOpenRouterGateway()
   const turn = await beginAssistantRetry(pool, {
     userId: user.id,
     assistantMessageId: input.assistantMessageId,
   })
 
-  return streamTurn(context, pool, turn, createOpenRouterGateway())
+  return streamTurn(context, pool, turn, gateway)
 })
 
 app.patch('/api/messages/:id', async (context) => {
@@ -431,6 +432,15 @@ app.patch('/api/messages/:id', async (context) => {
   })
 
   return context.json({ message })
+})
+
+app.post('/api/conversations/owner/read', async (context) => {
+  const { authUserId } = await requireAuth(context.req.raw)
+  const pool = getPool()
+  const { user } = await resolveAppUser(pool, authUserId)
+  const conversation = await getOrCreateConversation(pool, user.id, 'owner')
+  await markRead(pool, conversation.id, 'user')
+  return context.json({ ok: true })
 })
 
 app.post('/api/conversations/:id/read', async (context) => {

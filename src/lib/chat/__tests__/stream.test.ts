@@ -80,6 +80,26 @@ describe('streamChat', () => {
     expect(delta).toHaveBeenCalledWith('ok')
   })
 
+  it('reports EOF without a terminal frame as interrupted', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValue(
+          sseResponse(['event: delta\ndata: {"text":"hi"}\n\n']),
+        ),
+    )
+    const onError = vi.fn()
+
+    await streamChat('/api/chat/assistant', {}, { onError }, undefined, 'token')
+
+    expect(onError).toHaveBeenCalledWith({
+      code: 'STREAM_INTERRUPTED',
+      message: 'The response was interrupted.',
+      retryable: true,
+    })
+  })
+
   it('reports a non-OK response as an error', async () => {
     vi.stubGlobal(
       'fetch',

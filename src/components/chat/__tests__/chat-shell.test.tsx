@@ -8,6 +8,10 @@ import type {
   ViewMessage,
 } from '@/lib/chat/use-chat-thread'
 
+vi.mock('@tanstack/react-query', () => ({
+  useQueryClient: () => ({ invalidateQueries: vi.fn() }),
+}))
+
 vi.mock('@/lib/chat/session', () => ({
   useChatSession: vi.fn(),
 }))
@@ -186,7 +190,7 @@ describe('ChatShell', () => {
       thread({
         messages: [
           viewMessage({
-            id: 'failed-1',
+            id: '11111111-1111-4111-8111-111111111111',
             author: 'assistant',
             body: 'partial',
             status: 'failed',
@@ -200,7 +204,9 @@ describe('ChatShell', () => {
 
     await user.click(screen.getByRole('button', { name: 'Retry message' }))
     expect(retry).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'failed-1' }),
+      expect.objectContaining({
+        id: '11111111-1111-4111-8111-111111111111',
+      }),
     )
   })
 

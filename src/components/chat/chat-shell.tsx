@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { useEffect, useState } from 'react'
 import { chatProfiles, chatProfilesById } from '@/data/chat'
 import type { ChatProfileId } from '@/data/types'
+import { chatFetch } from '@/lib/chat/api-client'
 import { useChatSession } from '@/lib/chat/session'
 import { useChatThread, type ViewMessage } from '@/lib/chat/use-chat-thread'
 import { AiLockedPanel } from './ai-locked-panel'
@@ -15,6 +17,7 @@ type ChatView = ChatProfileId | 'inbox'
 
 export function ChatShell() {
   const session = useChatSession()
+  const queryClient = useQueryClient()
   const [activeView, setActiveView] = useState<ChatView>('assistant')
   const [drafts, setDrafts] = useState<Record<ChatProfileId, string>>({
     assistant: '',
@@ -29,6 +32,16 @@ export function ChatShell() {
     enabled: Boolean(session.token) && !session.isOwner,
     pollMs: 10_000,
   })
+
+  useEffect(() => {
+    if (activeView !== 'owner' || !session.token || session.isOwner) {
+      return
+    }
+
+    void chatFetch('/api/conversations/owner/read', { method: 'POST' })
+      .then(() => queryClient.invalidateQueries({ queryKey: ['chat', 'me'] }))
+      .catch(() => {})
+  }, [activeView, queryClient, session.isOwner, session.token])
 
   if (session.isLoading) {
     return (

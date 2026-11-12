@@ -18,9 +18,9 @@ import {
 import { createMessage, getOrCreateConversation } from '../chat/conversations'
 import type { OpenRouterGateway } from '../chat/openrouter'
 
-const hasDatabase = Boolean(process.env.DATABASE_URL)
+const hasDatabase = Boolean(process.env.TEST_DATABASE_URL)
 const pool = hasDatabase
-  ? new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+  ? new Pool({ connectionString: process.env.TEST_DATABASE_URL, max: 2 })
   : null
 
 let userId = ''
@@ -28,7 +28,7 @@ let conversationId = ''
 
 function requirePool(): Pool {
   if (!pool) {
-    throw new Error('DATABASE_URL is required for this test')
+    throw new Error('TEST_DATABASE_URL is required for this test')
   }
   return pool
 }

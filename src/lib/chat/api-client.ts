@@ -118,6 +118,19 @@ export async function streamChat(
   const reader = response.body.getReader()
   const decoder = new TextDecoder()
   let buffer = ''
+  let terminal = false
+  const wrapped: StreamHandlers = {
+    onMeta: handlers.onMeta,
+    onDelta: handlers.onDelta,
+    onDone: (data) => {
+      terminal = true
+      handlers.onDone?.(data)
+    },
+    onError: (data) => {
+      terminal = true
+      handlers.onError?.(data)
+    },
+  }
 
   while (true) {
     const { done, value } = await reader.read()
@@ -131,9 +144,17 @@ export async function streamChat(
     while (boundary !== -1) {
       const frame = buffer.slice(0, boundary)
       buffer = buffer.slice(boundary + 2)
-      dispatchFrame(frame, handlers)
+      dispatchFrame(frame, wrapped)
       boundary = buffer.indexOf('\n\n')
     }
+  }
+
+  if (!terminal) {
+    wrapped.onError?.({
+      code: 'STREAM_INTERRUPTED',
+      message: 'The response was interrupted.',
+      retryable: true,
+    })
   }
 }
 

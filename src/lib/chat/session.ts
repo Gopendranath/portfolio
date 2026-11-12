@@ -51,6 +51,8 @@ export function useChatSession(): ChatSessionState {
     queryFn: () => chatFetch<MeResponse>('/api/me', {}, token ?? undefined),
     enabled: Boolean(token),
     staleTime: 60_000,
+    refetchInterval: 10_000,
+    refetchOnWindowFocus: true,
     retry: false,
   })
 

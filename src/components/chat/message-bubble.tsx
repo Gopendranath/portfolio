@@ -55,6 +55,10 @@ export function MessageBubble({
   const isStreaming = message.status === 'streaming'
   const isFailed = message.status === 'failed'
   const isSending = message.status === 'sending'
+  const isRetryable =
+    isFailed &&
+    (message.clientId !== null ||
+      /^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(message.id))
 
   return (
     <article
@@ -122,7 +126,7 @@ export function MessageBubble({
               <MessageActions
                 ref={actionsRef}
                 canEdit={canEdit}
-                canRetry={canRetry || isFailed}
+                canRetry={canRetry || isRetryable}
                 copyLabel={copyLabel}
                 onCopy={copyMessage}
                 onEdit={editor.startEditing}

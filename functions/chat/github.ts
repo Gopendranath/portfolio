@@ -85,6 +85,7 @@ export async function fetchGitHubProfile(
         'User-Agent': 'portfolio-chat',
       },
       cache: 'no-store',
+      signal: AbortSignal.timeout(3_000),
     },
   )
 

@@ -73,14 +73,25 @@ export async function beginAssistantTurn(
     )
   }
 
-  const assistantMessage = await createMessage(pool, {
-    conversationId: conversation.id,
-    author: 'assistant',
-    body: '',
-    status: 'streaming',
-    replyToId: userMessage.id,
-    model: OPENROUTER_MODEL,
-  })
+  let assistantMessage: ChatMessageDTO
+  try {
+    assistantMessage = await createMessage(pool, {
+      conversationId: conversation.id,
+      author: 'assistant',
+      body: '',
+      status: 'streaming',
+      replyToId: userMessage.id,
+      model: OPENROUTER_MODEL,
+    })
+  } catch (error) {
+    if ((error as { code?: string }).code === '23505') {
+      throw new ApiError(
+        'DUPLICATE',
+        'This message already has an assistant reply',
+      )
+    }
+    throw error
+  }
 
   return {
     conversationId: conversation.id,
@@ -287,6 +298,21 @@ export async function beginAssistantRetry(
   } finally {
     client.release()
   }
+}
+
+export async function markAssistantFailed(
+  pool: Pool,
+  messageId: string,
+  code = 'STREAM_INTERRUPTED',
+): Promise<void> {
+  await pool.query(
+    `update messages
+        set status = 'failed',
+            error_code = coalesce(error_code, $2),
+            error_message = coalesce(error_message, 'The response was interrupted.')
+      where id = $1 and status = 'streaming'`,
+    [messageId, code],
+  )
 }
 
 export interface AssistantTurnResult {

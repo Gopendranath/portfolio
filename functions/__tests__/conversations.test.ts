@@ -17,9 +17,9 @@ import {
   markRead,
 } from '../chat/conversations'
 
-const hasDatabase = Boolean(process.env.DATABASE_URL)
+const hasDatabase = Boolean(process.env.TEST_DATABASE_URL)
 const pool = hasDatabase
-  ? new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+  ? new Pool({ connectionString: process.env.TEST_DATABASE_URL, max: 2 })
   : null
 
 let userId = ''
@@ -27,7 +27,7 @@ let conversationId = ''
 
 function requirePool(): Pool {
   if (!pool) {
-    throw new Error('DATABASE_URL is required for this test')
+    throw new Error('TEST_DATABASE_URL is required for this test')
   }
   return pool
 }
@@ -156,6 +156,27 @@ describe.skipIf(!hasDatabase)('conversation helpers', () => {
       limit: 10,
     })
     expect(page.messages).toHaveLength(0)
+  })
+
+  it('marks stale streaming messages as failed on read', async () => {
+    const message = await createMessage(requirePool(), {
+      conversationId,
+      author: 'assistant',
+      body: '',
+      status: 'streaming',
+      clientId: 'client-stale-0001',
+    })
+    await requirePool().query(
+      "update messages set created_at = now() - interval '3 minutes' where id = $1",
+      [message.id],
+    )
+
+    const page = await listMessages(requirePool(), conversationId, {
+      limit: 10,
+    })
+    expect(
+      page.messages.find((candidate) => candidate.id === message.id),
+    ).toMatchObject({ status: 'failed', errorCode: 'STALE_STREAM' })
   })
 
   it('edits an own owner-thread message and keeps a revision', async () => {
