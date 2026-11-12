@@ -551,7 +551,7 @@ Commit `neon.ts` with:
 - **GitHub account age is weak trust.** Old purchased accounts exist. Rate limits and output caps are the real abuse control.
 - **No email notifications.** The owner must visit the inbox. Acceptable for v1; add email later without changing the schema.
 - **Postgres-backed rate limiting.** Fine at portfolio volume, but it adds a write per request. A dedicated Redis would be faster at scale.
-- **30-day key expiry.** The assistant stops working when the key expires. The rotation runbook is mandatory.
+- **No-expiry OpenRouter key.** The key stays valid until rotated or deleted. Treat exposure as an incident and rotate manually.
 - **SSE through Neon Functions.** Long streams are supported, but client disconnect handling and partial persistence must be tested.
 - **Owner polling.** Up to 10 seconds of delay. Acceptable; realtime can replace it later.
 - **Neon Free egress.** 5 GB/project/month is ample for text chat, but not for large attachments (not in scope).

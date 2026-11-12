@@ -150,7 +150,7 @@ The site is a static client-side SPA on Vercel. The chat backend is a Neon Funct
 - Auth: Neon Auth, GitHub provider only. The owner is GitHub id `71755844`.
 - Function: `api`, declared in `neon.ts`, source `functions/api.ts`.
 - Database: Neon Postgres, migrations under `db/migrations`.
-- AI: OpenRouter `openrouter/free`, 1,200 output tokens, key expires after 30 days with a `$0` credit limit.
+- AI: OpenRouter `openrouter/free`, 1,200 output tokens, `$0` credit-limit key with no automatic expiration.
 - AI eligibility: GitHub account at least 365 days old. Checked server-side and cached for 7 days.
 - Rate limits: AI 5/min and 30/day per user; owner 10/min and 60/day; global 20/min and 1,000/day.
 
@@ -173,7 +173,7 @@ npx neon deploy --env .env.local
 npx neon functions get api
 ```
 
-Rotate the OpenRouter key every 30 days: create a replacement with the same limits, update the function env, verify `/api/health`, then delete the old key. The database schema and auth state are independent of the key.
+The OpenRouter key does not expire automatically. Rotate it if it is exposed or when spend policy changes: create a replacement with the same `$0` limit and free router, update the function env, verify `/api/health` and one streamed AI reply, then delete the old key. The database schema and auth state are independent of the key.
 
 Required frontend environment variables on Vercel:
 
