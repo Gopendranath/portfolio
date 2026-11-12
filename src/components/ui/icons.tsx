@@ -131,6 +131,22 @@ export function ArrowUpRightIcon(props: IconProps) {
   )
 }
 
+export function ArrowLeftIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M19 12H5m6-6-6 6 6 6" />
+    </StrokeIcon>
+  )
+}
+
+export function StopIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <rect x="6" y="6" width="12" height="12" rx="1" />
+    </StrokeIcon>
+  )
+}
+
 export function ArrowRightIcon(props: IconProps) {
   return (
     <StrokeIcon {...props}>

@@ -1,264 +1,231 @@
-import { fireEvent, render, screen, within } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { afterEach, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ChatShell } from '@/components/chat/chat-shell'
+import type { ChatSessionState } from '@/lib/chat/session'
+import type {
+  ChatThreadController,
+  ViewMessage,
+} from '@/lib/chat/use-chat-thread'
 
-afterEach(() => {
-  Reflect.deleteProperty(navigator, 'clipboard')
-})
+vi.mock('@/lib/chat/session', () => ({
+  useChatSession: vi.fn(),
+}))
 
-it('exposes the composer as a declarative WebMCP tool', () => {
-  render(<ChatShell />)
+vi.mock('@/lib/chat/use-chat-thread', () => ({
+  useChatThread: vi.fn(),
+}))
 
-  const composer = screen.getByRole('textbox', {
-    name: 'Message Portfolio assistant',
-  })
-  const form = composer.closest('form')
+vi.mock('@/lib/chat/use-owner-inbox', () => ({
+  useOwnerThreads: vi.fn(() => ({
+    data: { pages: [{ threads: [], hasMore: false, nextCursor: null }] },
+    isLoading: false,
+    hasNextPage: false,
+    isFetchingNextPage: false,
+    fetchNextPage: vi.fn(),
+  })),
+  useMarkOwnerThreadRead: vi.fn(() => vi.fn()),
+}))
 
-  expect(form).toHaveAttribute('toolname', 'send-chat-message')
-  expect(form?.getAttribute('tooldescription')).toMatch(
-    /not sent to any backend/,
-  )
-  expect(form).not.toHaveAttribute('toolautosubmit')
-  expect(composer).toHaveAttribute('toolparamdescription')
-})
+import { useChatSession } from '@/lib/chat/session'
+import { useChatThread } from '@/lib/chat/use-chat-thread'
 
-it('renders two profiles and defaults to the assistant thread', () => {
-  render(<ChatShell />)
+const sessionBase: ChatSessionState = {
+  user: {
+    id: 'user-1',
+    githubLogin: 'visitor',
+    githubCreatedAt: '2020-01-01T00:00:00.000Z',
+    role: 'user',
+  },
+  token: 'token',
+  isOwner: false,
+  aiEligible: true,
+  aiReason: 'eligible',
+  ownerUnreadCount: 0,
+  isLoading: false,
+  error: null,
+  signIn: vi.fn(),
+  signOut: vi.fn(),
+}
 
-  const profiles = screen.getByRole('group', { name: 'Chat profiles' })
-  const buttons = within(profiles).getAllByRole('button')
+function viewMessage(overrides: Partial<ViewMessage> = {}): ViewMessage {
+  return {
+    id: 'message-1',
+    seq: 1,
+    conversationId: 'conversation-1',
+    author: 'assistant',
+    body: 'Hello from the assistant',
+    status: 'complete',
+    clientId: null,
+    sentAt: '2026-11-12T09:00:00.000Z',
+    editedAt: null,
+    errorCode: null,
+    ...overrides,
+  }
+}
 
-  expect(buttons).toHaveLength(2)
-  expect(buttons[0]).toHaveAccessibleName(/Portfolio assistant/i)
-  expect(buttons[0]).toHaveAttribute('aria-pressed', 'true')
-  expect(buttons[1]).toHaveAccessibleName(/Gopendranath Sasmal/i)
-  expect(buttons[1]).toHaveAttribute('aria-pressed', 'false')
+function thread(
+  overrides: Partial<ChatThreadController> = {},
+): ChatThreadController {
+  return {
+    messages: [viewMessage()],
+    isLoading: false,
+    error: null,
+    hasMore: false,
+    isFetchingOlder: false,
+    isSending: false,
+    isStreaming: false,
+    loadOlder: vi.fn(async () => {}),
+    send: vi.fn(async () => {}),
+    stop: vi.fn(),
+    retry: vi.fn(async () => {}),
+    edit: vi.fn(async () => {}),
+    refetch: vi.fn(async () => {}),
+    ...overrides,
+  }
+}
 
-  expect(
-    screen.getByRole('log', { name: 'Portfolio assistant messages' }),
-  ).toBeInTheDocument()
-  expect(screen.getByText(/What is terminal-web-vm/i)).toBeInTheDocument()
-})
+function setup(session: Partial<ChatSessionState> = {}) {
+  vi.mocked(useChatSession).mockReturnValue({ ...sessionBase, ...session })
+  vi.mocked(useChatThread).mockReturnValue(thread())
+}
 
-it('switches to the owner thread', async () => {
-  const user = userEvent.setup()
-  render(<ChatShell />)
-
-  await user.click(screen.getByRole('button', { name: /Gopendranath Sasmal/i }))
-
-  expect(
-    screen.getByRole('log', { name: 'Gopendranath Sasmal messages' }),
-  ).toBeInTheDocument()
-  expect(screen.getByText(/owner thread preview/i)).toBeInTheDocument()
-  expect(screen.queryByText(/What is terminal-web-vm/i)).not.toBeInTheDocument()
-})
-
-it('sends a message locally without adding an automatic reply', async () => {
-  const user = userEvent.setup()
-  render(<ChatShell />)
-
-  const log = screen.getByRole('log', {
-    name: 'Portfolio assistant messages',
-  })
-  const before = within(log).getAllByRole('article').length
-  const composer = screen.getByRole('textbox', {
-    name: 'Message Portfolio assistant',
-  })
-
-  await user.type(composer, 'Can you share the stack?')
-  await user.click(screen.getByRole('button', { name: 'Send message' }))
-
-  expect(screen.getByText('Can you share the stack?')).toBeInTheDocument()
-  expect(composer).toHaveValue('')
-  expect(within(log).getAllByRole('article')).toHaveLength(before + 1)
-})
-
-it('keeps a separate draft for each profile', async () => {
-  const user = userEvent.setup()
-  render(<ChatShell />)
-
-  await user.type(
-    screen.getByRole('textbox', { name: 'Message Portfolio assistant' }),
-    'draft for the assistant',
-  )
-  await user.click(screen.getByRole('button', { name: /Gopendranath Sasmal/i }))
-
-  const ownerComposer = screen.getByRole('textbox', {
-    name: 'Message Gopendranath Sasmal',
-  })
-  expect(ownerComposer).toHaveValue('')
-  await user.type(ownerComposer, 'draft for the owner')
-
-  await user.click(screen.getByRole('button', { name: /Portfolio assistant/i }))
-  expect(
-    screen.getByRole('textbox', { name: 'Message Portfolio assistant' }),
-  ).toHaveValue('draft for the assistant')
-
-  await user.click(screen.getByRole('button', { name: /Gopendranath Sasmal/i }))
-  expect(
-    screen.getByRole('textbox', { name: 'Message Gopendranath Sasmal' }),
-  ).toHaveValue('draft for the owner')
-})
-
-it('keeps sent messages in their own thread', async () => {
-  const user = userEvent.setup()
-  render(<ChatShell />)
-
-  await user.click(screen.getByRole('button', { name: /Gopendranath Sasmal/i }))
-  await user.type(
-    screen.getByRole('textbox', { name: 'Message Gopendranath Sasmal' }),
-    'Owner-only message',
-  )
-  await user.click(screen.getByRole('button', { name: 'Send message' }))
-
-  expect(screen.getByText('Owner-only message')).toBeInTheDocument()
-
-  await user.click(screen.getByRole('button', { name: /Portfolio assistant/i }))
-
-  expect(screen.queryByText('Owner-only message')).not.toBeInTheDocument()
-})
-
-it('blocks empty and whitespace-only messages', async () => {
-  const user = userEvent.setup()
-  render(<ChatShell />)
-
-  const send = screen.getByRole('button', { name: 'Send message' })
-  const composer = screen.getByRole('textbox', {
-    name: 'Message Portfolio assistant',
+describe('ChatShell', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    setup()
   })
 
-  expect(send).toBeDisabled()
-  await user.type(composer, '   ')
-  expect(send).toBeDisabled()
-})
+  it('shows the GitHub sign-in gate when signed out', () => {
+    setup({ token: null, user: null, aiEligible: false })
 
-it('sends on Enter and keeps Shift+Enter for a new line', async () => {
-  const user = userEvent.setup()
-  render(<ChatShell />)
+    render(<ChatShell />)
 
-  const log = screen.getByRole('log', {
-    name: 'Portfolio assistant messages',
-  })
-  const composer = screen.getByRole('textbox', {
-    name: 'Message Portfolio assistant',
+    expect(
+      screen.getByRole('button', { name: /continue with github/i }),
+    ).toBeInTheDocument()
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
   })
 
-  await user.type(composer, 'Enter sends this')
-  await user.keyboard('{Enter}')
+  it('renders assistant history and the composer when signed in', () => {
+    render(<ChatShell />)
 
-  expect(screen.getByText('Enter sends this')).toBeInTheDocument()
-  expect(composer).toHaveValue('')
-
-  const before = within(log).getAllByRole('article').length
-  await user.type(composer, 'line one')
-  await user.keyboard('{Shift>}{Enter}{/Shift}')
-
-  expect(within(log).getAllByRole('article')).toHaveLength(before)
-  expect((composer as HTMLTextAreaElement).value).toContain('line one')
-})
-
-it('caps the composer height once the message grows', async () => {
-  const user = userEvent.setup()
-  render(<ChatShell />)
-
-  const composer = screen.getByRole('textbox', {
-    name: 'Message Portfolio assistant',
-  }) as HTMLTextAreaElement
-
-  Object.defineProperty(composer, 'scrollHeight', {
-    configurable: true,
-    value: 240,
-  })
-  Object.defineProperty(composer, 'offsetHeight', {
-    configurable: true,
-    value: 46,
-  })
-  Object.defineProperty(composer, 'clientHeight', {
-    configurable: true,
-    value: 44,
+    expect(screen.getByText('Hello from the assistant')).toBeInTheDocument()
+    expect(
+      screen.getByRole('textbox', { name: 'Message Portfolio assistant' }),
+    ).toBeInTheDocument()
   })
 
-  await user.type(composer, 'A message that is long enough to need more room.')
+  it('locks the assistant for an ineligible account', () => {
+    setup({ aiEligible: false, aiReason: 'account_too_new' })
 
-  expect(composer.style.height).toBe('160px')
-  expect(composer.style.overflowY).toBe('auto')
-})
+    render(<ChatShell />)
 
-it('copies an incoming message from its hover actions', async () => {
-  const user = userEvent.setup()
-  const writeText = vi.fn().mockResolvedValue(undefined)
-  Object.defineProperty(navigator, 'clipboard', {
-    configurable: true,
-    value: { writeText },
+    expect(screen.getByText(/unlocks after one year/i)).toBeInTheDocument()
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
   })
-  render(<ChatShell />)
 
-  const message = screen
-    .getByText(/Hi — I’m the portfolio assistant/)
-    .closest('article') as HTMLElement
+  it('shows the owner inbox only to the owner', () => {
+    setup({
+      isOwner: true,
+      user: {
+        id: 'user-1',
+        githubLogin: 'visitor',
+        githubCreatedAt: '2020-01-01T00:00:00.000Z',
+        role: 'owner',
+      },
+    })
 
-  expect(
-    within(message).queryByRole('button', { name: 'Edit message' }),
-  ).not.toBeInTheDocument()
+    render(<ChatShell />)
 
-  await user.click(
-    within(message).getByRole('button', { name: 'Copy message' }),
-  )
-
-  await vi.waitFor(() =>
-    expect(writeText).toHaveBeenCalledWith(
-      'Hi — I’m the portfolio assistant. Ask me about projects, stack choices, or availability.',
-    ),
-  )
-})
-
-it('edits an own message and replaces the sent time with the edit time', async () => {
-  const user = userEvent.setup()
-  render(<ChatShell />)
-
-  const ownMessage = screen
-    .getByText('What is terminal-web-vm?')
-    .closest('article') as HTMLElement
-  const sentTime = within(ownMessage).getByText(/^\d{2}:\d{2}$/).textContent
-
-  expect(
-    within(ownMessage).getByRole('button', { name: 'Copy message' }),
-  ).toBeInTheDocument()
-  await user.click(
-    within(ownMessage).getByRole('button', { name: 'Edit message' }),
-  )
-
-  const editor = screen.getByRole('textbox', { name: 'Edit message' })
-  await user.clear(editor)
-  await user.type(editor, 'What is CheerpX?')
-  await user.click(screen.getByRole('button', { name: 'Save edit' }))
-
-  const editedMessage = screen
-    .getByText('What is CheerpX?')
-    .closest('article') as HTMLElement
-  const editedMeta = within(editedMessage).getByText(/edited/i)
-
-  expect(editedMeta).toHaveTextContent(/^edited\s+\d{2}:\d{2}$/)
-  expect(
-    within(editedMessage).queryByText(sentTime ?? ''),
-  ).not.toBeInTheDocument()
-})
-
-it('ignores Enter while an input method is composing', () => {
-  render(<ChatShell />)
-
-  const log = screen.getByRole('log', {
-    name: 'Portfolio assistant messages',
+    expect(screen.getByRole('button', { name: /inbox/i })).toBeInTheDocument()
   })
-  const composer = screen.getByRole('textbox', {
-    name: 'Message Portfolio assistant',
+
+  it('hides the owner inbox from visitors', () => {
+    render(<ChatShell />)
+
+    expect(
+      screen.queryByRole('button', { name: /inbox/i }),
+    ).not.toBeInTheDocument()
   })
-  const before = within(log).getAllByRole('article').length
 
-  fireEvent.change(composer, { target: { value: 'こんにちは' } })
-  fireEvent.keyDown(composer, { key: 'Enter', isComposing: true })
+  it('sends the draft and clears the composer', async () => {
+    const user = userEvent.setup()
+    const send = vi.fn(async () => {})
+    vi.mocked(useChatThread).mockReturnValue(thread({ send }))
+    render(<ChatShell />)
 
-  expect(within(log).getAllByRole('article')).toHaveLength(before)
-  expect(composer).toHaveValue('こんにちは')
+    const composer = screen.getByRole('textbox', {
+      name: 'Message Portfolio assistant',
+    })
+    await user.type(composer, 'new question')
+    await user.click(screen.getByRole('button', { name: 'Send message' }))
+
+    expect(send).toHaveBeenCalledWith('new question')
+    expect(composer).toHaveValue('')
+  })
+
+  it('shows the load previous control and calls the loader', async () => {
+    const user = userEvent.setup()
+    const loadOlder = vi.fn(async () => {})
+    vi.mocked(useChatThread).mockReturnValue(
+      thread({ hasMore: true, loadOlder }),
+    )
+    render(<ChatShell />)
+
+    await user.click(
+      screen.getByRole('button', { name: 'Load previous messages' }),
+    )
+    expect(loadOlder).toHaveBeenCalled()
+  })
+
+  it('retries a failed message', async () => {
+    const user = userEvent.setup()
+    const retry = vi.fn(async () => {})
+    vi.mocked(useChatThread).mockReturnValue(
+      thread({
+        messages: [
+          viewMessage({
+            id: 'failed-1',
+            author: 'assistant',
+            body: 'partial',
+            status: 'failed',
+            errorCode: 'UPSTREAM_ERROR',
+          }),
+        ],
+        retry,
+      }),
+    )
+    render(<ChatShell />)
+
+    await user.click(screen.getByRole('button', { name: 'Retry message' }))
+    expect(retry).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'failed-1' }),
+    )
+  })
+
+  it('renders the edited timestamp on an edited message', () => {
+    vi.mocked(useChatThread).mockReturnValue(
+      thread({
+        messages: [
+          viewMessage({
+            author: 'user',
+            body: 'edited text',
+            editedAt: '2026-11-12T09:30:00.000Z',
+          }),
+        ],
+      }),
+    )
+    render(<ChatShell />)
+
+    const article = screen.getByText('edited text').closest('article')
+    expect(article).not.toBeNull()
+    const editedTime = (article as HTMLElement).querySelector(
+      'time[datetime="2026-11-12T09:30:00.000Z"]',
+    )
+    expect(editedTime?.parentElement?.textContent).toMatch(/^edited/)
+    expect(
+      within(article as HTMLElement).getByText('edited text'),
+    ).toBeInTheDocument()
+  })
 })

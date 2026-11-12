@@ -4,12 +4,14 @@ import { ChatAvatar } from './chat-avatar'
 interface ProfileListProps {
   profiles: readonly ChatProfile[]
   activeProfileId: ChatProfileId
+  badges?: Partial<Record<ChatProfileId, number>>
   onSelect: (id: ChatProfileId) => void
 }
 
 export function ProfileList({
   profiles,
   activeProfileId,
+  badges,
   onSelect,
 }: ProfileListProps) {
   return (
@@ -50,6 +52,11 @@ export function ProfileList({
                 {profile.role}
               </span>
             </span>
+            {badges?.[profile.id] ? (
+              <span className="ml-auto flex size-5 shrink-0 items-center justify-center rounded-full bg-accent font-mono text-[9px] text-accent-ink">
+                {badges[profile.id]}
+              </span>
+            ) : null}
           </button>
         )
       })}
