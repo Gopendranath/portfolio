@@ -1,5 +1,10 @@
 import type { Pool } from 'pg'
-import { type ChatAuthor, type ChatMessageDTO, PAGE_SIZE } from '../../src/lib/chat/protocol'
+import {
+  type ChatAuthor,
+  type ChatMessageDTO,
+  type MessagePage,
+  PAGE_SIZE,
+} from '../../src/lib/chat/protocol'
 import { withTransaction } from './db'
 import { ApiError } from './errors'
 import { MESSAGE_COLUMNS, type MessageRow, toMessageDTO } from './message-rows'
@@ -67,22 +72,8 @@ export async function listMessages(
   pool: Pool,
   conversationId: string,
   options: { beforeSeq?: number; limit?: number } = {},
-): Promise<{
-  messages: ChatMessageDTO[]
-  hasMore: boolean
-  nextCursor: number | null
-}> {
+): Promise<MessagePage> {
   const limit = Math.min(options.limit ?? PAGE_SIZE, PAGE_SIZE)
-  await pool.query(
-    `update messages
-        set status = 'failed',
-            error_code = coalesce(error_code, 'STALE_STREAM'),
-            error_message = coalesce(error_message, 'The response was interrupted.')
-      where conversation_id = $1
-        and status = 'streaming'
-        and created_at < now() - interval '2 minutes'`,
-    [conversationId],
-  )
 
   const { rows } = await pool.query<MessageRow>(
     `select ${MESSAGE_COLUMNS}

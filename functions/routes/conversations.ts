@@ -18,7 +18,8 @@ import {
   listAssistantConversations,
 } from '../chat/history'
 import { markUserOwnerUnread } from '../chat/inbox'
-import { editMessage, listMessages } from '../chat/messages'
+import { getMessagePage } from '../chat/message-page'
+import { editMessage } from '../chat/messages'
 import { consumeUserRateLimit } from '../chat/rate-limit'
 import { resolveAppUser } from '../chat/users'
 import { parseBody } from '../chat/validation'
@@ -61,7 +62,7 @@ export const conversationsRouter = new Hono()
             nextCursor: null,
           })
         }
-        const page = await listMessages(pool, latest.id, {
+        const page = await getMessagePage(pool, latest.id, {
           beforeSeq: pagination.before,
           limit: pagination.limit,
         })
@@ -74,7 +75,7 @@ export const conversationsRouter = new Hono()
         conversationId,
       })
       const conversation = await getOwnedAssistantConversation(pool, user.id, query.conversationId)
-      const page = await listMessages(pool, conversation.id, {
+      const page = await getMessagePage(pool, conversation.id, {
         beforeSeq: query.before,
         limit: query.limit,
       })
@@ -86,7 +87,7 @@ export const conversationsRouter = new Hono()
       before: context.req.query('before'),
     })
     const conversation = await getOrCreateConversation(pool, user.id, kind)
-    const page = await listMessages(pool, conversation.id, {
+    const page = await getMessagePage(pool, conversation.id, {
       beforeSeq: query.before,
       limit: query.limit,
     })

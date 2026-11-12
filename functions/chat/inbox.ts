@@ -7,7 +7,8 @@ import {
 } from '../../src/lib/chat/protocol'
 import { getConversationForUser, markRead, markUnread } from './conversations'
 import { ApiError } from './errors'
-import { createMessage, listMessages } from './messages'
+import { getMessagePage } from './message-page'
+import { createMessage } from './messages'
 
 interface ThreadRow {
   id: string
@@ -136,7 +137,7 @@ export async function getOwnerThreadMessages(
 }> {
   const conversation = await getConversationForUser(pool, visitorUserId, 'owner')
 
-  return listMessages(pool, conversation.id, options)
+  return getMessagePage(pool, conversation.id, options)
 }
 
 export async function createOwnerReply(

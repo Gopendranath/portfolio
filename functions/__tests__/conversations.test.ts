@@ -2,7 +2,8 @@ import { randomUUID } from 'node:crypto'
 import { Pool } from 'pg'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { getOrCreateConversation, markRead, markUnread } from '../chat/conversations'
-import { createMessage, editMessage, listMessages } from '../chat/messages'
+import { getMessagePage } from '../chat/message-page'
+import { createMessage, editMessage } from '../chat/messages'
 
 const hasDatabase = Boolean(process.env.TEST_DATABASE_URL)
 const pool = hasDatabase
@@ -93,7 +94,7 @@ describe.skipIf(!hasDatabase)('conversation helpers', () => {
       })
     }
 
-    const first = await listMessages(requirePool(), conversationId, {
+    const first = await getMessagePage(requirePool(), conversationId, {
       limit: 10,
     })
     expect(first.messages.map((message) => message.body)).toEqual(
@@ -102,7 +103,7 @@ describe.skipIf(!hasDatabase)('conversation helpers', () => {
     expect(first.hasMore).toBe(true)
     expect(first.nextCursor).toBe(first.messages[0]?.seq)
 
-    const second = await listMessages(requirePool(), conversationId, {
+    const second = await getMessagePage(requirePool(), conversationId, {
       limit: 10,
       beforeSeq: first.nextCursor ?? undefined,
     })
@@ -111,7 +112,7 @@ describe.skipIf(!hasDatabase)('conversation helpers', () => {
     )
     expect(second.hasMore).toBe(true)
 
-    const third = await listMessages(requirePool(), conversationId, {
+    const third = await getMessagePage(requirePool(), conversationId, {
       limit: 10,
       beforeSeq: second.nextCursor ?? undefined,
     })
@@ -133,7 +134,7 @@ describe.skipIf(!hasDatabase)('conversation helpers', () => {
       [message.id],
     )
 
-    const page = await listMessages(requirePool(), conversationId, {
+    const page = await getMessagePage(requirePool(), conversationId, {
       limit: 10,
     })
     expect(page.messages).toHaveLength(0)
@@ -152,7 +153,7 @@ describe.skipIf(!hasDatabase)('conversation helpers', () => {
       [message.id],
     )
 
-    const page = await listMessages(requirePool(), conversationId, {
+    const page = await getMessagePage(requirePool(), conversationId, {
       limit: 10,
     })
     expect(page.messages.find((candidate) => candidate.id === message.id)).toMatchObject({
