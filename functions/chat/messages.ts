@@ -1,5 +1,6 @@
 import type { Pool } from 'pg'
 import { type ChatAuthor, type ChatMessageDTO, PAGE_SIZE } from '../../src/lib/chat/protocol'
+import { withTransaction } from './db'
 import { ApiError } from './errors'
 
 export interface MessageRow {
@@ -51,11 +52,7 @@ export async function createMessage(
   pool: Pool,
   input: CreateMessageInput,
 ): Promise<ChatMessageDTO> {
-  const client = await pool.connect()
-
-  try {
-    await client.query('begin')
-
+  const row = await withTransaction(pool, async (client) => {
     const { rows } = await client.query<MessageRow>(
       `insert into messages (
          conversation_id, author, body, status, client_id, reply_to_id, model,
@@ -78,8 +75,8 @@ export async function createMessage(
       ],
     )
 
-    const row = rows[0]
-    if (!row) {
+    const inserted = rows[0]
+    if (!inserted) {
       throw new ApiError('INTERNAL', 'Could not create the message')
     }
 
@@ -88,17 +85,13 @@ export async function createMessage(
           set last_message_at = greatest(last_message_at, $2),
               updated_at = now()
         where id = $1`,
-      [input.conversationId, row.created_at],
+      [input.conversationId, inserted.created_at],
     )
 
-    await client.query('commit')
-    return toMessageDTO(row)
-  } catch (error) {
-    await client.query('rollback')
-    throw error
-  } finally {
-    client.release()
-  }
+    return inserted
+  })
+
+  return toMessageDTO(row)
 }
 
 export async function listMessages(
@@ -155,12 +148,9 @@ export async function editMessage(
     now?: Date
   },
 ): Promise<ChatMessageDTO> {
-  const client = await pool.connect()
   const now = input.now ?? new Date()
 
-  try {
-    await client.query('begin')
-
+  const row = await withTransaction(pool, async (client) => {
     const { rows } = await client.query<{
       id: string
       body: string
@@ -210,17 +200,11 @@ export async function editMessage(
       [existing.conversation_id],
     )
 
-    await client.query('commit')
+    return updated.rows[0]
+  })
 
-    const row = updated.rows[0]
-    if (!row) {
-      throw new ApiError('INTERNAL', 'Could not update the message')
-    }
-    return toMessageDTO(row)
-  } catch (error) {
-    await client.query('rollback')
-    throw error
-  } finally {
-    client.release()
+  if (!row) {
+    throw new ApiError('INTERNAL', 'Could not update the message')
   }
+  return toMessageDTO(row)
 }
