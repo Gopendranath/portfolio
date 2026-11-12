@@ -262,6 +262,30 @@ export async function markRead(
   )
 }
 
+export async function markUnread(
+  pool: Pool,
+  conversationId: string,
+  side: 'user' | 'owner',
+): Promise<void> {
+  const column = side === 'user' ? 'user_last_read_at' : 'owner_last_read_at'
+  const incomingAuthor = side === 'user' ? 'owner' : 'user'
+  await pool.query(
+    `update conversations c
+        set ${column} = (
+              select m.created_at - interval '1 microsecond'
+                from messages m
+               where m.conversation_id = c.id
+                 and m.author = $2
+                 and m.deleted_at is null
+               order by m.created_at desc
+               limit 1
+            ),
+            updated_at = now()
+      where c.id = $1`,
+    [conversationId, incomingAuthor],
+  )
+}
+
 export async function getConversationForUser(
   pool: Pool,
   userId: string,

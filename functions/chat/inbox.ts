@@ -10,6 +10,7 @@ import {
   getConversationForUser,
   listMessages,
   markRead,
+  markUnread,
 } from './conversations'
 import { ApiError } from './errors'
 
@@ -188,6 +189,26 @@ export async function markOwnerRead(
     'owner',
   )
   await markRead(pool, conversation.id, 'owner')
+}
+
+export async function markOwnerUnread(
+  pool: Pool,
+  visitorUserId: string,
+): Promise<void> {
+  const conversation = await getConversationForUser(
+    pool,
+    visitorUserId,
+    'owner',
+  )
+  await markUnread(pool, conversation.id, 'owner')
+}
+
+export async function markUserOwnerUnread(
+  pool: Pool,
+  userId: string,
+): Promise<void> {
+  const conversation = await getConversationForUser(pool, userId, 'owner')
+  await markUnread(pool, conversation.id, 'user')
 }
 
 export { PAGE_SIZE }

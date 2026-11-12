@@ -37,6 +37,8 @@ import {
   getOwnerThreadMessages,
   listOwnerThreads,
   markOwnerRead,
+  markOwnerUnread,
+  markUserOwnerUnread,
 } from './chat/inbox'
 import {
   createOpenRouterGateway,
@@ -357,6 +359,15 @@ app.post('/api/owner/threads/:userId/read', async (context) => {
   return context.json({ ok: true })
 })
 
+app.post('/api/owner/threads/:userId/unread', async (context) => {
+  const { authUserId } = await requireAuth(context.req.raw)
+  const pool = getPool()
+  const { isOwner } = await resolveAppUser(pool, authUserId)
+  assertOwner(isOwner)
+  await markOwnerUnread(pool, context.req.param('userId'))
+  return context.json({ ok: true })
+})
+
 app.post('/api/chat/assistant', async (context) => {
   const { authUserId } = await requireAuth(context.req.raw)
   const input = await parseBody(sendMessageSchema, context.req.raw)
@@ -440,6 +451,14 @@ app.post('/api/conversations/owner/read', async (context) => {
   const { user } = await resolveAppUser(pool, authUserId)
   const conversation = await getOrCreateConversation(pool, user.id, 'owner')
   await markRead(pool, conversation.id, 'user')
+  return context.json({ ok: true })
+})
+
+app.post('/api/conversations/owner/unread', async (context) => {
+  const { authUserId } = await requireAuth(context.req.raw)
+  const pool = getPool()
+  const { user } = await resolveAppUser(pool, authUserId)
+  await markUserOwnerUnread(pool, user.id)
   return context.json({ ok: true })
 })
 

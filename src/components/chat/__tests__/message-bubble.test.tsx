@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
+import { MessageBubble } from '@/components/chat/message-bubble'
 import { chatProfilesById } from '@/data/chat'
 import type { ViewMessage } from '@/lib/chat/use-chat-thread'
-import { MessageBubble } from '../message-bubble'
 
 function message(overrides: Partial<ViewMessage> = {}): ViewMessage {
   return {

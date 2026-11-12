@@ -32,3 +32,17 @@ export function useMarkOwnerThreadRead() {
     [queryClient],
   )
 }
+
+export function useMarkOwnerThreadUnread() {
+  const queryClient = useQueryClient()
+
+  return useCallback(
+    async (userId: string) => {
+      await chatFetch(`/api/owner/threads/${userId}/unread`, { method: 'POST' })
+      await queryClient.invalidateQueries({
+        queryKey: ['chat', 'owner-threads'],
+      })
+    },
+    [queryClient],
+  )
+}

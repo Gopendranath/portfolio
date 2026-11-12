@@ -1,7 +1,8 @@
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ChatShell } from '@/components/chat/chat-shell'
+import { chatFetch } from '@/lib/chat/api-client'
 import type { ChatSessionState } from '@/lib/chat/session'
 import type {
   ChatThreadController,
@@ -10,6 +11,10 @@ import type {
 
 vi.mock('@tanstack/react-query', () => ({
   useQueryClient: () => ({ invalidateQueries: vi.fn() }),
+}))
+
+vi.mock('@/lib/chat/api-client', () => ({
+  chatFetch: vi.fn(async () => ({ ok: true })),
 }))
 
 vi.mock('@/lib/chat/session', () => ({
@@ -129,7 +134,7 @@ describe('ChatShell', () => {
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
   })
 
-  it('shows the owner inbox only to the owner', () => {
+  it('shows the owner inbox in the same nav grid as the assistant', () => {
     setup({
       isOwner: true,
       user: {
@@ -142,7 +147,47 @@ describe('ChatShell', () => {
 
     render(<ChatShell />)
 
-    expect(screen.getByRole('button', { name: /inbox/i })).toBeInTheDocument()
+    const nav = screen.getByRole('group', { name: 'Chat profiles' })
+    expect(
+      within(nav).getByRole('button', { name: /inbox/i }),
+    ).toBeInTheDocument()
+    expect(
+      within(nav).getByRole('button', { name: /portfolio assistant/i }),
+    ).toBeInTheDocument()
+  })
+
+  it('marks owner messages read when a new message arrives in the open thread', async () => {
+    const user = userEvent.setup()
+    const first = viewMessage({ id: 'owner-message-1', author: 'owner' })
+    vi.mocked(useChatThread).mockReturnValue(thread({ messages: [first] }))
+    const { rerender } = render(<ChatShell />)
+
+    await user.click(
+      screen.getByRole('button', { name: /Gopendranath Sasmal/i }),
+    )
+
+    await waitFor(() => {
+      expect(chatFetch).toHaveBeenCalledWith('/api/conversations/owner/read', {
+        method: 'POST',
+      })
+    })
+
+    vi.mocked(chatFetch).mockClear()
+    vi.mocked(useChatThread).mockReturnValue(
+      thread({
+        messages: [
+          first,
+          viewMessage({ id: 'owner-message-2', author: 'owner' }),
+        ],
+      }),
+    )
+    rerender(<ChatShell />)
+
+    await waitFor(() => {
+      expect(chatFetch).toHaveBeenCalledWith('/api/conversations/owner/read', {
+        method: 'POST',
+      })
+    })
   })
 
   it('hides the owner inbox from visitors', () => {

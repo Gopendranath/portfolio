@@ -248,3 +248,4 @@ Microsoft Edge uses a separate [Origin Trials program](https://developer.microso
 - The design uses one accent color and a dark-only theme. Theme tokens live in the `@theme` block in `src/index.css`.
 - Tests cover content invariants, the GitHub fallback, the QueryClient defaults, sidebar state, project cards, the GitHub snapshot, chat protocol validation, JWT auth, GitHub age eligibility, owner messages, AI streaming persistence, edit forks, rate limits, owner inbox, SSE parsing, and the chat shell.
 - Assistant conversations are private. The owner inbox shows owner threads only.
+- Open chat threads mark incoming messages read automatically. The owner can mark a thread unread from its header.

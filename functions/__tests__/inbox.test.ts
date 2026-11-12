@@ -14,6 +14,7 @@ import {
   createOwnerReply,
   listOwnerThreads,
   markOwnerRead,
+  markOwnerUnread,
 } from '../chat/inbox'
 
 const hasDatabase = Boolean(process.env.TEST_DATABASE_URL)
@@ -112,6 +113,13 @@ describe.skipIf(!hasDatabase)('owner inbox', () => {
     await markOwnerRead(requirePool(), visitorId)
     const page = await listOwnerThreads(requirePool(), { limit: 20 })
     expect(page.threads[0]?.unreadCount).toBe(0)
+  })
+
+  it('marks the latest visitor message unread again', async () => {
+    await markOwnerRead(requirePool(), visitorId)
+    await markOwnerUnread(requirePool(), visitorId)
+    const page = await listOwnerThreads(requirePool(), { limit: 20 })
+    expect(page.threads[0]?.unreadCount).toBe(1)
   })
 
   it('creates an owner reply and updates the thread preview', async () => {

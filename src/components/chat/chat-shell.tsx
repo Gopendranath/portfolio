@@ -9,6 +9,8 @@ import { AiLockedPanel } from './ai-locked-panel'
 import { AuthPanel } from './auth-panel'
 import { ChatAvatar } from './chat-avatar'
 import { ChatComposer } from './chat-composer'
+import { ChatHeader } from './chat-header'
+import { ChatNavCard } from './chat-nav-card'
 import { MessageList } from './message-list'
 import { OwnerInbox } from './owner-inbox'
 import { ProfileList } from './profile-list'
@@ -32,16 +34,28 @@ export function ChatShell() {
     enabled: Boolean(session.token) && !session.isOwner,
     pollMs: 10_000,
   })
+  const latestOwnerMessageId = ownerThread.messages.at(-1)?.id
 
   useEffect(() => {
-    if (activeView !== 'owner' || !session.token || session.isOwner) {
+    if (
+      activeView !== 'owner' ||
+      !session.token ||
+      session.isOwner ||
+      !latestOwnerMessageId
+    ) {
       return
     }
 
     void chatFetch('/api/conversations/owner/read', { method: 'POST' })
       .then(() => queryClient.invalidateQueries({ queryKey: ['chat', 'me'] }))
       .catch(() => {})
-  }, [activeView, queryClient, session.isOwner, session.token])
+  }, [
+    activeView,
+    latestOwnerMessageId,
+    queryClient,
+    session.isOwner,
+    session.token,
+  ])
 
   if (session.isLoading) {
     return (
@@ -135,27 +149,23 @@ export function ChatShell() {
                 : undefined
             }
             onSelect={setActiveView}
-          />
-
-          {isOwner ? (
-            <button
-              type="button"
-              onClick={() => setActiveView('inbox')}
-              className="flex w-full items-center gap-2.5 border border-transparent p-3 text-left transition-colors hover:border-line hover:bg-surface/40"
-            >
-              <span className="flex size-8 shrink-0 items-center justify-center border border-line bg-canvas font-mono text-[9px] uppercase tracking-[0.12em] text-accent">
-                IN
-              </span>
-              <span>
-                <span className="block text-[13px] font-medium leading-tight text-ink md:text-sm">
-                  Inbox
-                </span>
-                <span className="mt-1 block font-mono text-[9px] uppercase leading-tight tracking-[0.14em] text-muted">
-                  Owner messages
-                </span>
-              </span>
-            </button>
-          ) : null}
+          >
+            {isOwner ? (
+              <ChatNavCard
+                avatar={
+                  <span
+                    aria-hidden="true"
+                    className="flex size-8 shrink-0 items-center justify-center border border-line bg-canvas font-mono text-[9px] uppercase tracking-[0.12em] text-accent"
+                  >
+                    IN
+                  </span>
+                }
+                title="Inbox"
+                subtitle="Owner messages"
+                onClick={() => setActiveView('inbox')}
+              />
+            ) : null}
+          </ProfileList>
         </div>
 
         {signedIn ? (
@@ -181,31 +191,13 @@ export function ChatShell() {
         aria-labelledby="chat-thread-title"
         className="flex min-h-0 flex-1 flex-col overflow-hidden"
       >
-        <header className="chat-thread-header hidden shrink-0 items-center gap-3 border-b border-line p-4 md:flex">
-          <ChatAvatar profile={activeProfile} />
-          <div className="min-w-0">
-            <h2
-              id="chat-thread-title"
-              className="truncate text-sm font-medium text-ink"
-            >
-              {activeProfile.name}
-            </h2>
-            <p className="mt-0.5 font-mono text-[9px] uppercase tracking-[0.14em] text-muted">
-              {activeProfile.role}
-            </p>
-          </div>
-          {signedIn ? (
-            <button
-              type="button"
-              onClick={() => {
-                void session.signOut()
-              }}
-              className="ml-auto border border-line px-2 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-muted transition-colors hover:border-accent hover:text-accent md:hidden"
-            >
-              Sign out
-            </button>
-          ) : null}
-        </header>
+        <ChatHeader
+          className="chat-thread-header hidden md:flex"
+          titleId="chat-thread-title"
+          title={activeProfile.name}
+          subtitle={activeProfile.role}
+          avatar={<ChatAvatar profile={activeProfile} />}
+        />
 
         {!signedIn ? (
           <AuthPanel

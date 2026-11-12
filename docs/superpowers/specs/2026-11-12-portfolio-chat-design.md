@@ -251,6 +251,7 @@ Base path: `/api` on the Neon Function.
 
 - `GET /api/me` → `{ user, isOwner, aiEligible, aiReason }`.
 - `POST /api/conversations/:id/read` → mark the caller's side read.
+- `POST /api/conversations/owner/unread` → mark the caller's owner conversation unread.
 
 ### Messages
 
@@ -292,6 +293,7 @@ The inbox is restricted to conversations where `kind = 'owner'`. Assistant conve
 - `GET /api/owner/threads/:userId/messages?limit=10&before=<cursor>` → thread messages.
 - `POST /api/owner/threads/:userId/messages` → owner reply `{ body, clientId }`.
 - `POST /api/owner/threads/:userId/read` → clear owner unread.
+- `POST /api/owner/threads/:userId/unread` → mark the latest visitor message unread.
 
 ### SSE protocol
 
@@ -388,10 +390,11 @@ HTTP status: 400 validation, 401 auth, 403 eligibility/owner, 409 duplicate/edit
 - **Gopendranath Sasmal:** visitor’s owner thread. Owner replies appear on the left with an owner label.
 - **Inbox:** owner-only. Replaces the owner profile button for the owner. Shows visitor owner-threads sorted by last activity, with unread badges and last-message preview.
   - Selecting a thread opens it; a back control returns to the inbox list.
+  - Open threads mark incoming visitor messages read; a Mark unread action in the thread header restores the badge.
   - Owner reply composer at the bottom.
   - Poll the inbox and active thread every 10 seconds while visible.
   - Assistant conversations never appear in the inbox.
-- **Visitor owner thread:** poll the active thread every 10 seconds while it is open. Show an unread badge on the owner profile button when a new owner reply arrives while another thread is active. Clear unread when the thread is opened.
+- **Visitor owner thread:** poll the active thread every 10 seconds while it is open. Show an unread badge on the owner profile button when a new owner reply arrives while another thread is active. Clear unread when the thread is opened or when a new reply arrives while it is open.
 
 ### History
 

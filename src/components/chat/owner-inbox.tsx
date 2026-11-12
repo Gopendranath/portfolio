@@ -1,14 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowLeftIcon } from '@/components/ui/icons'
 import { chatProfilesById } from '@/data/chat'
 import type { OwnerThreadDTO } from '@/lib/chat/protocol'
 import { useChatThread } from '@/lib/chat/use-chat-thread'
 import {
   useMarkOwnerThreadRead,
+  useMarkOwnerThreadUnread,
   useOwnerThreads,
 } from '@/lib/chat/use-owner-inbox'
 import { ChatAvatar } from './chat-avatar'
 import { ChatComposer } from './chat-composer'
+import { ChatHeader } from './chat-header'
 import { MessageList } from './message-list'
 
 interface OwnerInboxProps {
@@ -24,7 +25,9 @@ const timeFormatter = new Intl.DateTimeFormat('en-GB', {
 export function OwnerInbox({ onBack }: OwnerInboxProps) {
   const threadsQuery = useOwnerThreads(true)
   const markRead = useMarkOwnerThreadRead()
+  const markUnread = useMarkOwnerThreadUnread()
   const [selected, setSelected] = useState<OwnerThreadDTO | null>(null)
+  const [isMarkingUnread, setIsMarkingUnread] = useState(false)
   const thread = useChatThread({
     kind: 'owner',
     ownerThreadUserId: selected?.userId,
@@ -38,13 +41,27 @@ export function OwnerInbox({ onBack }: OwnerInboxProps) {
     [threadsQuery.data],
   )
 
-  const messageCount = thread.messages.length
+  const latestMessageId = thread.messages.at(-1)?.id
 
   useEffect(() => {
-    if (selected && messageCount >= 0) {
+    if (selected && latestMessageId) {
       void markRead(selected.userId)
     }
-  }, [selected, messageCount, markRead])
+  }, [selected, latestMessageId, markRead])
+
+  async function handleMarkUnread() {
+    if (!selected || isMarkingUnread) {
+      return
+    }
+
+    setIsMarkingUnread(true)
+    try {
+      await markUnread(selected.userId)
+      setSelected(null)
+    } finally {
+      setIsMarkingUnread(false)
+    }
+  }
 
   if (selected) {
     return (
@@ -52,25 +69,32 @@ export function OwnerInbox({ onBack }: OwnerInboxProps) {
         aria-label="Owner inbox thread"
         className="flex min-h-0 flex-1 flex-col overflow-hidden"
       >
-        <header className="flex shrink-0 items-center gap-3 border-b border-line p-4">
-          <button
-            type="button"
-            onClick={() => setSelected(null)}
-            aria-label="Back to inbox"
-            className="flex size-8 items-center justify-center border border-line text-muted transition-colors hover:border-accent hover:text-accent"
-          >
-            <ArrowLeftIcon className="size-4" />
-          </button>
-          <ChatAvatar profile={chatProfilesById.owner} size="sm" />
-          <div className="min-w-0">
-            <h2 className="truncate text-sm font-medium text-ink">
-              {selected.githubLogin ?? 'GitHub user'}
-            </h2>
-            <p className="mt-0.5 font-mono text-[9px] uppercase tracking-[0.14em] text-muted">
-              Owner inbox
-            </p>
-          </div>
-        </header>
+        <ChatHeader
+          className="flex"
+          title={selected.githubLogin ?? 'GitHub user'}
+          subtitle="Owner inbox"
+          avatar={
+            <ChatAvatar
+              profile={chatProfilesById.owner}
+              label={selected.githubLogin ?? 'Visitor'}
+              size="sm"
+            />
+          }
+          onBack={() => setSelected(null)}
+          backLabel="Back to inbox"
+          actions={
+            <button
+              type="button"
+              onClick={() => {
+                void handleMarkUnread().catch(() => {})
+              }}
+              disabled={isMarkingUnread}
+              className="border border-line px-2.5 py-1.5 font-mono text-[9px] uppercase tracking-[0.14em] text-muted transition-colors hover:border-accent hover:text-accent disabled:cursor-wait disabled:opacity-50"
+            >
+              Mark unread
+            </button>
+          }
+        />
 
         <MessageList
           messages={thread.messages}
@@ -107,24 +131,14 @@ export function OwnerInbox({ onBack }: OwnerInboxProps) {
       aria-label="Owner inbox"
       className="flex min-h-0 flex-1 flex-col overflow-hidden"
     >
-      <header className="flex shrink-0 items-center gap-3 border-b border-line p-4">
-        <button
-          type="button"
-          onClick={onBack}
-          aria-label="Back to assistant"
-          className="flex size-8 items-center justify-center border border-line text-muted transition-colors hover:border-accent hover:text-accent"
-        >
-          <ArrowLeftIcon className="size-4" />
-        </button>
-        <div>
-          <h1 className="text-xl font-medium tracking-[-0.02em] text-ink">
-            Inbox.
-          </h1>
-          <p className="mt-0.5 font-mono text-[9px] uppercase tracking-[0.14em] text-muted">
-            Owner messages only
-          </p>
-        </div>
-      </header>
+      <ChatHeader
+        className="flex"
+        level={1}
+        title="Inbox."
+        subtitle="Owner messages only"
+        onBack={onBack}
+        backLabel="Back to assistant"
+      />
 
       <div className="min-h-0 flex-1 overflow-y-auto p-4">
         {threadsQuery.isLoading ? (

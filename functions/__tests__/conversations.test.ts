@@ -15,6 +15,7 @@ import {
   getOrCreateConversation,
   listMessages,
   markRead,
+  markUnread,
 } from '../chat/conversations'
 
 const hasDatabase = Boolean(process.env.TEST_DATABASE_URL)
@@ -232,5 +233,26 @@ describe.skipIf(!hasDatabase)('conversation helpers', () => {
       [conversationId],
     )
     expect(rows[0]?.user_last_read_at).not.toBeNull()
+  })
+
+  it('marks the latest incoming message unread', async () => {
+    const message = await createMessage(requirePool(), {
+      conversationId,
+      author: 'owner',
+      body: 'read this again',
+      clientId: 'client-unread-0001',
+    })
+    await markRead(requirePool(), conversationId, 'user')
+    await markUnread(requirePool(), conversationId, 'user')
+
+    const { rows } = await requirePool().query<{ is_before: boolean }>(
+      `select user_last_read_at < (
+         select created_at from messages where id = $2
+       ) as is_before
+         from conversations where id = $1`,
+      [conversationId, message.id],
+    )
+
+    expect(rows[0]?.is_before).toBe(true)
   })
 })
