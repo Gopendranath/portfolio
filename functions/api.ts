@@ -10,6 +10,7 @@ import {
   ownerRetrySchema,
   paginationSchema,
   sendMessageSchema,
+  threadPaginationSchema,
 } from '../src/lib/chat/protocol'
 import {
   type AssistantTurn,
@@ -29,6 +30,12 @@ import {
 import { getCorsHeaders } from './chat/cors'
 import { getPool } from './chat/db'
 import { ApiError, toApiError } from './chat/errors'
+import {
+  createOwnerReply,
+  getOwnerThreadMessages,
+  listOwnerThreads,
+  markOwnerRead,
+} from './chat/inbox'
 import {
   createOpenRouterGateway,
   type OpenRouterGateway,
@@ -77,6 +84,12 @@ function assertAiEligible(input: {
       : 'We could not verify your GitHub account age. Try again later.',
     403,
   )
+}
+
+function assertOwner(isOwner: boolean): void {
+  if (!isOwner) {
+    throw new ApiError('FORBIDDEN', 'Owner access only', 403)
+  }
 }
 
 async function assertAiRateLimits(
@@ -275,6 +288,67 @@ app.get('/api/conversations/:kind/messages', async (context) => {
   })
 
   return context.json(page)
+})
+
+app.get('/api/owner/threads', async (context) => {
+  const { authUserId } = await requireAuth(context.req.raw)
+  const pool = getPool()
+  const { isOwner } = await resolveAppUser(pool, authUserId)
+  assertOwner(isOwner)
+  const query = threadPaginationSchema.parse({
+    limit: context.req.query('limit'),
+    before: context.req.query('before'),
+  })
+  const page = await listOwnerThreads(pool, query)
+  return context.json(page)
+})
+
+app.get('/api/owner/threads/:userId/messages', async (context) => {
+  const { authUserId } = await requireAuth(context.req.raw)
+  const pool = getPool()
+  const { isOwner } = await resolveAppUser(pool, authUserId)
+  assertOwner(isOwner)
+  const query = paginationSchema.parse({
+    limit: context.req.query('limit'),
+    before: context.req.query('before'),
+  })
+  const page = await getOwnerThreadMessages(pool, context.req.param('userId'), {
+    beforeSeq: query.before,
+    limit: query.limit,
+  })
+  return context.json(page)
+})
+
+app.post('/api/owner/threads/:userId/messages', async (context) => {
+  const { authUserId } = await requireAuth(context.req.raw)
+  const input = await parseBody(sendMessageSchema, context.req.raw)
+  const pool = getPool()
+  const { user, isOwner } = await resolveAppUser(pool, authUserId)
+  assertOwner(isOwner)
+  assertAllowedRateLimit(
+    context,
+    await consumeUserRateLimit(pool, {
+      userId: user.id,
+      action: 'owner_send',
+      perMinute: 10,
+      perDay: 60,
+    }),
+  )
+  const message = await createOwnerReply(pool, {
+    visitorUserId: context.req.param('userId'),
+    body: input.body,
+    clientId: input.clientId,
+  })
+  return context.json({ message })
+})
+
+app.post('/api/owner/threads/:userId/read', async (context) => {
+  const { authUserId } = await requireAuth(context.req.raw)
+  const pool = getPool()
+  const { isOwner } = await resolveAppUser(pool, authUserId)
+  assertOwner(isOwner)
+  await markOwnerRead(pool, context.req.param('userId'))
+  return context.json({ ok: true })
 })
 
 app.post('/api/chat/assistant', async (context) => {

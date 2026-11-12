@@ -3,6 +3,7 @@ import { ChatValidationError } from '../../src/lib/chat/protocol'
 
 export type ApiErrorCode =
   | 'UNAUTHORIZED'
+  | 'FORBIDDEN'
   | 'AI_LOCKED'
   | 'VALIDATION'
   | 'RATE_LIMITED'
@@ -14,6 +15,7 @@ export type ApiErrorCode =
 
 const STATUS_BY_CODE: Record<ApiErrorCode, number> = {
   UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
   AI_LOCKED: 403,
   VALIDATION: 400,
   RATE_LIMITED: 429,

@@ -141,6 +141,7 @@ export interface MessagePage {
 }
 
 export interface OwnerThreadDTO {
+  conversationId: string
   userId: string
   githubLogin: string | null
   lastMessage: string
