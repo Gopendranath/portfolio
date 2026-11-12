@@ -117,6 +117,23 @@ export async function markUnread(
   await pool.query(statement, [conversationId])
 }
 
+export async function getOwnedConversationById(
+  pool: Pool,
+  userId: string,
+  conversationId: string,
+): Promise<{ id: string }> {
+  const { rows } = await pool.query<{ id: string }>(
+    'select id from conversations where id = $1 and user_id = $2',
+    [conversationId, userId],
+  )
+
+  const row = rows[0]
+  if (!row) {
+    throw new ApiError('NOT_FOUND', 'Conversation not found')
+  }
+  return row
+}
+
 export async function getConversationForUser(
   pool: Pool,
   userId: string,

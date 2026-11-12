@@ -3,9 +3,11 @@ import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import { getCorsHeaders } from './chat/cors'
 import { toApiError } from './chat/errors'
 import { assistantRouter } from './routes/assistant'
-import { conversationsRouter } from './routes/conversations'
+import { assistantHistoryRouter } from './routes/assistant-history'
+import { conversationMessagesRouter } from './routes/conversation-messages'
 import { healthRouter } from './routes/health'
 import { meRouter } from './routes/me'
+import { messageEditRouter } from './routes/message-edit'
 import { ownerChatRouter } from './routes/owner-chat'
 import { ownerInboxRouter } from './routes/owner-inbox'
 
@@ -27,7 +29,9 @@ app.route('/', healthRouter)
 app.route('/', meRouter)
 app.route('/', assistantRouter)
 app.route('/', ownerChatRouter)
-app.route('/', conversationsRouter)
+app.route('/', assistantHistoryRouter)
+app.route('/', conversationMessagesRouter)
+app.route('/', messageEditRouter)
 app.route('/', ownerInboxRouter)
 
 app.onError((error, context) => {
