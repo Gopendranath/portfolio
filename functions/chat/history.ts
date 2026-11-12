@@ -10,7 +10,7 @@ const HISTORY_LIMIT = 20
 const MAX_HISTORY_LIMIT = 50
 
 const historyCursorSchema = z.object({
-  lastMessageAt: z.string().datetime({ offset: true }),
+  lastMessageAtUs: z.string().regex(/^\d+$/),
   id: z.string().uuid(),
 })
 
@@ -19,6 +19,7 @@ interface ConversationRow {
   title: string | null
   created_at: Date
   last_message_at: Date
+  last_message_at_us: string
 }
 
 function toConversationDTO(row: ConversationRow): AssistantConversationDTO {
@@ -33,13 +34,13 @@ function toConversationDTO(row: ConversationRow): AssistantConversationDTO {
 function encodeCursor(row: ConversationRow): string {
   return Buffer.from(
     JSON.stringify({
-      lastMessageAt: row.last_message_at.toISOString(),
+      lastMessageAtUs: row.last_message_at_us,
       id: row.id,
     }),
   ).toString('base64url')
 }
 
-function decodeCursor(value: string): { lastMessageAt: string; id: string } {
+function decodeCursor(value: string): { lastMessageAtUs: string; id: string } {
   let decoded: unknown
   try {
     decoded = JSON.parse(Buffer.from(value, 'base64url').toString('utf8'))
@@ -90,6 +91,25 @@ export async function getLatestAssistantConversation(
       order by last_message_at desc, id desc
       limit 1`,
     [userId],
+  )
+  return rows[0] ?? null
+}
+
+export async function findAssistantConversationByClientId(
+  pool: Pool,
+  userId: string,
+  clientId: string,
+): Promise<{ id: string } | null> {
+  const { rows } = await pool.query<{ id: string }>(
+    `select c.id
+       from messages m
+       join conversations c on c.id = m.conversation_id
+      where m.client_id = $2
+        and c.user_id = $1
+        and c.kind = 'assistant'
+      order by m.seq desc
+      limit 1`,
+    [userId, clientId],
   )
   return rows[0] ?? null
 }
@@ -183,7 +203,9 @@ export async function listAssistantConversations(
   const cursor = options.before ? decodeCursor(options.before) : null
 
   const { rows } = await pool.query<ConversationRow>(
-    `select c.id, c.title, c.created_at, c.last_message_at
+    `select c.id, c.title, c.created_at, c.last_message_at,
+            (extract(epoch from c.last_message_at) * 1000000)::bigint::text
+              as last_message_at_us
        from conversations c
       where c.user_id = $1
         and c.kind = 'assistant'
@@ -195,12 +217,18 @@ export async function listAssistantConversations(
              and m.status <> 'superseded'
         )
         and (
-          $2::timestamptz is null
-          or (c.last_message_at, c.id) < ($2::timestamptz, $3::uuid)
+          $2::bigint is null
+          or (
+            extract(epoch from c.last_message_at) * 1000000
+          )::bigint < $2::bigint
+          or (
+            (extract(epoch from c.last_message_at) * 1000000)::bigint = $2::bigint
+            and c.id < $3::uuid
+          )
         )
       order by c.last_message_at desc, c.id desc
       limit $4`,
-    [userId, cursor?.lastMessageAt ?? null, cursor?.id ?? null, limit + 1],
+    [userId, cursor?.lastMessageAtUs ?? null, cursor?.id ?? null, limit + 1],
   )
 
   const hasMore = rows.length > limit

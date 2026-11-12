@@ -19,12 +19,28 @@ interface AssistantHistoryDialogProps {
 }
 
 const timeFormatter = new Intl.DateTimeFormat('en-GB', {
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false,
+})
+
+const dateTimeFormatter = new Intl.DateTimeFormat('en-GB', {
   day: '2-digit',
   month: 'short',
   hour: '2-digit',
   minute: '2-digit',
   hour12: false,
 })
+
+function formatActivity(value: string): string {
+  const date = new Date(value)
+  const now = new Date()
+  const today =
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate()
+  return (today ? timeFormatter : dateTimeFormatter).format(date)
+}
 
 function HistoryRow({
   conversation,
@@ -59,7 +75,7 @@ function HistoryRow({
           dateTime={conversation.lastMessageAt}
           className="mt-1 block font-mono text-[9px] uppercase tracking-[0.14em] text-muted"
         >
-          {timeFormatter.format(new Date(conversation.lastMessageAt))}
+          {formatActivity(conversation.lastMessageAt)}
         </time>
       </button>
       <button

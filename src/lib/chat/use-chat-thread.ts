@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ChatApiError,
   chatFetch,
@@ -125,6 +125,18 @@ export function useChatThread({
     retry: false,
   })
 
+  useEffect(() => {
+    if (kind !== 'assistant' || !conversationId) {
+      return
+    }
+    if (
+      query.error instanceof ChatApiError &&
+      query.error.code === 'NOT_FOUND'
+    ) {
+      onConversationLost?.(conversationId, '')
+    }
+  }, [conversationId, kind, onConversationLost, query.error])
+
   const persisted = useMemo(
     () =>
       query.data
@@ -198,10 +210,20 @@ export function useChatThread({
       const refreshMessages = () => {
         void queryClient.invalidateQueries({ queryKey })
         const streamedConversationId = streamedConversationRef.current
-        if (kind === 'assistant' && streamedConversationId) {
+        if (kind === 'assistant') {
           void queryClient.invalidateQueries({
-            queryKey: ['chat', 'messages', 'assistant', streamedConversationId],
+            queryKey: ['chat', 'assistant-conversations'],
           })
+          if (streamedConversationId) {
+            void queryClient.invalidateQueries({
+              queryKey: [
+                'chat',
+                'messages',
+                'assistant',
+                streamedConversationId,
+              ],
+            })
+          }
         }
       }
       const handlers: StreamHandlers = {
@@ -403,7 +425,11 @@ export function useChatThread({
         try {
           await runStream(
             '/api/chat/assistant',
-            { body: message.body, clientId: message.clientId },
+            {
+              body: message.body,
+              clientId: message.clientId,
+              ...(conversationId ? { conversationId } : {}),
+            },
             message.clientId,
             message,
           )
@@ -469,7 +495,7 @@ export function useChatThread({
         setIsSending(false)
       }
     },
-    [isOwnerInbox, kind, ownerThreadUserId, query, runStream],
+    [conversationId, isOwnerInbox, kind, ownerThreadUserId, query, runStream],
   )
 
   const edit = useCallback(
@@ -552,6 +578,9 @@ export function useChatThread({
           abortRef.current = null
           setIsStreaming(false)
           await query.refetch()
+          void queryClient.invalidateQueries({
+            queryKey: ['chat', 'assistant-conversations'],
+          })
           setForkedAtSeq(null)
           setStreaming(null)
         }
@@ -564,7 +593,7 @@ export function useChatThread({
       })
       await query.refetch()
     },
-    [isOwnerInbox, kind, messages, query],
+    [isOwnerInbox, kind, messages, query, queryClient],
   )
 
   const stop = useCallback(() => {

@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { act, renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { chatFetch, streamChat } from '@/lib/chat/api-client'
+import { ChatApiError, chatFetch, streamChat } from '@/lib/chat/api-client'
 import { useAssistantConversations } from '@/lib/chat/use-assistant-history'
 import { useChatThread } from '@/lib/chat/use-chat-thread'
 
@@ -111,6 +111,124 @@ describe('useChatThread conversation scope', () => {
       expect.anything(),
       expect.anything(),
     )
+  })
+
+  it('invalidates history after a send to an existing chat', async () => {
+    vi.mocked(streamChat).mockImplementation(async (_path, _body, handlers) => {
+      handlers.onMeta?.({
+        conversationId: 'c1',
+        userMessageId: 'u1',
+        assistantMessageId: 'a1',
+      })
+      handlers.onDone?.({
+        assistantMessageId: 'a1',
+        finishReason: 'stop',
+        truncated: false,
+        outputTokens: 1,
+      })
+    })
+    const client = createClient()
+    const invalidate = vi.spyOn(client, 'invalidateQueries')
+    const { result } = renderHook(
+      () =>
+        useChatThread({
+          kind: 'assistant',
+          conversationId: '6f1c5a8e-3f7e-4c1e-9a0e-2d4b6c8d0e2f',
+          enabled: true,
+        }),
+      { wrapper: wrapperFor(client) },
+    )
+
+    await act(async () => {
+      await result.current.send('hello')
+    })
+
+    await waitFor(() => {
+      expect(invalidate).toHaveBeenCalledWith({
+        queryKey: ['chat', 'assistant-conversations'],
+      })
+    })
+  })
+
+  it('retries into the selected conversation', async () => {
+    vi.mocked(streamChat).mockImplementation(async (_path, _body, handlers) => {
+      handlers.onMeta?.({
+        conversationId: 'c1',
+        userMessageId: 'u1',
+        assistantMessageId: 'a1',
+      })
+      handlers.onDone?.({
+        assistantMessageId: 'a1',
+        finishReason: 'stop',
+        truncated: false,
+        outputTokens: 1,
+      })
+    })
+    const client = createClient()
+    const conversationId = '6f1c5a8e-3f7e-4c1e-9a0e-2d4b6c8d0e2f'
+    const { result } = renderHook(
+      () =>
+        useChatThread({
+          kind: 'assistant',
+          conversationId,
+          enabled: true,
+        }),
+      { wrapper: wrapperFor(client) },
+    )
+
+    await act(async () => {
+      await result.current.retry({
+        id: 'user-message',
+        seq: 1,
+        conversationId,
+        author: 'user',
+        body: 'retry me',
+        status: 'failed',
+        clientId: 'client-retry-0001',
+        sentAt: '2026-11-12T09:00:00.000Z',
+        editedAt: null,
+        errorCode: 'UPSTREAM_ERROR',
+      })
+    })
+
+    expect(streamChat).toHaveBeenCalledWith(
+      '/api/chat/assistant',
+      expect.objectContaining({ conversationId }),
+      expect.anything(),
+      expect.anything(),
+    )
+  })
+
+  it('reports a selected conversation deleted before loading', async () => {
+    vi.mocked(chatFetch).mockRejectedValue(
+      new ChatApiError(
+        {
+          error: {
+            code: 'NOT_FOUND',
+            message: 'Conversation not found',
+            retryable: false,
+          },
+        },
+        404,
+      ),
+    )
+    const client = createClient()
+    const onConversationLost = vi.fn()
+    const conversationId = '6f1c5a8e-3f7e-4c1e-9a0e-2d4b6c8d0e2f'
+    renderHook(
+      () =>
+        useChatThread({
+          kind: 'assistant',
+          conversationId,
+          enabled: true,
+          onConversationLost,
+        }),
+      { wrapper: wrapperFor(client) },
+    )
+
+    await waitFor(() => {
+      expect(onConversationLost).toHaveBeenCalledWith(conversationId, '')
+    })
   })
 
   it('reports the new conversation id from meta on a draft send', async () => {

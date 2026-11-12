@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
-import { chatFetch } from './api-client'
+import { ChatApiError, chatFetch } from './api-client'
 import type { AssistantConversationPage } from './protocol'
 
 export function useAssistantConversations(enabled: boolean) {
@@ -24,9 +24,16 @@ export function useDeleteAssistantConversation() {
 
   return useCallback(
     async (conversationId: string) => {
-      await chatFetch(`/api/conversations/${conversationId}`, {
-        method: 'DELETE',
-      })
+      try {
+        await chatFetch(`/api/conversations/${conversationId}`, {
+          method: 'DELETE',
+        })
+      } catch (error) {
+        // A chat deleted in another tab is already in the desired state.
+        if (!(error instanceof ChatApiError) || error.code !== 'NOT_FOUND') {
+          throw error
+        }
+      }
       await queryClient.invalidateQueries({
         queryKey: ['chat', 'assistant-conversations'],
       })

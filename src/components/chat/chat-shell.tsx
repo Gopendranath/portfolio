@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { ChatProfileId } from '@/data/types'
 import { chatFetch } from '@/lib/chat/api-client'
 import { useChatSession } from '@/lib/chat/session'
@@ -54,7 +54,8 @@ export function ChatShell() {
   >({})
   const [notice, setNotice] = useState<string | null>(null)
 
-  const historyEnabled = Boolean(session.token) && session.aiEligible
+  const historyEnabled =
+    activeView === 'assistant' && Boolean(session.token) && session.aiEligible
   const historyQuery = useAssistantConversations(historyEnabled)
   const deleteConversation = useDeleteAssistantConversation()
   const conversations = useMemo(
@@ -68,21 +69,32 @@ export function ChatShell() {
         ? selection.id
         : null
 
-  const assistantThread = useChatThread({
-    kind: 'assistant',
-    conversationId: activeConversationId,
-    enabled: Boolean(session.token) && session.aiEligible,
-    onConversationStarted: (conversationId) => {
+  const handleConversationStarted = useCallback(
+    (conversationId: string) => {
       setSelection({ type: 'chat', id: conversationId })
       setNotice(null)
       void queryClient.invalidateQueries({ queryKey: HISTORY_QUERY_KEY })
     },
-    onConversationLost: (_conversationId, body) => {
-      setAssistantDrafts((current) => ({ ...current, new: body }))
+    [queryClient],
+  )
+  const handleConversationLost = useCallback(
+    (_conversationId: string, body: string) => {
+      if (body) {
+        setAssistantDrafts((current) => ({ ...current, new: body }))
+      }
       setSelection({ type: 'auto' })
       setNotice('This chat was deleted. Your message was not sent.')
       void queryClient.invalidateQueries({ queryKey: HISTORY_QUERY_KEY })
     },
+    [queryClient],
+  )
+
+  const assistantThread = useChatThread({
+    kind: 'assistant',
+    conversationId: activeConversationId,
+    enabled: Boolean(session.token) && session.aiEligible,
+    onConversationStarted: handleConversationStarted,
+    onConversationLost: handleConversationLost,
   })
   const ownerThread = useChatThread({
     kind: 'owner',
@@ -135,18 +147,16 @@ export function ChatShell() {
         : null
 
   function confirmAssistantSwitch(): boolean {
-    if (!assistantThread.isStreaming) {
-      return true
+    if (assistantThread.isStreaming) {
+      const confirmed = window.confirm(
+        'Stop the response and switch chats? The partial reply will be saved.',
+      )
+      if (!confirmed) {
+        return false
+      }
+      assistantThread.stop()
     }
 
-    const confirmed = window.confirm(
-      'Stop the response and switch chats? The partial reply will be saved.',
-    )
-    if (!confirmed) {
-      return false
-    }
-
-    assistantThread.stop()
     assistantThread.reset()
     return true
   }
@@ -171,14 +181,12 @@ export function ChatShell() {
 
   async function removeConversation(conversationId: string) {
     const deletingActive = conversationId === activeConversationId
-    if (deletingActive && assistantThread.isStreaming) {
-      assistantThread.stop()
-      assistantThread.reset()
-    }
 
     try {
       await deleteConversation(conversationId)
       if (deletingActive) {
+        assistantThread.stop()
+        assistantThread.reset()
         setSelection({ type: 'auto' })
         setNotice(null)
       }
@@ -189,6 +197,9 @@ export function ChatShell() {
 
   function handleDraftChange(value: string) {
     if (threadView === 'assistant') {
+      if (selection.type === 'auto' && !activeConversationId) {
+        setSelection({ type: 'new' })
+      }
       setAssistantDrafts((current) => ({ ...current, [draftKey]: value }))
     } else {
       setOwnerDraft(value)
@@ -233,7 +244,7 @@ export function ChatShell() {
         aiReason={session.aiReason}
         thread={activeThread}
         draft={activeDraft}
-        notice={notice}
+        notice={threadView === 'assistant' ? notice : null}
         showHistory={threadView === 'assistant'}
         onDraftChange={handleDraftChange}
         onSend={handleSend}

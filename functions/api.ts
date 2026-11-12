@@ -2,6 +2,7 @@ import type { Context } from 'hono'
 import { Hono } from 'hono'
 import { streamSSE } from 'hono/streaming'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
+import { z } from 'zod'
 import {
   assistantEditSchema,
   assistantHistoryQuerySchema,
@@ -35,8 +36,8 @@ import { getCorsHeaders } from './chat/cors'
 import { getPool } from './chat/db'
 import { ApiError, toApiError } from './chat/errors'
 import {
-  createAssistantConversation,
   deleteAssistantConversation,
+  findAssistantConversationByClientId,
   getLatestAssistantConversation,
   getOwnedAssistantConversation,
   listAssistantConversations,
@@ -297,7 +298,8 @@ app.get('/api/conversations/assistant', async (context) => {
     before: context.req.query('before'),
   })
   const pool = getPool()
-  const { user } = await resolveAppUser(pool, authUserId)
+  const { user, aiEligible, aiReason } = await resolveAppUser(pool, authUserId)
+  assertAiEligible({ aiEligible, aiReason })
   const page = await listAssistantConversations(pool, user.id, query)
   return context.json(page)
 })
@@ -306,20 +308,43 @@ app.get('/api/conversations/:kind/messages', async (context) => {
   const { authUserId } = await requireAuth(context.req.raw)
   const kind = chatKindSchema.parse(context.req.param('kind'))
   const pool = getPool()
-  const { user } = await resolveAppUser(pool, authUserId)
+  const { user, aiEligible, aiReason } = await resolveAppUser(pool, authUserId)
 
   if (kind === 'assistant') {
+    assertAiEligible({ aiEligible, aiReason })
     const conversationId = context.req.query('conversationId')
+    const pagination = paginationSchema.parse({
+      limit: context.req.query('limit'),
+      before: context.req.query('before'),
+    })
+
+    if (!conversationId) {
+      // Rolling deploy: older clients read the assistant thread without an id.
+      const latest = await getLatestAssistantConversation(pool, user.id)
+      if (!latest) {
+        return context.json({
+          messages: [],
+          hasMore: false,
+          nextCursor: null,
+        })
+      }
+      const page = await listMessages(pool, latest.id, {
+        beforeSeq: pagination.before,
+        limit: pagination.limit,
+      })
+      return context.json(page)
+    }
+
     const query = assistantMessagesQuerySchema.parse({
       limit: context.req.query('limit'),
       before: context.req.query('before'),
-      conversationId: conversationId ?? undefined,
+      conversationId,
     })
-    // Rolling deploy: older clients read the assistant thread without an id.
-    const conversation = conversationId
-      ? await getOwnedAssistantConversation(pool, user.id, query.conversationId)
-      : ((await getLatestAssistantConversation(pool, user.id)) ??
-        (await createAssistantConversation(pool, user.id)))
+    const conversation = await getOwnedAssistantConversation(
+      pool,
+      user.id,
+      query.conversationId,
+    )
     const page = await listMessages(pool, conversation.id, {
       beforeSeq: query.before,
       limit: query.limit,
@@ -343,8 +368,10 @@ app.get('/api/conversations/:kind/messages', async (context) => {
 app.delete('/api/conversations/:id', async (context) => {
   const { authUserId } = await requireAuth(context.req.raw)
   const pool = getPool()
-  const { user } = await resolveAppUser(pool, authUserId)
-  await deleteAssistantConversation(pool, user.id, context.req.param('id'))
+  const { user, aiEligible, aiReason } = await resolveAppUser(pool, authUserId)
+  assertAiEligible({ aiEligible, aiReason })
+  const conversationId = z.string().uuid().parse(context.req.param('id'))
+  await deleteAssistantConversation(pool, user.id, conversationId)
   return context.json({ ok: true })
 })
 
@@ -426,7 +453,13 @@ app.post('/api/chat/assistant', async (context) => {
   assertAiEligible({ aiEligible, aiReason })
   const conversationId =
     input.conversationId === undefined
-      ? ((await getLatestAssistantConversation(pool, user.id))?.id ?? undefined)
+      ? ((
+          (await findAssistantConversationByClientId(
+            pool,
+            user.id,
+            input.clientId,
+          )) ?? (await getLatestAssistantConversation(pool, user.id))
+        )?.id ?? undefined)
       : (input.conversationId ?? undefined)
   if (conversationId) {
     await getOwnedAssistantConversation(pool, user.id, conversationId)

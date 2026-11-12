@@ -407,7 +407,7 @@ describe('ChatShell', () => {
     expect(assistantThreadOptions()?.conversationId).toBe(latest.id)
   })
 
-  it('switches to a selected chat', async () => {
+  it('switches to a selected chat and clears transient state', async () => {
     const user = userEvent.setup()
     const second = conversation({
       id: 'conversation-2',
@@ -415,6 +415,8 @@ describe('ChatShell', () => {
       lastMessageAt: '2026-11-11T09:00:00.000Z',
     })
     setup({}, [conversation(), second])
+    const reset = vi.fn()
+    vi.mocked(useChatThread).mockReturnValue(thread({ reset }))
     render(<ChatShell />)
 
     await user.click(
@@ -424,6 +426,7 @@ describe('ChatShell', () => {
       screen.getByRole('button', { name: 'Open chat Second chat' }),
     )
 
+    expect(reset).toHaveBeenCalled()
     expect(assistantThreadOptions()?.conversationId).toBe(second.id)
   })
 
@@ -500,6 +503,52 @@ describe('ChatShell', () => {
     )
 
     expect(composer).toHaveValue('first draft')
+  })
+
+  it('keeps a draft typed while history is still loading', async () => {
+    const user = userEvent.setup()
+    setup()
+    vi.mocked(useAssistantConversations).mockReturnValue(
+      history([], { isLoading: true }) as unknown as ReturnType<
+        typeof useAssistantConversations
+      >,
+    )
+    const { rerender } = render(<ChatShell />)
+
+    const composer = screen.getByRole('textbox', {
+      name: 'Message Portfolio assistant',
+    })
+    await user.type(composer, 'typed while loading')
+
+    vi.mocked(useAssistantConversations).mockReturnValue(
+      history([conversation()]) as unknown as ReturnType<
+        typeof useAssistantConversations
+      >,
+    )
+    rerender(<ChatShell />)
+
+    expect(composer).toHaveValue('typed while loading')
+    expect(assistantThreadOptions()?.conversationId).toBeNull()
+  })
+
+  it('does not request assistant history in the owner inbox', async () => {
+    const user = userEvent.setup()
+    setup({
+      isOwner: true,
+      user: {
+        id: 'user-1',
+        githubLogin: 'visitor',
+        githubCreatedAt: '2020-01-01T00:00:00.000Z',
+        role: 'owner',
+      },
+    })
+    render(<ChatShell />)
+
+    await user.click(screen.getByRole('button', { name: /inbox/i }))
+
+    expect(vi.mocked(useAssistantConversations).mock.calls.at(-1)?.[0]).toBe(
+      false,
+    )
   })
 
   it('deletes the active chat and falls back to the newest remaining', async () => {

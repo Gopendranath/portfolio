@@ -13,6 +13,7 @@ import { createMessage, getOrCreateConversation } from '../chat/conversations'
 import {
   createAssistantConversation,
   deleteAssistantConversation,
+  findAssistantConversationByClientId,
   getLatestAssistantConversation,
   getOwnedAssistantConversation,
   listAssistantConversations,
@@ -104,6 +105,34 @@ describe.skipIf(!hasDatabase)('assistant history helpers', () => {
     ).resolves.toEqual({ id: newer.id })
   })
 
+  it('finds a conversation by client id for retries', async () => {
+    const conversation = await createAssistantConversation(
+      requirePool(),
+      userId,
+    )
+    await createMessage(requirePool(), {
+      conversationId: conversation.id,
+      author: 'user',
+      body: 'retry target',
+      clientId: 'history-client-0001',
+    })
+
+    await expect(
+      findAssistantConversationByClientId(
+        requirePool(),
+        userId,
+        'history-client-0001',
+      ),
+    ).resolves.toEqual({ id: conversation.id })
+    await expect(
+      findAssistantConversationByClientId(
+        requirePool(),
+        userId,
+        'history-client-missing',
+      ),
+    ).resolves.toBeNull()
+  })
+
   it('keeps one owner conversation per user', async () => {
     const first = await getOrCreateConversation(requirePool(), userId, 'owner')
     const second = await getOrCreateConversation(requirePool(), userId, 'owner')
@@ -187,6 +216,46 @@ describe.skipIf(!hasDatabase)('assistant history helpers', () => {
     })
     expect(next.conversations[0]?.id).toBe(first.id)
     expect(next.hasMore).toBe(false)
+  })
+
+  it('keeps microsecond cursor precision between pages', async () => {
+    const first = await createAssistantConversation(requirePool(), userId)
+    const second = await createAssistantConversation(requirePool(), userId)
+    await createMessage(requirePool(), {
+      conversationId: first.id,
+      author: 'user',
+      body: 'first microsecond',
+      clientId: 'history-micro-0001',
+    })
+    await createMessage(requirePool(), {
+      conversationId: second.id,
+      author: 'user',
+      body: 'second microsecond',
+      clientId: 'history-micro-0002',
+    })
+    await requirePool().query(
+      `update conversations
+          set last_message_at = '2026-11-12 09:00:00.123456+00'
+        where id = $1`,
+      [first.id],
+    )
+    await requirePool().query(
+      `update conversations
+          set last_message_at = '2026-11-12 09:00:00.123100+00'
+        where id = $1`,
+      [second.id],
+    )
+
+    const page = await listAssistantConversations(requirePool(), userId, {
+      limit: 1,
+    })
+    const next = await listAssistantConversations(requirePool(), userId, {
+      limit: 1,
+      before: page.nextCursor ?? undefined,
+    })
+
+    expect(page.conversations[0]?.id).toBe(first.id)
+    expect(next.conversations[0]?.id).toBe(second.id)
   })
 
   it('normalizes and truncates titles', () => {
