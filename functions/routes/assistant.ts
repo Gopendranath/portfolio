@@ -18,8 +18,9 @@ import { streamTurn } from '../http/sse'
 
 export const assistantRouter = new Hono()
   .post('/api/chat/assistant', async (context) => {
-    const { pool, app } = await requireAppUser(context)
-    const input = await parseBody(assistantSendSchema, context.req.raw)
+    const { pool, app, input } = await requireAppUser(context, () =>
+      parseBody(assistantSendSchema, context.req.raw),
+    )
     const { user, aiEligible, aiReason } = app
     assertAiEligible({ aiEligible, aiReason })
     const conversationId =
@@ -45,8 +46,9 @@ export const assistantRouter = new Hono()
     return streamTurn(context, pool, turn, gateway)
   })
   .post('/api/chat/assistant/edit', async (context) => {
-    const { pool, app } = await requireAppUser(context)
-    const input = await parseBody(assistantEditSchema, context.req.raw)
+    const { pool, app, input } = await requireAppUser(context, () =>
+      parseBody(assistantEditSchema, context.req.raw),
+    )
     const { user, aiEligible, aiReason } = app
     assertAiEligible({ aiEligible, aiReason })
     await assertAiRateLimits(context, pool, user.id)
@@ -61,8 +63,9 @@ export const assistantRouter = new Hono()
     return streamTurn(context, pool, turn, gateway)
   })
   .post('/api/chat/assistant/retry', async (context) => {
-    const { pool, app } = await requireAppUser(context)
-    const input = await parseBody(assistantRetrySchema, context.req.raw)
+    const { pool, app, input } = await requireAppUser(context, () =>
+      parseBody(assistantRetrySchema, context.req.raw),
+    )
     const { user, aiEligible, aiReason } = app
     assertAiEligible({ aiEligible, aiReason })
     await assertAiRateLimits(context, pool, user.id)

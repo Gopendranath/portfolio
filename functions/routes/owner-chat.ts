@@ -38,14 +38,16 @@ async function handleOwnerSend(
 
 export const ownerChatRouter = new Hono()
   .post('/api/chat/owner', async (context) => {
-    const { pool, app } = await requireAppUser(context)
-    const input = await parseBody(sendMessageSchema, context.req.raw)
+    const { pool, app, input } = await requireAppUser(context, () =>
+      parseBody(sendMessageSchema, context.req.raw),
+    )
     const { user } = app
     return handleOwnerSend(context, pool, user, input)
   })
   .post('/api/chat/owner/retry', async (context) => {
-    const { pool, app } = await requireAppUser(context)
-    const input = await parseBody(ownerRetrySchema, context.req.raw)
+    const { pool, app, input } = await requireAppUser(context, () =>
+      parseBody(ownerRetrySchema, context.req.raw),
+    )
     const { user } = app
     return handleOwnerSend(context, pool, user, input)
   })

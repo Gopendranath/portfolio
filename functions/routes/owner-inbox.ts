@@ -43,8 +43,9 @@ export const ownerInboxRouter = new Hono()
     return context.json(page)
   })
   .post('/api/owner/threads/:userId/messages', async (context) => {
-    const { pool, app } = await requireAppUser(context)
-    const input = await parseBody(sendMessageSchema, context.req.raw)
+    const { pool, app, input } = await requireAppUser(context, () =>
+      parseBody(sendMessageSchema, context.req.raw),
+    )
     const { user, isOwner } = app
     assertOwner(isOwner)
     assertAllowedRateLimit(

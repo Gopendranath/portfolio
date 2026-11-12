@@ -25,19 +25,27 @@ import { assertAiEligible, assertAllowedRateLimit } from '../http/guards'
 
 export const conversationsRouter = new Hono()
   .get('/api/conversations/assistant', async (context) => {
-    const { pool, app } = await requireAppUser(context)
-    const query = assistantHistoryQuerySchema.parse({
-      limit: context.req.query('limit'),
-      before: context.req.query('before'),
-    })
+    const {
+      pool,
+      app,
+      input: query,
+    } = await requireAppUser(context, () =>
+      assistantHistoryQuerySchema.parse({
+        limit: context.req.query('limit'),
+        before: context.req.query('before'),
+      }),
+    )
     const { user, aiEligible, aiReason } = app
     assertAiEligible({ aiEligible, aiReason })
     const page = await listAssistantConversations(pool, user.id, query)
     return context.json(page)
   })
   .get('/api/conversations/:kind/messages', async (context) => {
-    const { pool, app } = await requireAppUser(context)
-    const kind = chatKindSchema.parse(context.req.param('kind'))
+    const {
+      pool,
+      app,
+      input: kind,
+    } = await requireAppUser(context, () => chatKindSchema.parse(context.req.param('kind')))
     const { user, aiEligible, aiReason } = app
 
     if (kind === 'assistant') {
@@ -99,8 +107,9 @@ export const conversationsRouter = new Hono()
     return context.json({ ok: true })
   })
   .patch('/api/messages/:id', async (context) => {
-    const { pool, app } = await requireAppUser(context)
-    const input = await parseBody(editMessageSchema, context.req.raw)
+    const { pool, app, input } = await requireAppUser(context, () =>
+      parseBody(editMessageSchema, context.req.raw),
+    )
     const { user, isOwner } = app
     assertAllowedRateLimit(
       context,
