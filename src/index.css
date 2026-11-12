@@ -185,3 +185,10 @@
     }
   }
 }
+
+/* Native modal dialogs live in the top layer, above the custom cursor portal.
+   Restore the platform cursor while one is open so the pointer never vanishes. */
+html:has(dialog[open]),
+html:has(dialog[open]) * {
+  cursor: auto !important;
+}
