@@ -1,3 +1,4 @@
+import type { Context } from 'hono'
 import { Hono } from 'hono'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import {
@@ -18,10 +19,30 @@ import {
 import { getCorsHeaders } from './chat/cors'
 import { getPool } from './chat/db'
 import { ApiError, toApiError } from './chat/errors'
+import { consumeUserRateLimit, type RateLimitResult } from './chat/rate-limit'
 import { resolveAppUser } from './chat/users'
 import { parseBody } from './chat/validation'
 
 const app = new Hono()
+
+function assertAllowedRateLimit(
+  context: Context,
+  result: RateLimitResult,
+): void {
+  if (result.allowed) {
+    return
+  }
+
+  context.header('Retry-After', String(result.retryAfterSeconds))
+  throw new ApiError(
+    'RATE_LIMITED',
+    result.reason === 'minute'
+      ? 'Too many messages. Try again in a minute.'
+      : 'Daily message limit reached. Try again tomorrow.',
+    429,
+    true,
+  )
+}
 
 app.use('*', async (context, next) => {
   for (const [key, value] of getCorsHeaders(context.req.raw)) {
@@ -62,6 +83,15 @@ app.post('/api/chat/owner', async (context) => {
   const input = await parseBody(sendMessageSchema, context.req.raw)
   const pool = getPool()
   const { user } = await resolveAppUser(pool, authUserId)
+  assertAllowedRateLimit(
+    context,
+    await consumeUserRateLimit(pool, {
+      userId: user.id,
+      action: 'owner_send',
+      perMinute: 10,
+      perDay: 60,
+    }),
+  )
   const conversation = await getOrCreateConversation(pool, user.id, 'owner')
   const message = await createMessage(pool, {
     conversationId: conversation.id,
@@ -78,6 +108,15 @@ app.post('/api/chat/owner/retry', async (context) => {
   const input = await parseBody(ownerRetrySchema, context.req.raw)
   const pool = getPool()
   const { user } = await resolveAppUser(pool, authUserId)
+  assertAllowedRateLimit(
+    context,
+    await consumeUserRateLimit(pool, {
+      userId: user.id,
+      action: 'owner_send',
+      perMinute: 10,
+      perDay: 60,
+    }),
+  )
   const conversation = await getOrCreateConversation(pool, user.id, 'owner')
   const message = await createMessage(pool, {
     conversationId: conversation.id,
@@ -112,6 +151,15 @@ app.patch('/api/messages/:id', async (context) => {
   const input = await parseBody(editMessageSchema, context.req.raw)
   const pool = getPool()
   const { user } = await resolveAppUser(pool, authUserId)
+  assertAllowedRateLimit(
+    context,
+    await consumeUserRateLimit(pool, {
+      userId: user.id,
+      action: 'edit',
+      perMinute: 10,
+      perDay: 60,
+    }),
+  )
   const message = await editMessage(pool, {
     messageId: context.req.param('id'),
     userId: user.id,
