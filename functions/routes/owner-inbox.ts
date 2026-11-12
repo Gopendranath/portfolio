@@ -4,8 +4,6 @@ import {
   sendMessageSchema,
   threadPaginationSchema,
 } from '../../src/lib/chat/protocol'
-import { requireAuth } from '../chat/auth'
-import { getPool } from '../chat/db'
 import {
   createOwnerReply,
   getOwnerThreadMessages,
@@ -14,15 +12,14 @@ import {
   markOwnerUnread,
 } from '../chat/inbox'
 import { consumeUserRateLimit } from '../chat/rate-limit'
-import { resolveAppUser } from '../chat/users'
 import { parseBody } from '../chat/validation'
+import { requireAppUser } from '../http/app-user'
 import { assertAllowedRateLimit, assertOwner } from '../http/guards'
 
 export const ownerInboxRouter = new Hono()
   .get('/api/owner/threads', async (context) => {
-    const { authUserId } = await requireAuth(context.req.raw)
-    const pool = getPool()
-    const { isOwner } = await resolveAppUser(pool, authUserId)
+    const { pool, app } = await requireAppUser(context)
+    const { isOwner } = app
     assertOwner(isOwner)
     const query = threadPaginationSchema.parse({
       limit: context.req.query('limit'),
@@ -32,9 +29,8 @@ export const ownerInboxRouter = new Hono()
     return context.json(page)
   })
   .get('/api/owner/threads/:userId/messages', async (context) => {
-    const { authUserId } = await requireAuth(context.req.raw)
-    const pool = getPool()
-    const { isOwner } = await resolveAppUser(pool, authUserId)
+    const { pool, app } = await requireAppUser(context)
+    const { isOwner } = app
     assertOwner(isOwner)
     const query = paginationSchema.parse({
       limit: context.req.query('limit'),
@@ -47,10 +43,9 @@ export const ownerInboxRouter = new Hono()
     return context.json(page)
   })
   .post('/api/owner/threads/:userId/messages', async (context) => {
-    const { authUserId } = await requireAuth(context.req.raw)
+    const { pool, app } = await requireAppUser(context)
     const input = await parseBody(sendMessageSchema, context.req.raw)
-    const pool = getPool()
-    const { user, isOwner } = await resolveAppUser(pool, authUserId)
+    const { user, isOwner } = app
     assertOwner(isOwner)
     assertAllowedRateLimit(
       context,
@@ -69,17 +64,15 @@ export const ownerInboxRouter = new Hono()
     return context.json({ message })
   })
   .post('/api/owner/threads/:userId/read', async (context) => {
-    const { authUserId } = await requireAuth(context.req.raw)
-    const pool = getPool()
-    const { isOwner } = await resolveAppUser(pool, authUserId)
+    const { pool, app } = await requireAppUser(context)
+    const { isOwner } = app
     assertOwner(isOwner)
     await markOwnerRead(pool, context.req.param('userId'))
     return context.json({ ok: true })
   })
   .post('/api/owner/threads/:userId/unread', async (context) => {
-    const { authUserId } = await requireAuth(context.req.raw)
-    const pool = getPool()
-    const { isOwner } = await resolveAppUser(pool, authUserId)
+    const { pool, app } = await requireAppUser(context)
+    const { isOwner } = app
     assertOwner(isOwner)
     await markOwnerUnread(pool, context.req.param('userId'))
     return context.json({ ok: true })

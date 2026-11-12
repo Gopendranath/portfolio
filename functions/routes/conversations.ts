@@ -7,9 +7,7 @@ import {
   editMessageSchema,
   paginationSchema,
 } from '../../src/lib/chat/protocol'
-import { requireAuth } from '../chat/auth'
 import { getOrCreateConversation, markRead } from '../chat/conversations'
-import { getPool } from '../chat/db'
 import { ApiError } from '../chat/errors'
 import {
   deleteAssistantConversation,
@@ -21,28 +19,26 @@ import { markUserOwnerUnread } from '../chat/inbox'
 import { getMessagePage } from '../chat/message-page'
 import { editMessage } from '../chat/messages'
 import { consumeUserRateLimit } from '../chat/rate-limit'
-import { resolveAppUser } from '../chat/users'
 import { parseBody } from '../chat/validation'
+import { requireAppUser } from '../http/app-user'
 import { assertAiEligible, assertAllowedRateLimit } from '../http/guards'
 
 export const conversationsRouter = new Hono()
   .get('/api/conversations/assistant', async (context) => {
-    const { authUserId } = await requireAuth(context.req.raw)
+    const { pool, app } = await requireAppUser(context)
     const query = assistantHistoryQuerySchema.parse({
       limit: context.req.query('limit'),
       before: context.req.query('before'),
     })
-    const pool = getPool()
-    const { user, aiEligible, aiReason } = await resolveAppUser(pool, authUserId)
+    const { user, aiEligible, aiReason } = app
     assertAiEligible({ aiEligible, aiReason })
     const page = await listAssistantConversations(pool, user.id, query)
     return context.json(page)
   })
   .get('/api/conversations/:kind/messages', async (context) => {
-    const { authUserId } = await requireAuth(context.req.raw)
+    const { pool, app } = await requireAppUser(context)
     const kind = chatKindSchema.parse(context.req.param('kind'))
-    const pool = getPool()
-    const { user, aiEligible, aiReason } = await resolveAppUser(pool, authUserId)
+    const { user, aiEligible, aiReason } = app
 
     if (kind === 'assistant') {
       assertAiEligible({ aiEligible, aiReason })
@@ -95,19 +91,17 @@ export const conversationsRouter = new Hono()
     return context.json(page)
   })
   .delete('/api/conversations/:id', async (context) => {
-    const { authUserId } = await requireAuth(context.req.raw)
-    const pool = getPool()
-    const { user, aiEligible, aiReason } = await resolveAppUser(pool, authUserId)
+    const { pool, app } = await requireAppUser(context)
+    const { user, aiEligible, aiReason } = app
     assertAiEligible({ aiEligible, aiReason })
     const conversationId = z.string().uuid().parse(context.req.param('id'))
     await deleteAssistantConversation(pool, user.id, conversationId)
     return context.json({ ok: true })
   })
   .patch('/api/messages/:id', async (context) => {
-    const { authUserId } = await requireAuth(context.req.raw)
+    const { pool, app } = await requireAppUser(context)
     const input = await parseBody(editMessageSchema, context.req.raw)
-    const pool = getPool()
-    const { user, isOwner } = await resolveAppUser(pool, authUserId)
+    const { user, isOwner } = app
     assertAllowedRateLimit(
       context,
       await consumeUserRateLimit(pool, {
@@ -127,24 +121,21 @@ export const conversationsRouter = new Hono()
     return context.json({ message })
   })
   .post('/api/conversations/owner/read', async (context) => {
-    const { authUserId } = await requireAuth(context.req.raw)
-    const pool = getPool()
-    const { user } = await resolveAppUser(pool, authUserId)
+    const { pool, app } = await requireAppUser(context)
+    const { user } = app
     const conversation = await getOrCreateConversation(pool, user.id, 'owner')
     await markRead(pool, conversation.id, 'user')
     return context.json({ ok: true })
   })
   .post('/api/conversations/owner/unread', async (context) => {
-    const { authUserId } = await requireAuth(context.req.raw)
-    const pool = getPool()
-    const { user } = await resolveAppUser(pool, authUserId)
+    const { pool, app } = await requireAppUser(context)
+    const { user } = app
     await markUserOwnerUnread(pool, user.id)
     return context.json({ ok: true })
   })
   .post('/api/conversations/:id/read', async (context) => {
-    const { authUserId } = await requireAuth(context.req.raw)
-    const pool = getPool()
-    const { user } = await resolveAppUser(pool, authUserId)
+    const { pool, app } = await requireAppUser(context)
+    const { user } = app
     const { rows } = await pool.query<{ id: string }>(
       'select id from conversations where id = $1 and user_id = $2',
       [context.req.param('id'), user.id],

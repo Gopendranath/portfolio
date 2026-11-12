@@ -2,13 +2,12 @@ import type { Context } from 'hono'
 import { Hono } from 'hono'
 import type { Pool } from 'pg'
 import { ownerRetrySchema, sendMessageSchema } from '../../src/lib/chat/protocol'
-import { requireAuth } from '../chat/auth'
 import { getOrCreateConversation } from '../chat/conversations'
-import { getPool } from '../chat/db'
 import { createMessage } from '../chat/messages'
 import { consumeUserRateLimit } from '../chat/rate-limit'
-import { type AppUser, resolveAppUser } from '../chat/users'
+import type { AppUser } from '../chat/users'
 import { parseBody } from '../chat/validation'
+import { requireAppUser } from '../http/app-user'
 import { assertAllowedRateLimit } from '../http/guards'
 
 async function handleOwnerSend(
@@ -39,16 +38,14 @@ async function handleOwnerSend(
 
 export const ownerChatRouter = new Hono()
   .post('/api/chat/owner', async (context) => {
-    const { authUserId } = await requireAuth(context.req.raw)
+    const { pool, app } = await requireAppUser(context)
     const input = await parseBody(sendMessageSchema, context.req.raw)
-    const pool = getPool()
-    const { user } = await resolveAppUser(pool, authUserId)
+    const { user } = app
     return handleOwnerSend(context, pool, user, input)
   })
   .post('/api/chat/owner/retry', async (context) => {
-    const { authUserId } = await requireAuth(context.req.raw)
+    const { pool, app } = await requireAppUser(context)
     const input = await parseBody(ownerRetrySchema, context.req.raw)
-    const pool = getPool()
-    const { user } = await resolveAppUser(pool, authUserId)
+    const { user } = app
     return handleOwnerSend(context, pool, user, input)
   })

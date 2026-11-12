@@ -5,25 +5,22 @@ import {
   assistantSendSchema,
 } from '../../src/lib/chat/protocol'
 import { beginAssistantEdit, beginAssistantRetry, beginAssistantTurn } from '../chat/ai-turns'
-import { requireAuth } from '../chat/auth'
-import { getPool } from '../chat/db'
 import {
   findAssistantConversationByClientId,
   getLatestAssistantConversation,
   getOwnedAssistantConversation,
 } from '../chat/history'
 import { createOpenRouterGateway } from '../chat/openrouter'
-import { resolveAppUser } from '../chat/users'
 import { parseBody } from '../chat/validation'
+import { requireAppUser } from '../http/app-user'
 import { assertAiEligible, assertAiRateLimits } from '../http/guards'
 import { streamTurn } from '../http/sse'
 
 export const assistantRouter = new Hono()
   .post('/api/chat/assistant', async (context) => {
-    const { authUserId } = await requireAuth(context.req.raw)
+    const { pool, app } = await requireAppUser(context)
     const input = await parseBody(assistantSendSchema, context.req.raw)
-    const pool = getPool()
-    const { user, aiEligible, aiReason } = await resolveAppUser(pool, authUserId)
+    const { user, aiEligible, aiReason } = app
     assertAiEligible({ aiEligible, aiReason })
     const conversationId =
       input.conversationId === undefined
@@ -48,10 +45,9 @@ export const assistantRouter = new Hono()
     return streamTurn(context, pool, turn, gateway)
   })
   .post('/api/chat/assistant/edit', async (context) => {
-    const { authUserId } = await requireAuth(context.req.raw)
+    const { pool, app } = await requireAppUser(context)
     const input = await parseBody(assistantEditSchema, context.req.raw)
-    const pool = getPool()
-    const { user, aiEligible, aiReason } = await resolveAppUser(pool, authUserId)
+    const { user, aiEligible, aiReason } = app
     assertAiEligible({ aiEligible, aiReason })
     await assertAiRateLimits(context, pool, user.id)
 
@@ -65,10 +61,9 @@ export const assistantRouter = new Hono()
     return streamTurn(context, pool, turn, gateway)
   })
   .post('/api/chat/assistant/retry', async (context) => {
-    const { authUserId } = await requireAuth(context.req.raw)
+    const { pool, app } = await requireAppUser(context)
     const input = await parseBody(assistantRetrySchema, context.req.raw)
-    const pool = getPool()
-    const { user, aiEligible, aiReason } = await resolveAppUser(pool, authUserId)
+    const { user, aiEligible, aiReason } = app
     assertAiEligible({ aiEligible, aiReason })
     await assertAiRateLimits(context, pool, user.id)
 
