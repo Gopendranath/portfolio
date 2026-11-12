@@ -292,4 +292,142 @@ describe.skipIf(!hasDatabase)('assistant turns', () => {
     )
     expect(rows[0]?.status).toBe('superseded')
   })
+
+  it('creates a new conversation and title when no id is given', async () => {
+    const turn = await beginAssistantTurn(requirePool(), {
+      userId,
+      body: '  first   chat question  ',
+      clientId: 'client-ai-0008',
+    })
+
+    expect(turn.conversationId).not.toBe(conversationId)
+    await expect(conversationTitle(turn.conversationId)).resolves.toBe(
+      'first chat question',
+    )
+  })
+
+  it('reuses an owned conversation', async () => {
+    const turn = await beginAssistantTurn(requirePool(), {
+      userId,
+      body: 'reuse me',
+      clientId: 'client-ai-0009',
+      conversationId,
+    })
+
+    expect(turn.conversationId).toBe(conversationId)
+  })
+
+  it('rejects a conversation owned by another user', async () => {
+    const otherUserId = await createTestUser()
+    const otherConversation = await getOrCreateConversation(
+      requirePool(),
+      otherUserId,
+      'assistant',
+    )
+
+    await expect(
+      beginAssistantTurn(requirePool(), {
+        userId,
+        body: 'stolen',
+        clientId: 'client-ai-0010',
+        conversationId: otherConversation.id,
+      }),
+    ).rejects.toMatchObject({ code: 'NOT_FOUND' })
+
+    await requirePool().query('delete from app_users where id = $1', [
+      otherUserId,
+    ])
+  })
+
+  it('rejects an owner conversation', async () => {
+    const owner = await getOrCreateConversation(
+      requirePool(),
+      userId,
+      'owner',
+    )
+
+    await expect(
+      beginAssistantTurn(requirePool(), {
+        userId,
+        body: 'wrong kind',
+        clientId: 'client-ai-0011',
+        conversationId: owner.id,
+      }),
+    ).rejects.toMatchObject({ code: 'NOT_FOUND' })
+  })
+
+  it('retitles when the earliest user message is edited', async () => {
+    const turn = await beginAssistantTurn(requirePool(), {
+      userId,
+      body: 'first question',
+      clientId: 'client-ai-0012',
+      conversationId,
+    })
+
+    await beginAssistantEdit(requirePool(), {
+      userId,
+      messageId: turn.userMessage.id,
+      body: 'edited first question',
+    })
+
+    await expect(conversationTitle(conversationId)).resolves.toBe(
+      'edited first question',
+    )
+  })
+
+  it('does not retitle when a later user message is edited', async () => {
+    const first = await beginAssistantTurn(requirePool(), {
+      userId,
+      body: 'first question',
+      clientId: 'client-ai-0013',
+      conversationId,
+    })
+    const later = await beginAssistantTurn(requirePool(), {
+      userId,
+      body: 'later question',
+      clientId: 'client-ai-0014',
+      conversationId,
+    })
+    expect(first.conversationId).toBe(conversationId)
+
+    await beginAssistantEdit(requirePool(), {
+      userId,
+      messageId: later.userMessage.id,
+      body: 'edited later question',
+    })
+
+    await expect(conversationTitle(conversationId)).resolves.toBe(
+      'first question',
+    )
+  })
+
+  it('does not retitle on retry', async () => {
+    const turn = await beginAssistantTurn(requirePool(), {
+      userId,
+      body: 'retry title',
+      clientId: 'client-ai-0015',
+      conversationId,
+    })
+    await requirePool().query(
+      `update messages set status = 'failed', body = 'broken' where id = $1`,
+      [turn.assistantMessage.id],
+    )
+
+    await beginAssistantRetry(requirePool(), {
+      userId,
+      assistantMessageId: turn.assistantMessage.id,
+    })
+
+    await expect(conversationTitle(conversationId)).resolves.toBe(
+      'retry title',
+    )
+  })
 })
+
+async function conversationTitle(conversationId: string): Promise<string | null> {
+  const { rows } = await requirePool().query<{ title: string | null }>(
+    'select title from conversations where id = $1',
+    [conversationId],
+  )
+  return rows[0]?.title ?? null
+}

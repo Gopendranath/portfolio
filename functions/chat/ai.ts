@@ -5,12 +5,17 @@ import {
 } from '../../src/lib/chat/protocol'
 import {
   createMessage,
-  getOrCreateConversation,
   MESSAGE_COLUMNS,
   type MessageRow,
   toMessageDTO,
 } from './conversations'
 import { ApiError } from './errors'
+import {
+  createAssistantConversation,
+  getOwnedAssistantConversation,
+  setAssistantTitleIfEmpty,
+  titleFromBody,
+} from './history'
 import type { OpenRouterGateway } from './openrouter'
 import { OPENROUTER_MODEL } from './openrouter'
 import { buildAiContext, buildSystemPrompt } from './prompt'
@@ -44,19 +49,27 @@ export interface AssistantTurn {
 
 export async function beginAssistantTurn(
   pool: Pool,
-  input: { userId: string; body: string; clientId: string },
+  input: {
+    userId: string
+    body: string
+    clientId: string
+    conversationId?: string
+  },
 ): Promise<AssistantTurn> {
-  const conversation = await getOrCreateConversation(
-    pool,
-    input.userId,
-    'assistant',
-  )
+  const conversation = input.conversationId
+    ? await getOwnedAssistantConversation(
+        pool,
+        input.userId,
+        input.conversationId,
+      )
+    : await createAssistantConversation(pool, input.userId)
   const userMessage = await createMessage(pool, {
     conversationId: conversation.id,
     author: 'user',
     body: input.body,
     clientId: input.clientId,
   })
+  await setAssistantTitleIfEmpty(pool, conversation.id, input.body)
 
   const existing = await pool.query<{ id: string }>(
     `select id from messages
@@ -150,6 +163,23 @@ export async function beginAssistantEdit(
         where id = $1
         returning ${MESSAGE_COLUMNS}`,
       [existing.id, input.body, now],
+    )
+
+    await client.query(
+      `update conversations c
+          set title = $3, updated_at = now()
+        where c.id = $1
+          and c.kind = 'assistant'
+          and not exists (
+            select 1
+              from messages m
+             where m.conversation_id = c.id
+               and m.author = 'user'
+               and m.deleted_at is null
+               and m.status <> 'superseded'
+               and m.seq < $2
+          )`,
+      [existing.conversation_id, existing.seq, titleFromBody(input.body)],
     )
 
     await client.query(
