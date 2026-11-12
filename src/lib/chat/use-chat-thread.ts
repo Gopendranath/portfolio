@@ -1,0 +1,486 @@
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import {
+  ChatApiError,
+  chatFetch,
+  type StreamHandlers,
+  streamChat,
+} from './api-client'
+import type { ChatKind, ChatMessageDTO, MessagePage } from './protocol'
+import { MAX_MESSAGE_LENGTH } from './protocol'
+
+export interface ViewMessage extends Omit<ChatMessageDTO, 'status'> {
+  status: ChatMessageDTO['status'] | 'sending'
+  errorMessage?: string
+}
+
+interface UseChatThreadOptions {
+  kind: ChatKind
+  ownerThreadUserId?: string
+  enabled: boolean
+  pollMs?: number
+}
+
+export interface ChatThreadController {
+  messages: ViewMessage[]
+  isLoading: boolean
+  error: string | null
+  hasMore: boolean
+  isFetchingOlder: boolean
+  isSending: boolean
+  isStreaming: boolean
+  loadOlder: () => Promise<void>
+  send: (body: string) => Promise<void>
+  stop: () => void
+  retry: (message: ViewMessage) => Promise<void>
+  edit: (messageId: string, body: string) => Promise<void>
+  refetch: () => Promise<void>
+}
+
+function toViewMessage(message: ChatMessageDTO): ViewMessage {
+  return { ...message }
+}
+
+function optimisticMessage(clientId: string, body: string): ViewMessage {
+  return {
+    id: `pending-${clientId}`,
+    seq: Number.MAX_SAFE_INTEGER,
+    conversationId: '',
+    author: 'user',
+    body,
+    status: 'sending',
+    clientId,
+    sentAt: new Date().toISOString(),
+    editedAt: null,
+    errorCode: null,
+  }
+}
+
+function errorMessage(error: unknown): string {
+  if (error instanceof ChatApiError) {
+    return error.message
+  }
+  return error instanceof Error ? error.message : 'Something went wrong'
+}
+
+export function useChatThread({
+  kind,
+  ownerThreadUserId,
+  enabled,
+  pollMs,
+}: UseChatThreadOptions): ChatThreadController {
+  const queryClient = useQueryClient()
+  const [pending, setPending] = useState<ViewMessage[]>([])
+  const [streaming, setStreaming] = useState<ViewMessage | null>(null)
+  const [isSending, setIsSending] = useState(false)
+  const [isStreaming, setIsStreaming] = useState(false)
+  const abortRef = useRef<AbortController | null>(null)
+
+  const isOwnerInbox = Boolean(ownerThreadUserId)
+  const path = isOwnerInbox
+    ? `/api/owner/threads/${ownerThreadUserId}/messages`
+    : `/api/conversations/${kind}/messages`
+
+  const query = useInfiniteQuery({
+    queryKey: ['chat', 'messages', kind, ownerThreadUserId ?? 'me'],
+    queryFn: ({ pageParam }) =>
+      chatFetch<MessagePage>(
+        `${path}?limit=10${pageParam === undefined ? '' : `&before=${pageParam}`}`,
+      ),
+    initialPageParam: undefined as number | undefined,
+    getNextPageParam: (last) => last.nextCursor ?? undefined,
+    enabled,
+    staleTime: 0,
+    refetchOnWindowFocus: false,
+    refetchInterval: pollMs ?? false,
+    retry: false,
+  })
+
+  const threadKey = `${kind}:${ownerThreadUserId ?? 'me'}`
+
+  useEffect(() => {
+    if (!threadKey) {
+      return
+    }
+    setPending([])
+    setStreaming(null)
+    setIsSending(false)
+    setIsStreaming(false)
+    abortRef.current?.abort()
+    abortRef.current = null
+  }, [threadKey])
+
+  const persisted = query.data
+    ? [...query.data.pages].reverse().flatMap((page) => page.messages)
+    : []
+  const persistedClientIds = new Set(
+    persisted
+      .map((message) => message.clientId)
+      .filter((clientId): clientId is string => Boolean(clientId)),
+  )
+  const pendingMessages = pending.filter(
+    (message) => !message.clientId || !persistedClientIds.has(message.clientId),
+  )
+  const messages: ViewMessage[] = [
+    ...persisted.map(toViewMessage),
+    ...pendingMessages,
+    ...(streaming ? [streaming] : []),
+  ]
+
+  const refetch = useCallback(async () => {
+    await query.refetch()
+  }, [query])
+
+  const runStream = useCallback(
+    async (
+      streamPath: string,
+      body: unknown,
+      clientId: string,
+      userMessage: ViewMessage,
+      existingAssistantId?: string,
+    ) => {
+      const controller = new AbortController()
+      abortRef.current = controller
+      setIsStreaming(true)
+      setStreaming({
+        id: existingAssistantId ?? 'streaming-assistant',
+        seq: Number.MAX_SAFE_INTEGER + 1,
+        conversationId: userMessage.conversationId,
+        author: 'assistant',
+        body: '',
+        status: 'streaming',
+        clientId: null,
+        sentAt: new Date().toISOString(),
+        editedAt: null,
+        errorCode: null,
+      })
+
+      let receivedMeta = false
+      const handlers: StreamHandlers = {
+        onMeta: (meta) => {
+          receivedMeta = true
+          setPending((current) =>
+            current.map((message) =>
+              message.clientId === clientId
+                ? {
+                    ...message,
+                    id: meta.userMessageId,
+                    conversationId: meta.conversationId,
+                    status: 'complete',
+                  }
+                : message,
+            ),
+          )
+          setStreaming((current) =>
+            current
+              ? {
+                  ...current,
+                  id: meta.assistantMessageId,
+                  conversationId: meta.conversationId,
+                }
+              : current,
+          )
+        },
+        onDelta: (text) => {
+          setStreaming((current) =>
+            current ? { ...current, body: current.body + text } : current,
+          )
+        },
+        onDone: () => {
+          setStreaming(null)
+          setPending([])
+          setIsStreaming(false)
+          void queryClient.invalidateQueries({
+            queryKey: ['chat', 'messages', kind, ownerThreadUserId ?? 'me'],
+          })
+        },
+        onError: (error) => {
+          setStreaming((current) =>
+            current
+              ? {
+                  ...current,
+                  status: 'failed',
+                  errorCode: error.code,
+                  errorMessage: error.message,
+                }
+              : current,
+          )
+          setPending((current) =>
+            current.map((message) =>
+              message.clientId === clientId
+                ? {
+                    ...message,
+                    status: 'failed',
+                    errorMessage: error.message,
+                  }
+                : message,
+            ),
+          )
+          setIsStreaming(false)
+          if (receivedMeta) {
+            setStreaming(null)
+            setPending([])
+            void queryClient.invalidateQueries({
+              queryKey: ['chat', 'messages', kind, ownerThreadUserId ?? 'me'],
+            })
+          }
+        },
+      }
+
+      try {
+        await streamChat(streamPath, body, handlers, controller.signal)
+      } catch (error) {
+        if (controller.signal.aborted) {
+          setStreaming((current) =>
+            current
+              ? {
+                  ...current,
+                  status: 'failed',
+                  errorCode: 'ABORTED',
+                  errorMessage: 'The response was stopped.',
+                }
+              : current,
+          )
+        } else {
+          setStreaming((current) =>
+            current
+              ? {
+                  ...current,
+                  status: 'failed',
+                  errorCode: 'UPSTREAM_ERROR',
+                  errorMessage: errorMessage(error),
+                }
+              : current,
+          )
+        }
+        setIsStreaming(false)
+        if (receivedMeta) {
+          setStreaming(null)
+          setPending([])
+          void queryClient.invalidateQueries({
+            queryKey: ['chat', 'messages', kind, ownerThreadUserId ?? 'me'],
+          })
+        }
+      } finally {
+        abortRef.current = null
+      }
+    },
+    [kind, ownerThreadUserId, queryClient],
+  )
+
+  const send = useCallback(
+    async (body: string) => {
+      const trimmed = body.trim()
+      if (!trimmed || trimmed.length > MAX_MESSAGE_LENGTH) {
+        return
+      }
+
+      const clientId = crypto.randomUUID()
+      const optimistic = optimisticMessage(clientId, trimmed)
+      setPending((current) => [...current, optimistic])
+
+      if (kind === 'assistant' && !isOwnerInbox) {
+        await runStream(
+          '/api/chat/assistant',
+          { body: trimmed, clientId },
+          clientId,
+          optimistic,
+        )
+        return
+      }
+
+      setIsSending(true)
+      try {
+        await chatFetch(
+          isOwnerInbox
+            ? `/api/owner/threads/${ownerThreadUserId}/messages`
+            : '/api/chat/owner',
+          {
+            method: 'POST',
+            body: JSON.stringify({ body: trimmed, clientId }),
+          },
+        )
+        setPending((current) =>
+          current.filter((message) => message.clientId !== clientId),
+        )
+        await query.refetch()
+      } catch (error) {
+        setPending((current) =>
+          current.map((message) =>
+            message.clientId === clientId
+              ? {
+                  ...message,
+                  status: 'failed',
+                  errorMessage: errorMessage(error),
+                }
+              : message,
+          ),
+        )
+      } finally {
+        setIsSending(false)
+      }
+    },
+    [isOwnerInbox, kind, ownerThreadUserId, query, runStream],
+  )
+
+  const retry = useCallback(
+    async (message: ViewMessage) => {
+      if (message.author === 'assistant' && kind === 'assistant') {
+        await runStream(
+          '/api/chat/assistant/retry',
+          { assistantMessageId: message.id },
+          message.clientId ?? message.id,
+          message,
+          message.id,
+        )
+        return
+      }
+
+      if (!message.clientId) {
+        return
+      }
+
+      setPending((current) =>
+        current.map((item) =>
+          item.id === message.id
+            ? { ...item, status: 'sending', errorMessage: undefined }
+            : item,
+        ),
+      )
+      setIsSending(true)
+      try {
+        await chatFetch(
+          isOwnerInbox
+            ? `/api/owner/threads/${ownerThreadUserId}/messages`
+            : '/api/chat/owner/retry',
+          {
+            method: 'POST',
+            body: JSON.stringify({
+              body: message.body,
+              clientId: message.clientId,
+            }),
+          },
+        )
+        setPending((current) =>
+          current.filter((item) => item.id !== message.id),
+        )
+        await query.refetch()
+      } catch (error) {
+        setPending((current) =>
+          current.map((item) =>
+            item.id === message.id
+              ? {
+                  ...item,
+                  status: 'failed',
+                  errorMessage: errorMessage(error),
+                }
+              : item,
+          ),
+        )
+      } finally {
+        setIsSending(false)
+      }
+    },
+    [isOwnerInbox, kind, ownerThreadUserId, query, runStream],
+  )
+
+  const edit = useCallback(
+    async (messageId: string, body: string) => {
+      const trimmed = body.trim()
+      if (!trimmed || trimmed.length > MAX_MESSAGE_LENGTH) {
+        return
+      }
+
+      if (kind === 'assistant' && !isOwnerInbox) {
+        const controller = new AbortController()
+        abortRef.current = controller
+        setIsStreaming(true)
+        setStreaming({
+          id: 'streaming-edit',
+          seq: Number.MAX_SAFE_INTEGER + 1,
+          conversationId: '',
+          author: 'assistant',
+          body: '',
+          status: 'streaming',
+          clientId: null,
+          sentAt: new Date().toISOString(),
+          editedAt: null,
+          errorCode: null,
+        })
+        await streamChat(
+          '/api/chat/assistant/edit',
+          { messageId, body: trimmed },
+          {
+            onMeta: (meta) => {
+              setStreaming((current) =>
+                current ? { ...current, id: meta.assistantMessageId } : current,
+              )
+            },
+            onDelta: (text) => {
+              setStreaming((current) =>
+                current ? { ...current, body: current.body + text } : current,
+              )
+            },
+            onDone: () => {
+              setStreaming(null)
+              setIsStreaming(false)
+              void queryClient.invalidateQueries({
+                queryKey: ['chat', 'messages', kind, ownerThreadUserId ?? 'me'],
+              })
+            },
+            onError: (error) => {
+              setStreaming((current) =>
+                current
+                  ? {
+                      ...current,
+                      status: 'failed',
+                      errorCode: error.code,
+                      errorMessage: error.message,
+                    }
+                  : current,
+              )
+              setIsStreaming(false)
+            },
+          },
+          controller.signal,
+        )
+        abortRef.current = null
+        return
+      }
+
+      await chatFetch(`/api/messages/${messageId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ body: trimmed }),
+      })
+      await query.refetch()
+    },
+    [isOwnerInbox, kind, ownerThreadUserId, query, queryClient],
+  )
+
+  const stop = useCallback(() => {
+    abortRef.current?.abort()
+  }, [])
+
+  return {
+    messages,
+    isLoading: query.isLoading,
+    error:
+      query.error instanceof Error
+        ? query.error.message
+        : query.error
+          ? 'Could not load messages'
+          : null,
+    hasMore: query.hasNextPage,
+    isFetchingOlder: query.isFetchingNextPage,
+    isSending,
+    isStreaming,
+    loadOlder: async () => {
+      await query.fetchNextPage()
+    },
+    send,
+    stop,
+    retry,
+    edit,
+    refetch,
+  }
+}

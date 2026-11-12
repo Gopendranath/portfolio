@@ -24,7 +24,7 @@
   },
   "include": [
     "functions/**/*.ts",
-    "src/lib/chat/**/*.ts",
+    "src/lib/chat/protocol.ts",
     "src/data/profile.ts",
     "src/data/projects.ts",
     "src/data/about.ts",

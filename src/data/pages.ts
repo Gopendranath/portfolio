@@ -39,7 +39,7 @@ export const pageMeta = {
     path: '/chat',
     title: 'Chat — Gopendranath Sasmal',
     description:
-      'Preview the portfolio assistant and a direct owner thread. Messages stay on the page and are not sent.',
+      'Message Gopendranath directly or talk to the portfolio assistant. GitHub sign-in is required; the assistant is limited to accounts at least one year old.',
   },
   more: {
     path: '/more',

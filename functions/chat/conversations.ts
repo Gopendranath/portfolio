@@ -164,6 +164,7 @@ export async function editMessage(
     messageId: string
     userId: string
     body: string
+    allowOwner?: boolean
     now?: Date
   },
 ): Promise<ChatMessageDTO> {
@@ -191,12 +192,13 @@ export async function editMessage(
     )
 
     const existing = rows[0]
-    if (
-      !existing ||
-      existing.user_id !== input.userId ||
-      existing.kind !== 'owner' ||
-      existing.author !== 'user'
-    ) {
+    const canEdit =
+      existing &&
+      existing.kind === 'owner' &&
+      ((existing.author === 'user' && existing.user_id === input.userId) ||
+        (input.allowOwner === true && existing.author === 'owner'))
+
+    if (!existing || !canEdit) {
       throw new ApiError('NOT_FOUND', 'Message not found')
     }
 

@@ -20,7 +20,10 @@ export default defineConfig(({ mode }) => {
       css: false,
       isolate: true,
       pool: 'vmThreads',
+      fileParallelism: false,
       env,
+      testTimeout: 20_000,
+      hookTimeout: 20_000,
     },
   }
 })

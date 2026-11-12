@@ -48,7 +48,7 @@ pnpm format     # Write Biome formatting
 src/
   components/
     appearance/  accent, cursor, and hero-name preferences
-    chat/        assistant and owner chat preview
+    chat/        live assistant thread, owner thread, and owner inbox
     home/        GitHub snapshot and contribution graph
     layout/      sidebar, mobile header and dock, shell
     projects/    project card
@@ -60,6 +60,7 @@ src/
     portrait-ripple/ WebGL portrait scene and its React adapters
   hooks/         shared React hooks (scroll edges, reduced motion)
   lib/
+    chat/          auth, API client, SSE parser, thread state, protocol
     dom/ github/ query/ routing/ text/   small focused modules
     seo.ts         head/meta factory and site constants
     preferences.ts versioned appearance/theme storage
@@ -116,7 +117,7 @@ Routes are files under `src/routes`:
 - `projects.tsx` — `/projects`
 - `about.tsx` — `/about`
 - `contact.tsx` — `/contact`
-- `chat.tsx` — `/chat` (full-page interactive local preview; no chat backend yet)
+- `chat.tsx` — `/chat` (GitHub sign-in, owner thread, owner inbox, and streaming assistant)
 - `more.tsx` — `/more` (site details and planned SSH access)
 
 Adding a page means adding a route file and a navigation entry. The TanStack Router Vite plugin regenerates `src/routeTree.gen.ts`; never edit it manually.
@@ -141,7 +142,43 @@ See `src/assets/avatar/README.md` for the ffmpeg regeneration commands.
 
 ## Deployment
 
-The site is a static client-side SPA. No server runtime, environment variables, or database are required.
+The site is a static client-side SPA on Vercel. The chat backend is a Neon Function in the same Neon project as Postgres and Neon Auth. No separate server, container, or backend app is deployed.
+
+### Chat backend
+
+- Neon project: `portfolio-chat`, region `aws-ap-southeast-1`.
+- Auth: Neon Auth, GitHub provider only. The owner is GitHub id `71755844`.
+- Function: `api`, declared in `neon.ts`, source `functions/api.ts`.
+- Database: Neon Postgres, migrations under `db/migrations`.
+- AI: OpenRouter `openrouter/free`, 1,200 output tokens, key expires after 30 days with a `$0` credit limit.
+- AI eligibility: GitHub account at least 365 days old. Checked server-side and cached for 7 days.
+- Rate limits: AI 5/min and 30/day per user; owner 10/min and 60/day; global 20/min and 1,000/day.
+
+Local setup:
+
+```bash
+pnpm install
+pnpm db:migrate
+npx neon link
+npx neon dev          # function at http://localhost:8787
+pnpm dev              # SPA at http://localhost:5173
+```
+
+Set `VITE_NEON_AUTH_URL` and `VITE_CHAT_API_URL` in `.env.local`. All server secrets live in `.env.local` or the Neon function environment; never prefix them with `VITE_`.
+
+Deploy:
+
+```bash
+npx neon deploy --env .env.local
+npx neon functions get api
+```
+
+Rotate the OpenRouter key every 30 days: create a replacement with the same limits, update the function env, verify `/api/health`, then delete the old key. The database schema and auth state are independent of the key.
+
+Required frontend environment variables on Vercel:
+
+- `VITE_NEON_AUTH_URL`
+- `VITE_CHAT_API_URL`
 
 ### Required steps
 
@@ -209,4 +246,5 @@ Microsoft Edge uses a separate [Origin Trials program](https://developer.microso
 
 - Resume is intentionally a disabled placeholder until a PDF is added. Replace the disabled buttons in `contact.tsx` and `app-sidebar.tsx` with a link when the file is ready.
 - The design uses one accent color and a dark-only theme. Theme tokens live in the `@theme` block in `src/index.css`.
-- Tests cover content invariants, the GitHub fallback, the QueryClient defaults, sidebar state, project cards, and the GitHub snapshot.
+- Tests cover content invariants, the GitHub fallback, the QueryClient defaults, sidebar state, project cards, the GitHub snapshot, chat protocol validation, JWT auth, GitHub age eligibility, owner messages, AI streaming persistence, edit forks, rate limits, owner inbox, SSE parsing, and the chat shell.
+- Assistant conversations are private. The owner inbox shows owner threads only.

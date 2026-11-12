@@ -1,5 +1,6 @@
 import type { KeyboardEvent } from 'react'
 import { useEffect, useRef } from 'react'
+import { MAX_MESSAGE_LENGTH } from '@/lib/chat/protocol'
 
 interface MessageEditorProps {
   draft: string
@@ -29,6 +30,7 @@ export function MessageEditor({
         aria-label="Edit message"
         rows={3}
         value={draft}
+        maxLength={MAX_MESSAGE_LENGTH}
         onChange={(event) => onChange(event.target.value)}
         onKeyDown={onKeyDown}
         className="block max-h-40 w-full resize-none overflow-y-auto border border-accent bg-canvas px-3 py-2 text-sm leading-relaxed text-ink focus:outline-none"

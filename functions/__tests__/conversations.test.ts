@@ -52,7 +52,9 @@ async function createTestUser(): Promise<string> {
 
 describe.skipIf(!hasDatabase)('conversation helpers', () => {
   beforeAll(async () => {
-    await requirePool().query('select 1')
+    await requirePool().query(
+      "delete from app_users where auth_user_id like 'test-%' and auth_user_id not like 'test-ai-%' and auth_user_id not like 'test-inbox-%' and auth_user_id not like 'test-rate-%'",
+    )
   })
 
   beforeEach(async () => {

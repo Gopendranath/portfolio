@@ -80,6 +80,10 @@ export async function listOwnerThreads(
         limit 1
      ) lm on true
      where c.kind = 'owner'
+       and exists (
+         select 1 from messages m
+          where m.conversation_id = c.id and m.deleted_at is null
+       )
        and (
          $1::timestamptz is null
          or (c.last_message_at, c.id) < ($1::timestamptz, $2::uuid)
@@ -107,6 +111,28 @@ export async function listOwnerThreads(
     nextCursor:
       hasMore && last ? `${last.lastMessageAt}|${last.conversationId}` : null,
   }
+}
+
+export async function countUserOwnerUnread(
+  pool: Pool,
+  userId: string,
+): Promise<number> {
+  const { rows } = await pool.query<{ count: number }>(
+    `select count(*)::int as count
+       from messages m
+       join conversations c on c.id = m.conversation_id
+      where c.user_id = $1
+        and c.kind = 'owner'
+        and m.author = 'owner'
+        and m.deleted_at is null
+        and (
+          c.user_last_read_at is null
+          or m.created_at > c.user_last_read_at
+          or (m.edited_at is not null and m.edited_at > c.user_last_read_at)
+        )`,
+    [userId],
+  )
+  return rows[0]?.count ?? 0
 }
 
 export async function getOwnerThreadMessages(

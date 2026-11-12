@@ -18,7 +18,7 @@ export default defineConfig({
         CORS_ORIGINS: {
           value:
             process.env.CORS_ORIGINS ??
-            'http://localhost:5173,https://gopendra.is-a.dev,https://portfolio-zeta-coral-18.vercel.app',
+            'http://localhost:5173,http://127.0.0.1:5173,https://gopendra.is-a.dev,https://portfolio-zeta-coral-18.vercel.app',
           required: true,
         },
       },

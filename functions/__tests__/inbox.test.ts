@@ -56,7 +56,9 @@ async function createUser(role: 'user' | 'owner'): Promise<string> {
 
 describe.skipIf(!hasDatabase)('owner inbox', () => {
   beforeAll(async () => {
-    await requirePool().query('select 1')
+    await requirePool().query(
+      "delete from app_users where auth_user_id like 'test-inbox-%'",
+    )
   })
 
   beforeEach(async () => {

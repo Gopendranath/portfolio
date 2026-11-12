@@ -31,6 +31,7 @@ import { getCorsHeaders } from './chat/cors'
 import { getPool } from './chat/db'
 import { ApiError, toApiError } from './chat/errors'
 import {
+  countUserOwnerUnread,
   createOwnerReply,
   getOwnerThreadMessages,
   listOwnerThreads,
@@ -204,10 +205,12 @@ app.get('/api/health', (context) => context.json({ ok: true }))
 
 app.get('/api/me', async (context) => {
   const { authUserId } = await requireAuth(context.req.raw)
+  const pool = getPool()
   const { user, isOwner, aiEligible, aiReason } = await resolveAppUser(
-    getPool(),
+    pool,
     authUserId,
   )
+  const ownerUnreadCount = await countUserOwnerUnread(pool, user.id)
 
   return context.json({
     user: {
@@ -219,6 +222,7 @@ app.get('/api/me', async (context) => {
     isOwner,
     aiEligible,
     aiReason,
+    ownerUnreadCount,
   })
 })
 
@@ -286,6 +290,10 @@ app.get('/api/conversations/:kind/messages', async (context) => {
     beforeSeq: query.before,
     limit: query.limit,
   })
+
+  if (kind === 'owner') {
+    await markRead(pool, conversation.id, 'user')
+  }
 
   return context.json(page)
 })
@@ -405,7 +413,7 @@ app.patch('/api/messages/:id', async (context) => {
   const { authUserId } = await requireAuth(context.req.raw)
   const input = await parseBody(editMessageSchema, context.req.raw)
   const pool = getPool()
-  const { user } = await resolveAppUser(pool, authUserId)
+  const { user, isOwner } = await resolveAppUser(pool, authUserId)
   assertAllowedRateLimit(
     context,
     await consumeUserRateLimit(pool, {
@@ -419,6 +427,7 @@ app.patch('/api/messages/:id', async (context) => {
     messageId: context.req.param('id'),
     userId: user.id,
     body: input.body,
+    allowOwner: isOwner,
   })
 
   return context.json({ message })
