@@ -6,8 +6,6 @@ export const AI_CONTEXT_MESSAGE_LIMIT = 20
 export const AI_CONTEXT_CHAR_LIMIT = 12_000
 export const PAGE_SIZE = 10
 
-const CONTROL_CHARACTERS = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/
-
 export class ChatValidationError extends Error {
   readonly code = 'VALIDATION'
 
@@ -17,6 +15,23 @@ export class ChatValidationError extends Error {
   }
 }
 
+function hasControlCharacters(value: string): boolean {
+  for (const character of value) {
+    const code = character.codePointAt(0) ?? 0
+    if (
+      (code >= 0 && code <= 8) ||
+      code === 11 ||
+      code === 12 ||
+      (code >= 14 && code <= 31) ||
+      code === 127
+    ) {
+      return true
+    }
+  }
+
+  return false
+}
+
 export function normalizeBody(input: string): string {
   const normalized = input.normalize('NFC').trim()
 
@@ -24,7 +39,7 @@ export function normalizeBody(input: string): string {
     throw new ChatValidationError('Message is required')
   }
 
-  if (CONTROL_CHARACTERS.test(normalized)) {
+  if (hasControlCharacters(normalized)) {
     throw new ChatValidationError('Message contains control characters')
   }
 
@@ -64,9 +79,7 @@ export const editMessageSchema = z.object({
   body: bodySchema,
 })
 
-export const ownerRetrySchema = z.object({
-  clientId: clientIdSchema,
-})
+export const ownerRetrySchema = sendMessageSchema
 
 export const assistantRetrySchema = z.object({
   assistantMessageId: z.string().uuid(),
