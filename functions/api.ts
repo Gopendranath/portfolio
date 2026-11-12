@@ -1,13 +1,23 @@
 import type { Context } from 'hono'
 import { Hono } from 'hono'
+import { streamSSE } from 'hono/streaming'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import {
+  assistantEditSchema,
+  assistantRetrySchema,
   chatKindSchema,
   editMessageSchema,
   ownerRetrySchema,
   paginationSchema,
   sendMessageSchema,
 } from '../src/lib/chat/protocol'
+import {
+  type AssistantTurn,
+  beginAssistantEdit,
+  beginAssistantRetry,
+  beginAssistantTurn,
+  runAssistantTurn,
+} from './chat/ai'
 import { requireAuth } from './chat/auth'
 import {
   createMessage,
@@ -19,7 +29,15 @@ import {
 import { getCorsHeaders } from './chat/cors'
 import { getPool } from './chat/db'
 import { ApiError, toApiError } from './chat/errors'
-import { consumeUserRateLimit, type RateLimitResult } from './chat/rate-limit'
+import {
+  createOpenRouterGateway,
+  type OpenRouterGateway,
+} from './chat/openrouter'
+import {
+  consumeGlobalAiLimit,
+  consumeUserRateLimit,
+  type RateLimitResult,
+} from './chat/rate-limit'
 import { resolveAppUser } from './chat/users'
 import { parseBody } from './chat/validation'
 
@@ -42,6 +60,119 @@ function assertAllowedRateLimit(
     429,
     true,
   )
+}
+
+function assertAiEligible(input: {
+  aiEligible: boolean
+  aiReason: string
+}): void {
+  if (input.aiEligible) {
+    return
+  }
+
+  throw new ApiError(
+    'AI_LOCKED',
+    input.aiReason === 'account_too_new'
+      ? 'Your GitHub account must be at least one year old to use the assistant.'
+      : 'We could not verify your GitHub account age. Try again later.',
+    403,
+  )
+}
+
+async function assertAiRateLimits(
+  context: Context,
+  pool: ReturnType<typeof getPool>,
+  userId: string,
+): Promise<void> {
+  assertAllowedRateLimit(
+    context,
+    await consumeUserRateLimit(pool, {
+      userId,
+      action: 'assistant_send',
+      perMinute: 5,
+      perDay: 30,
+    }),
+  )
+  assertAllowedRateLimit(context, await consumeGlobalAiLimit(pool))
+}
+
+async function streamTurn(
+  context: Context,
+  pool: ReturnType<typeof getPool>,
+  turn: AssistantTurn,
+  gateway: OpenRouterGateway,
+): Promise<Response> {
+  return streamSSE(context, async (stream) => {
+    const controller = new AbortController()
+    const heartbeat = setInterval(() => {
+      void stream.write(': ping\n\n').catch(() => {})
+    }, 15_000)
+
+    stream.onAbort(() => controller.abort())
+
+    try {
+      await stream.writeSSE({
+        event: 'meta',
+        data: JSON.stringify({
+          conversationId: turn.conversationId,
+          userMessageId: turn.userMessage.id,
+          assistantMessageId: turn.assistantMessage.id,
+        }),
+      })
+
+      const result = await runAssistantTurn({
+        pool,
+        assistantMessageId: turn.assistantMessage.id,
+        context: turn.context,
+        gateway,
+        signal: controller.signal,
+        onDelta: async (text) => {
+          await stream.writeSSE({
+            event: 'delta',
+            data: JSON.stringify({ text }),
+          })
+        },
+      })
+
+      if (result.status === 'complete') {
+        await stream.writeSSE({
+          event: 'done',
+          data: JSON.stringify({
+            assistantMessageId: turn.assistantMessage.id,
+            finishReason: result.finishReason,
+            truncated: result.truncated,
+            outputTokens: result.outputTokens,
+          }),
+        })
+      } else {
+        await stream.writeSSE({
+          event: 'error',
+          data: JSON.stringify({
+            code: result.errorCode ?? 'UPSTREAM_ERROR',
+            message:
+              result.errorCode === 'ABORTED'
+                ? 'Response stopped.'
+                : 'The assistant is temporarily unavailable.',
+            retryable: true,
+          }),
+        })
+      }
+    } catch (error) {
+      console.error('[sse] stream failed', error)
+      await stream
+        .writeSSE({
+          event: 'error',
+          data: JSON.stringify({
+            code: 'UPSTREAM_ERROR',
+            message: 'The assistant is temporarily unavailable.',
+            retryable: true,
+          }),
+        })
+        .catch(() => {})
+    } finally {
+      clearInterval(heartbeat)
+    }
+  })
 }
 
 app.use('*', async (context, next) => {
@@ -144,6 +275,56 @@ app.get('/api/conversations/:kind/messages', async (context) => {
   })
 
   return context.json(page)
+})
+
+app.post('/api/chat/assistant', async (context) => {
+  const { authUserId } = await requireAuth(context.req.raw)
+  const input = await parseBody(sendMessageSchema, context.req.raw)
+  const pool = getPool()
+  const { user, aiEligible, aiReason } = await resolveAppUser(pool, authUserId)
+  assertAiEligible({ aiEligible, aiReason })
+  await assertAiRateLimits(context, pool, user.id)
+
+  const turn = await beginAssistantTurn(pool, {
+    userId: user.id,
+    body: input.body,
+    clientId: input.clientId,
+  })
+
+  return streamTurn(context, pool, turn, createOpenRouterGateway())
+})
+
+app.post('/api/chat/assistant/edit', async (context) => {
+  const { authUserId } = await requireAuth(context.req.raw)
+  const input = await parseBody(assistantEditSchema, context.req.raw)
+  const pool = getPool()
+  const { user, aiEligible, aiReason } = await resolveAppUser(pool, authUserId)
+  assertAiEligible({ aiEligible, aiReason })
+  await assertAiRateLimits(context, pool, user.id)
+
+  const turn = await beginAssistantEdit(pool, {
+    userId: user.id,
+    messageId: input.messageId,
+    body: input.body,
+  })
+
+  return streamTurn(context, pool, turn, createOpenRouterGateway())
+})
+
+app.post('/api/chat/assistant/retry', async (context) => {
+  const { authUserId } = await requireAuth(context.req.raw)
+  const input = await parseBody(assistantRetrySchema, context.req.raw)
+  const pool = getPool()
+  const { user, aiEligible, aiReason } = await resolveAppUser(pool, authUserId)
+  assertAiEligible({ aiEligible, aiReason })
+  await assertAiRateLimits(context, pool, user.id)
+
+  const turn = await beginAssistantRetry(pool, {
+    userId: user.id,
+    assistantMessageId: input.assistantMessageId,
+  })
+
+  return streamTurn(context, pool, turn, createOpenRouterGateway())
 })
 
 app.patch('/api/messages/:id', async (context) => {

@@ -85,6 +85,11 @@ export const assistantRetrySchema = z.object({
   assistantMessageId: z.string().uuid(),
 })
 
+export const assistantEditSchema = z.object({
+  messageId: z.string().uuid(),
+  body: bodySchema,
+})
+
 export const paginationSchema = z.object({
   limit: z.preprocess(
     (value) => (value === undefined || value === '' ? PAGE_SIZE : value),
@@ -126,6 +131,7 @@ export interface ChatMessageDTO {
   clientId: string | null
   sentAt: string
   editedAt: string | null
+  errorCode: string | null
 }
 
 export interface MessagePage {

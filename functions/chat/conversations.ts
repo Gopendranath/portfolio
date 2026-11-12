@@ -6,7 +6,7 @@ import {
 } from '../../src/lib/chat/protocol'
 import { ApiError } from './errors'
 
-interface MessageRow {
+export interface MessageRow {
   id: string
   seq: string
   conversation_id: string
@@ -16,13 +16,15 @@ interface MessageRow {
   client_id: string | null
   created_at: Date
   edited_at: Date | null
+  error_code: string | null
 }
 
-const MESSAGE_COLUMNS = `
-  id, seq, conversation_id, author, body, status, client_id, created_at, edited_at
+export const MESSAGE_COLUMNS = `
+  id, seq, conversation_id, author, body, status, client_id, created_at,
+  edited_at, error_code
 `
 
-function toDTO(row: MessageRow): ChatMessageDTO {
+export function toMessageDTO(row: MessageRow): ChatMessageDTO {
   return {
     id: row.id,
     seq: Number(row.seq),
@@ -33,6 +35,7 @@ function toDTO(row: MessageRow): ChatMessageDTO {
     clientId: row.client_id,
     sentAt: row.created_at.toISOString(),
     editedAt: row.edited_at?.toISOString() ?? null,
+    errorCode: row.error_code,
   }
 }
 
@@ -44,6 +47,8 @@ export interface CreateMessageInput {
   status?: ChatMessageDTO['status']
   replyToId?: string | null
   model?: string | null
+  errorCode?: string | null
+  errorMessage?: string | null
 }
 
 export async function getOrCreateConversation(
@@ -77,9 +82,10 @@ export async function createMessage(
 
     const { rows } = await client.query<MessageRow>(
       `insert into messages (
-         conversation_id, author, body, status, client_id, reply_to_id, model
+         conversation_id, author, body, status, client_id, reply_to_id, model,
+         error_code, error_message
        )
-       values ($1, $2, $3, $4, $5, $6, $7)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        on conflict (conversation_id, client_id) where client_id is not null
        do update set body = messages.body
        returning ${MESSAGE_COLUMNS}`,
@@ -91,6 +97,8 @@ export async function createMessage(
         input.clientId ?? null,
         input.replyToId ?? null,
         input.model ?? null,
+        input.errorCode ?? null,
+        input.errorMessage ?? null,
       ],
     )
 
@@ -108,7 +116,7 @@ export async function createMessage(
     )
 
     await client.query('commit')
-    return toDTO(row)
+    return toMessageDTO(row)
   } catch (error) {
     await client.query('rollback')
     throw error
@@ -141,7 +149,7 @@ export async function listMessages(
 
   const hasMore = rows.length > limit
   const pageRows = rows.slice(0, limit).reverse()
-  const messages = pageRows.map(toDTO)
+  const messages = pageRows.map(toMessageDTO)
 
   return {
     messages,
@@ -219,7 +227,7 @@ export async function editMessage(
     if (!row) {
       throw new ApiError('INTERNAL', 'Could not update the message')
     }
-    return toDTO(row)
+    return toMessageDTO(row)
   } catch (error) {
     await client.query('rollback')
     throw error
