@@ -41,7 +41,12 @@
     scroll-behavior: smooth;
     scrollbar-width: thin;
     scrollbar-color: var(--color-muted) transparent;
-    -webkit-tap-highlight-color: rgb(199 244 100 / 0.25);
+    /* Follow the active accent token instead of the default lime. */
+    -webkit-tap-highlight-color: color-mix(
+      in srgb,
+      var(--color-accent) 25%,
+      transparent
+    );
   }
 
   @media (pointer: fine) {
