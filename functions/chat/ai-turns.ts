@@ -7,7 +7,8 @@ import {
   retitleAssistantConversation,
   setAssistantTitleIfEmpty,
 } from './history'
-import { createMessage, MESSAGE_COLUMNS, type MessageRow, toMessageDTO } from './messages'
+import { MESSAGE_COLUMNS, type MessageRow, toMessageDTO } from './message-rows'
+import { createMessage } from './messages'
 import { OPENROUTER_MODEL } from './openrouter'
 
 async function loadContext(

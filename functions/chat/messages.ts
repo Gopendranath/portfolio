@@ -2,39 +2,8 @@ import type { Pool } from 'pg'
 import { type ChatAuthor, type ChatMessageDTO, PAGE_SIZE } from '../../src/lib/chat/protocol'
 import { withTransaction } from './db'
 import { ApiError } from './errors'
-
-export interface MessageRow {
-  id: string
-  seq: string
-  conversation_id: string
-  author: ChatAuthor
-  body: string
-  status: ChatMessageDTO['status']
-  client_id: string | null
-  created_at: Date
-  edited_at: Date | null
-  error_code: string | null
-}
-
-export const MESSAGE_COLUMNS = `
-  id, seq, conversation_id, author, body, status, client_id, created_at,
-  edited_at, error_code
-`
-
-export function toMessageDTO(row: MessageRow): ChatMessageDTO {
-  return {
-    id: row.id,
-    seq: Number(row.seq),
-    conversationId: row.conversation_id,
-    author: row.author,
-    body: row.body,
-    status: row.status,
-    clientId: row.client_id,
-    sentAt: row.created_at.toISOString(),
-    editedAt: row.edited_at?.toISOString() ?? null,
-    errorCode: row.error_code,
-  }
-}
+import { MESSAGE_COLUMNS, type MessageRow, toMessageDTO } from './message-rows'
+import { lockMessageForUpdate, writeUserEdit } from './message-writes'
 
 export interface CreateMessageInput {
   conversationId: string
@@ -151,60 +120,24 @@ export async function editMessage(
   const now = input.now ?? new Date()
 
   const row = await withTransaction(pool, async (client) => {
-    const { rows } = await client.query<{
-      id: string
-      body: string
-      author: ChatAuthor
-      conversation_id: string
-      user_id: string
-      kind: string
-    }>(
-      `select m.id, m.body, m.author, m.conversation_id, c.user_id, c.kind
-         from messages m
-         join conversations c on c.id = m.conversation_id
-        where m.id = $1
-          and m.deleted_at is null
-        for update`,
-      [input.messageId],
-    )
-
-    const existing = rows[0]
+    const existing = await lockMessageForUpdate(client, input.messageId)
     const canEdit =
       existing &&
       existing.kind === 'owner' &&
-      ((existing.author === 'user' && existing.user_id === input.userId) ||
+      ((existing.author === 'user' && existing.userId === input.userId) ||
         (input.allowOwner === true && existing.author === 'owner'))
 
     if (!existing || !canEdit) {
       throw new ApiError('NOT_FOUND', 'Message not found')
     }
 
-    await client.query(
-      `insert into message_revisions (message_id, body, edited_by_user_id, edited_at)
-       values ($1, $2, $3, $4)`,
-      [existing.id, existing.body, input.userId, now],
-    )
-
-    const updated = await client.query<MessageRow>(
-      `update messages
-          set body = $2, edited_at = $3
-        where id = $1
-        returning ${MESSAGE_COLUMNS}`,
-      [existing.id, input.body, now],
-    )
-
-    await client.query(
-      `update conversations
-          set updated_at = now()
-        where id = $1`,
-      [existing.conversation_id],
-    )
-
-    return updated.rows[0]
+    return writeUserEdit(client, {
+      message: existing,
+      body: input.body,
+      editorUserId: input.userId,
+      now,
+    })
   })
 
-  if (!row) {
-    throw new ApiError('INTERNAL', 'Could not update the message')
-  }
   return toMessageDTO(row)
 }
