@@ -69,6 +69,8 @@ function HomePage() {
         </div>
       </section>
 
+      <ContributionGraph />
+
       <section aria-label="Selected work">
         <h2 className="sr-only">Selected work</h2>
         <div className="flex items-end justify-between gap-6">
@@ -108,8 +110,6 @@ function HomePage() {
           </ul>
         </div>
       </section>
-
-      <ContributionGraph />
 
       <GithubSnapshot />
     </div>
