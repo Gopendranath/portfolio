@@ -88,6 +88,7 @@ export function ChatComposer({
           onChange={(event) => onChange(event.target.value)}
           onKeyDown={handleKeyDown}
           toolparamdescription={`The message text addressed to ${profileName}.`}
+          data-lenis-prevent
           maxLength={MAX_MESSAGE_LENGTH}
           aria-describedby={showCounter ? 'chat-composer-count' : undefined}
           placeholder={disabledReason ?? `Message ${profileName}…`}

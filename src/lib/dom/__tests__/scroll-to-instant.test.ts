@@ -38,3 +38,18 @@ it('leaves smooth requests to the window', () => {
   expect(immediate).not.toHaveBeenCalled()
   expect(scrollTo).toHaveBeenCalledWith({ top: 300, behavior: 'smooth' })
 })
+
+it('adds the virtualizer adjustment to the written offset', () => {
+  const scrollTo = vi.fn()
+  const immediate = vi.fn()
+  vi.stubGlobal('scrollTo', scrollTo)
+
+  scrollWindowInstant(400, { adjustments: 120 })
+
+  expect(scrollTo).toHaveBeenCalledWith({ top: 520, behavior: 'instant' })
+
+  setImmediateScroller(immediate)
+  scrollWindowInstant(400, { adjustments: -40 })
+
+  expect(immediate).toHaveBeenCalledWith(360)
+})

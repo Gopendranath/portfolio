@@ -27,11 +27,13 @@ Rejected: a transform-based virtual scroller (breaks sticky/fixed chrome,
 new Lenis({
   autoRaf: true,
   duration: 1.1,
-  anchors: true,
   stopInertiaOnNavigate: true,
   syncTouch: false,
 })
 ```
+
+`anchors` stays off: letting Lenis intercept anchor clicks would suppress the
+skip link's native focus move to the main landmark.
 
 - `syncTouch: false` keeps native momentum on phones — OS touch scrolling is
   already smoother than anything JS can emulate, and `syncTouch` is documented

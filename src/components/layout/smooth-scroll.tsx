@@ -1,6 +1,6 @@
 import { useRouter } from '@tanstack/react-router'
 import Lenis from 'lenis'
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { setImmediateScroller } from '@/lib/dom/scroll-to-instant'
 
 /**
@@ -13,10 +13,13 @@ import { setImmediateScroller } from '@/lib/dom/scroll-to-instant'
  *
  * `anchors` is deliberately off: intercepting anchor clicks would stop the skip
  * link from moving focus to the main landmark.
+ *
+ * Any new `overflow-y-auto` / `overflow-x-auto` surface needs
+ * `data-lenis-prevent` (or the `-horizontal` / `-vertical` variant), or Lenis
+ * will swallow its wheel input.
  */
 export function SmoothScroll() {
   const router = useRouter()
-  const lenisRef = useRef<Lenis | null>(null)
 
   useEffect(() => {
     const lenis = new Lenis({
@@ -26,10 +29,35 @@ export function SmoothScroll() {
       syncTouch: false,
     })
 
-    lenisRef.current = lenis
-    setImmediateScroller((offset) => {
+    let pendingCorrection: number | null = null
+
+    const writeImmediate = (offset: number) => {
       lenis.scrollTo(offset, { immediate: true, force: true })
-    })
+    }
+
+    // An immediate write calls `reset()`, which would kill an in-flight ease
+    // mid-gesture. Hold the correction until the ease settles instead.
+    const applyCorrection = (offset: number) => {
+      if (lenis.isScrolling === 'smooth') {
+        pendingCorrection = offset
+        return
+      }
+
+      writeImmediate(offset)
+    }
+
+    const flushCorrection = () => {
+      if (pendingCorrection === null) {
+        return
+      }
+
+      const offset = pendingCorrection
+      pendingCorrection = null
+      writeImmediate(offset)
+    }
+
+    setImmediateScroller(applyCorrection)
+    window.addEventListener('scrollend', flushCorrection)
 
     // Page height changes on navigation; keep Lenis's limits in step.
     const unsubscribe = router.subscribe('onResolved', () => {
@@ -38,8 +66,8 @@ export function SmoothScroll() {
 
     return () => {
       unsubscribe()
+      window.removeEventListener('scrollend', flushCorrection)
       setImmediateScroller(null)
-      lenisRef.current = null
       lenis.destroy()
     }
   }, [router])

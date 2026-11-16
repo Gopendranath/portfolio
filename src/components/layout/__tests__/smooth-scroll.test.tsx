@@ -6,6 +6,7 @@ import { scrollWindowInstant } from '@/lib/dom/scroll-to-instant'
 const harness = vi.hoisted(() => ({
   instances: [] as Array<{
     options: Record<string, unknown>
+    isScrolling: boolean | 'smooth' | 'native'
     scrollTo: ReturnType<typeof vi.fn>
     resize: ReturnType<typeof vi.fn>
     destroy: ReturnType<typeof vi.fn>
@@ -17,6 +18,7 @@ const harness = vi.hoisted(() => ({
 vi.mock('lenis', () => ({
   default: class MockLenis {
     options: Record<string, unknown>
+    isScrolling: boolean | 'smooth' | 'native' = false
     scrollTo = vi.fn()
     resize = vi.fn()
     destroy = vi.fn()
@@ -95,4 +97,24 @@ it('resizes lenis when navigation resolves', () => {
   }
 
   expect(lenis?.resize).toHaveBeenCalled()
+})
+
+it('defers a correction while an ease is running and applies it once the scroll settles', () => {
+  render(<SmoothScroll />)
+  const lenis = harness.instances[0]
+
+  if (!lenis) {
+    throw new Error('lenis instance missing')
+  }
+
+  lenis.isScrolling = 'smooth'
+
+  scrollWindowInstant(520, {})
+
+  expect(lenis.scrollTo).not.toHaveBeenCalled()
+
+  lenis.isScrolling = false
+  window.dispatchEvent(new CustomEvent('scrollend', { detail: { lenisScrollEnd: true } }))
+
+  expect(lenis.scrollTo).toHaveBeenCalledWith(520, { immediate: true, force: true })
 })

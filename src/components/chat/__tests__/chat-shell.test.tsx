@@ -185,6 +185,14 @@ describe('ChatShell', () => {
     expect(screen.getByRole('textbox', { name: 'Message Portfolio assistant' })).toBeInTheDocument()
   })
 
+  it('keeps the composer textarea native under the smooth scroller', () => {
+    render(<ChatShell />)
+
+    const composer = screen.getByRole('textbox', { name: 'Message Portfolio assistant' })
+
+    expect(composer.closest('[data-lenis-prevent]')).not.toBeNull()
+  })
+
   it('locks the assistant for an ineligible account', () => {
     setup({ aiEligible: false, aiReason: 'account_too_new' })
 
