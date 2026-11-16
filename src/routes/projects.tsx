@@ -3,6 +3,7 @@ import { ProjectCard } from '@/components/projects/project-card'
 import { ExternalLink } from '@/components/ui/external-link'
 import { PageHeader } from '@/components/ui/page-header'
 import { SectionLabel } from '@/components/ui/section-label'
+import { type VirtualSection, VirtualSectionList } from '@/components/ui/virtual-section-list'
 import { pageMeta } from '@/data/pages'
 import { projects } from '@/data/projects'
 import { pageHead } from '@/lib/seo'
@@ -12,6 +13,35 @@ export const Route = createFileRoute('/projects')({
     pageHead(pageMeta.projects.title, pageMeta.projects.description, pageMeta.projects.path),
   component: ProjectsPage,
 })
+
+const projectSections: VirtualSection[] = [
+  {
+    id: 'projects-grid',
+    estimate: 1100,
+    content: (
+      <div className="grid gap-4 md:grid-cols-2">
+        {projects.map((project, index) => (
+          <ProjectCard key={project.slug} project={project} index={index + 1} />
+        ))}
+      </div>
+    ),
+  },
+  {
+    id: 'projects-more',
+    estimate: 90,
+    content: (
+      <p className="mt-12 font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
+        More experiments on{' '}
+        <ExternalLink
+          href="https://github.com/Gopendranath"
+          className="text-ink transition-colors hover:text-accent"
+        >
+          GitHub
+        </ExternalLink>
+      </p>
+    ),
+  },
+]
 
 function ProjectsPage() {
   return (
@@ -30,21 +60,7 @@ function ProjectsPage() {
         </span>
       </div>
 
-      <div className="mt-8 grid gap-4 content-auto [contain-intrinsic-size:auto_600px] md:grid-cols-2">
-        {projects.map((project, index) => (
-          <ProjectCard key={project.slug} project={project} index={index + 1} />
-        ))}
-      </div>
-
-      <p className="mt-12 font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
-        More experiments on{' '}
-        <ExternalLink
-          href="https://github.com/Gopendranath"
-          className="text-ink transition-colors hover:text-accent"
-        >
-          GitHub
-        </ExternalLink>
-      </p>
+      <VirtualSectionList sections={projectSections} className="mt-8" />
     </div>
   )
 }
