@@ -38,7 +38,6 @@
 
   html {
     color-scheme: dark;
-    scroll-behavior: smooth;
     scrollbar-width: thin;
     scrollbar-color: var(--color-muted) transparent;
     /* Follow the active accent token instead of the default lime. */
