@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { type VirtualSection, VirtualSectionList } from '@/components/ui/virtual-section-list'
 import { scrollWindowInstant } from '@/lib/dom/scroll-to-instant'
@@ -11,6 +11,24 @@ const sections: VirtualSection[] = Array.from({ length: 6 }, (_, index) => ({
 
 class StubResizeObserver {
   observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
+class CallbackResizeObserver {
+  static instances: CallbackResizeObserver[] = []
+  callback: ResizeObserverCallback
+  observed: Element[] = []
+
+  constructor(callback: ResizeObserverCallback) {
+    this.callback = callback
+    CallbackResizeObserver.instances.push(this)
+  }
+
+  observe(target: Element) {
+    this.observed.push(target)
+  }
+
   unobserve() {}
   disconnect() {}
 }
@@ -155,6 +173,33 @@ it('includes the offset parent border in the scroll margin', () => {
   if (originalOffsetParent) {
     Object.defineProperty(HTMLElement.prototype, 'offsetParent', originalOffsetParent)
   }
+})
+
+it('defers margin re-measurement to the next frame so the body observer cannot loop', async () => {
+  globalThis.ResizeObserver = CallbackResizeObserver as unknown as typeof ResizeObserver
+  let listTop = 200
+  stubLayout(() => listTop)
+
+  render(<VirtualSectionList sections={sections} />)
+
+  const list = document.querySelector('[data-scroll-margin]')
+  expect(list).toHaveAttribute('data-scroll-margin', '200')
+
+  listTop = 400
+  const bodyObserver = CallbackResizeObserver.instances.find((observer) =>
+    observer.observed.includes(document.body),
+  )
+  expect(bodyObserver).toBeDefined()
+
+  const scheduleFrame = vi.spyOn(window, 'requestAnimationFrame')
+  bodyObserver?.callback([], bodyObserver as unknown as ResizeObserver)
+
+  expect(scheduleFrame).toHaveBeenCalled()
+  expect(list).toHaveAttribute('data-scroll-margin', '200')
+
+  await act(() => new Promise((resolve) => requestAnimationFrame(resolve)))
+
+  expect(list).toHaveAttribute('data-scroll-margin', '400')
 })
 
 it('corrects scroll offsets without animating them', () => {

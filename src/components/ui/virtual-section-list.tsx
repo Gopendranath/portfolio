@@ -92,10 +92,27 @@ function useScrollMargin(enabled: boolean) {
 
     update()
     window.addEventListener('resize', update)
-    const observer = new ResizeObserver(update)
+
+    // Deferred by a frame: writing the spacer height inside the observer
+    // callback resizes the observed body again, which Chrome reports as a
+    // "ResizeObserver loop completed with undelivered notifications" error.
+    let frame = 0
+    const schedule = () => {
+      if (frame !== 0) {
+        return
+      }
+
+      frame = requestAnimationFrame(() => {
+        frame = 0
+        update()
+      })
+    }
+
+    const observer = new ResizeObserver(schedule)
     observer.observe(document.body)
 
     return () => {
+      cancelAnimationFrame(frame)
       window.removeEventListener('resize', update)
       observer.disconnect()
     }
@@ -127,6 +144,10 @@ export function VirtualSectionList({ sections, className }: VirtualSectionListPr
     overscan: 2,
     useFlushSync: false,
     directDomUpdates: true,
+    // Item measurement writes the spacer height, which resizes the observed
+    // items again. Deferring to a frame keeps Chrome from reporting the
+    // "ResizeObserver loop completed with undelivered notifications" error.
+    useAnimationFrameWithResizeObserver: true,
     scrollToFn: scrollWindowInstant,
   })
 
