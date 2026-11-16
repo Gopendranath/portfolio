@@ -4,6 +4,7 @@ import { DownloadIcon, MapPinIcon } from '@/components/ui/icons'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageSection } from '@/components/ui/page-section'
 import { StatusBadge } from '@/components/ui/status-badge'
+import { type VirtualSection, VirtualSectionList } from '@/components/ui/virtual-section-list'
 import { principles } from '@/data/about'
 import { pageMeta } from '@/data/pages'
 import { profile } from '@/data/profile'
@@ -14,6 +15,56 @@ export const Route = createFileRoute('/about')({
   head: () => pageHead(pageMeta.about.title, pageMeta.about.description, pageMeta.about.path),
   component: AboutPage,
 })
+
+const aboutSections: VirtualSection[] = [
+  {
+    id: 'about-stack',
+    estimate: 520,
+    content: (
+      <PageSection label="Stack" ariaLabel="Technical stack">
+        <div className="mt-8 grid gap-8 sm:grid-cols-2">
+          {profile.stack.map((group) => (
+            <div key={group.title}>
+              <h2 className="font-mono text-[10px] uppercase tracking-[0.18em] text-accent">
+                {group.title}
+              </h2>
+              <StackList items={group.items} className="mt-4" />
+            </div>
+          ))}
+        </div>
+      </PageSection>
+    ),
+  },
+  {
+    id: 'about-principles',
+    estimate: 300,
+    content: (
+      <PageSection label="How I work" ariaLabel="Working principles">
+        <div className="mt-8 grid gap-8 md:grid-cols-3">
+          {principles.map((principle, index) => (
+            <div key={principle.title} className="cursor-target border-l border-line pl-5">
+              <span className="font-mono text-[9px] tracking-[0.18em] text-muted">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <h2 className="mt-4 text-lg font-medium text-ink">{principle.title}</h2>
+              <p className="mt-2 text-sm leading-relaxed text-muted">{principle.body}</p>
+            </div>
+          ))}
+        </div>
+      </PageSection>
+    ),
+  },
+  {
+    id: 'about-resume',
+    estimate: 90,
+    content: (
+      <p className="mt-20 flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.14em] text-muted">
+        <DownloadIcon className="size-3.5" />
+        Resume PDF coming soon.
+      </p>
+    ),
+  },
+]
 
 function AboutPage() {
   return (
@@ -56,37 +107,7 @@ function AboutPage() {
         </div>
       </div>
 
-      <PageSection label="Stack" ariaLabel="Technical stack">
-        <div className="mt-8 grid gap-8 sm:grid-cols-2">
-          {profile.stack.map((group) => (
-            <div key={group.title}>
-              <h2 className="font-mono text-[10px] uppercase tracking-[0.18em] text-accent">
-                {group.title}
-              </h2>
-              <StackList items={group.items} className="mt-4" />
-            </div>
-          ))}
-        </div>
-      </PageSection>
-
-      <PageSection label="How I work" ariaLabel="Working principles">
-        <div className="mt-8 grid gap-8 md:grid-cols-3">
-          {principles.map((principle, index) => (
-            <div key={principle.title} className="cursor-target border-l border-line pl-5">
-              <span className="font-mono text-[9px] tracking-[0.18em] text-muted">
-                {String(index + 1).padStart(2, '0')}
-              </span>
-              <h2 className="mt-4 text-lg font-medium text-ink">{principle.title}</h2>
-              <p className="mt-2 text-sm leading-relaxed text-muted">{principle.body}</p>
-            </div>
-          ))}
-        </div>
-      </PageSection>
-
-      <p className="mt-20 flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.14em] text-muted">
-        <DownloadIcon className="size-3.5" />
-        Resume PDF coming soon.
-      </p>
+      <VirtualSectionList sections={aboutSections} />
     </div>
   )
 }
