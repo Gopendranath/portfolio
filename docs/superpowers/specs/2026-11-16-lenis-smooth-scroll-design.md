@@ -26,14 +26,20 @@ Rejected: a transform-based virtual scroller (breaks sticky/fixed chrome,
 ```ts
 new Lenis({
   autoRaf: true,
-  duration: 1.1,
+  lerp: 0.15,
   stopInertiaOnNavigate: true,
   syncTouch: false,
+  wheelMultiplier: 1.15,
 })
 ```
 
 `anchors` stays off: letting Lenis intercept anchor clicks would suppress the
 skip link's native focus move to the main landmark.
+
+`lerp`, not `duration`: Lenis defaults `lerp` to `0.1` and a defined `lerp`
+always wins over `duration`/`easing`, so passing `duration` alone is inert.
+At `lerp: 0.15` a wheel step lands ~80% of its distance in ~270ms and settles
+in ~700ms (measured), instead of trailing for ~1s.
 
 - `syncTouch: false` keeps native momentum on phones — OS touch scrolling is
   already smoother than anything JS can emulate, and `syncTouch` is documented
@@ -83,8 +89,10 @@ skip link's native focus move to the main landmark.
 
 ## Tradeoffs
 
-- Wheel smoothing is a deliberate change of feel, not just performance: scroll
-  distance lags input by ~100ms.
-- One extra rAF loop runs on every page.
+- Wheel smoothing is a deliberate change of feel, not just performance: a wheel
+  step covers 15% more distance and trails input by ~270ms to 80%, settling in
+  ~700ms.
+- One extra rAF loop runs on every page; under reduced motion scrolling is 1:1
+  but still written per frame by JS, so a blocked main thread stalls it.
 - Users who dislike hijacked wheel scrolling have no in-page opt-out; the OS
   reduced-motion preference is the escape hatch.

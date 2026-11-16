@@ -24,9 +24,10 @@ export function SmoothScroll() {
   useEffect(() => {
     const lenis = new Lenis({
       autoRaf: true,
-      duration: 1.1,
+      lerp: 0.15,
       stopInertiaOnNavigate: true,
       syncTouch: false,
+      wheelMultiplier: 1.15,
     })
 
     let pendingCorrection: number | null = null

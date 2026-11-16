@@ -58,11 +58,13 @@ it('creates one lenis instance with the site options and no anchor interception'
   expect(harness.instances).toHaveLength(1)
   expect(harness.instances[0]?.options).toEqual({
     autoRaf: true,
-    duration: 1.1,
+    lerp: 0.15,
     stopInertiaOnNavigate: true,
     syncTouch: false,
+    wheelMultiplier: 1.15,
   })
   expect(harness.instances[0]?.options.anchors).toBeUndefined()
+  expect(harness.instances[0]?.options.duration).toBeUndefined()
 })
 
 it('routes instant corrections through lenis and restores the fallback on unmount', () => {
