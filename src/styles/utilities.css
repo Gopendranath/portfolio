@@ -43,6 +43,72 @@ html[data-theme="light"] .surface-tinted {
   -webkit-mask-image: linear-gradient(to top, black, transparent);
 }
 
+/* Technology marquee. The static wrapped list is the default; motion is only
+   enabled when the visitor has not asked for reduced motion. */
+.marquee-control {
+  display: none;
+}
+
+.marquee-track {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.marquee-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2.5rem;
+}
+
+.marquee-clone {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .technology-marquee {
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  }
+
+  .technology-marquee .marquee-track {
+    flex-wrap: nowrap;
+    width: max-content;
+    animation: marquee 45s linear infinite;
+  }
+
+  .technology-marquee .marquee-list {
+    flex-wrap: nowrap;
+    width: max-content;
+    padding-inline-end: 2.5rem;
+  }
+
+  .technology-marquee .marquee-clone {
+    display: flex;
+  }
+
+  .technology-marquee[data-active="false"] .marquee-track,
+  .technology-marquee[data-paused="true"] .marquee-track {
+    animation-play-state: paused;
+  }
+
+  .marquee-control {
+    display: inline-flex;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .technology-marquee:hover .marquee-track {
+      animation-play-state: paused;
+    }
+  }
+}
+
+@keyframes marquee {
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
 @keyframes avatar-shine {
   0% {
     opacity: 0;

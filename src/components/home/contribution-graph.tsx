@@ -13,7 +13,11 @@ import { ContributionHeatmap } from './contribution-heatmap'
 
 const numberFormat = new Intl.NumberFormat('en-US')
 
-export function ContributionGraph() {
+interface ContributionGraphProps {
+  className?: string
+}
+
+export function ContributionGraph({ className }: ContributionGraphProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [activeIndex, setActiveIndex] = useState(0)
   const query = useQuery(githubContributionsQuery)
@@ -46,7 +50,10 @@ export function ContributionGraph() {
   }, [contributions.days])
 
   return (
-    <section aria-label="Contribution activity">
+    <section
+      aria-label="Contribution activity"
+      className={['border-t border-line pt-10', className].filter(Boolean).join(' ')}
+    >
       <div className="flex flex-wrap items-center justify-between gap-4">
         <SectionLabel className="min-w-[10rem] flex-1">Contribution activity</SectionLabel>
         <span role="status" className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted">

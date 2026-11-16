@@ -22,7 +22,11 @@ function SnapshotStat({ label, value }: SnapshotStatProps) {
   )
 }
 
-export function GithubSnapshot() {
+interface GithubSnapshotProps {
+  className?: string
+}
+
+export function GithubSnapshot({ className }: GithubSnapshotProps) {
   const { data, isError, isFetching, isPlaceholderData } = useQuery(githubSnapshotQuery)
   const snapshot = data ?? GITHUB_FALLBACK
   const sourceLabel = querySourceLabel({
@@ -35,7 +39,12 @@ export function GithubSnapshot() {
   return (
     <section
       aria-label="GitHub snapshot"
-      className="border border-line bg-surface/60 p-5 content-auto [contain-intrinsic-size:auto_400px] sm:p-6"
+      className={[
+        'border border-line bg-surface/60 p-5 content-auto [contain-intrinsic-size:auto_400px] sm:p-6',
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
     >
       <div className="flex flex-wrap items-center justify-between gap-4">
         <SectionLabel className="min-w-[10rem] flex-1">GitHub snapshot</SectionLabel>

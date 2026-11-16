@@ -144,6 +144,22 @@ export function StopIcon(props: IconProps) {
   )
 }
 
+export function PauseIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M9 5v14M15 5v14" />
+    </StrokeIcon>
+  )
+}
+
+export function PlayIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="m8 5 11 7-11 7V5Z" />
+    </StrokeIcon>
+  )
+}
+
 export function ArrowRightIcon(props: IconProps) {
   return (
     <StrokeIcon {...props}>

@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { StackList } from '@/components/about/stack-list'
 import { DownloadIcon, MapPinIcon } from '@/components/ui/icons'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageSection } from '@/components/ui/page-section'
-import { StackTags } from '@/components/ui/stack-tags'
 import { StatusBadge } from '@/components/ui/status-badge'
 import { principles } from '@/data/about'
 import { pageMeta } from '@/data/pages'
@@ -63,7 +63,7 @@ function AboutPage() {
               <h2 className="font-mono text-[10px] uppercase tracking-[0.18em] text-accent">
                 {group.title}
               </h2>
-              <StackTags items={group.items} className="mt-4" hover />
+              <StackList items={group.items} className="mt-4" />
             </div>
           ))}
         </div>

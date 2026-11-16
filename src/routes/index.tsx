@@ -2,6 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useAppearance } from '@/components/appearance/appearance-context'
 import { ContributionGraph } from '@/components/home/contribution-graph'
 import { GithubSnapshot } from '@/components/home/github-snapshot'
+import { TechnologyStack } from '@/components/home/technology-stack'
 import { ProjectCard } from '@/components/projects/project-card'
 import { ExternalLink } from '@/components/ui/external-link'
 import { ArrowRightIcon } from '@/components/ui/icons'
@@ -9,7 +10,7 @@ import { ScrambleText } from '@/components/ui/scramble-text'
 import { SectionLabel } from '@/components/ui/section-label'
 import { StatusBadge } from '@/components/ui/status-badge'
 import { pageMeta } from '@/data/pages'
-import { coreStack, profile } from '@/data/profile'
+import { profile } from '@/data/profile'
 import { featuredProjects } from '@/data/projects'
 import { ParticleName } from '@/features/particle-name'
 import { pageHead } from '@/lib/seo'
@@ -23,7 +24,7 @@ function HomePage() {
   const { particles } = useAppearance()
 
   return (
-    <div className="space-y-20 sm:space-y-28">
+    <div>
       <section className="max-w-4xl">
         <p className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
           <span className="h-px w-10 bg-accent" aria-hidden="true" />
@@ -69,9 +70,11 @@ function HomePage() {
         </div>
       </section>
 
-      <ContributionGraph />
+      <TechnologyStack className="mt-12 sm:mt-16" />
 
-      <section aria-label="Selected work" className="border-t border-line pt-10">
+      <ContributionGraph className="mt-12 sm:mt-16" />
+
+      <section aria-label="Selected work" className="mt-20 border-t border-line pt-10 sm:mt-28">
         <h2 className="sr-only">Selected work</h2>
         <div className="flex items-end justify-between gap-6">
           <SectionLabel className="flex-1">Selected work</SectionLabel>
@@ -91,27 +94,7 @@ function HomePage() {
         </div>
       </section>
 
-      <section aria-label="Core stack" className="border-t border-line pt-10">
-        <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
-          <div>
-            <SectionLabel>Stack</SectionLabel>
-            <p className="mt-5 max-w-sm text-sm leading-relaxed text-muted">
-              The tools I reach for most, from interface work to the services behind it.
-            </p>
-          </div>
-
-          <ul className="cursor-target grid grid-cols-2 gap-x-6 gap-y-3 font-mono text-[10px] uppercase tracking-[0.14em] text-muted sm:grid-cols-4">
-            {coreStack.map((technology) => (
-              <li key={technology} translate="no" className="flex items-center gap-2">
-                <span className="size-1 shrink-0 bg-accent" aria-hidden="true" />
-                {technology}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
-      <GithubSnapshot />
+      <GithubSnapshot className="mt-20 sm:mt-28" />
     </div>
   )
 }
