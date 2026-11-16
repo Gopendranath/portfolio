@@ -13,6 +13,7 @@ import { MobileDock } from './mobile-dock'
 import { MobileHeader } from './mobile-header'
 import { ScrollBlur } from './scroll-blur'
 import { SkipLink } from './skip-link'
+import { SmoothScroll } from './smooth-scroll'
 
 const CURSOR_TARGET_SELECTOR =
   '.cursor-target, a[href], button:not(:disabled), [role="button"], summary, input, textarea, select'
@@ -29,6 +30,7 @@ export function RootLayout() {
         <WebMcpTools />
         {shouldEnableAnalytics() ? <Analytics route={pathname} path={pathname} /> : null}
         <SkipLink />
+        <SmoothScroll />
         <AppSidebar />
         {/* Remount on navigation so scroll-edge state resets before the scroll event fires. */}
         <MobileHeader key={`header-${pathname}`} />
