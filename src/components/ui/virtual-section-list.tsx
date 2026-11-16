@@ -8,6 +8,7 @@ import {
   useSyncExternalStore,
 } from 'react'
 import { cn } from '@/lib/cn'
+import { scrollWindowInstant } from '@/lib/dom/scroll-to-instant'
 
 export interface VirtualSection {
   id: string
@@ -74,15 +75,6 @@ function documentOffsetTop(element: HTMLElement) {
   return Math.round(top)
 }
 
-/**
- * Scroll adapter for the virtualizer. Measurement corrections must land in the
- * same frame; the document sets `scroll-behavior: smooth`, which would animate
- * them and leave the library's offset read-back lagging behind.
- */
-export function windowScrollInstant(offset: number, options: { behavior?: ScrollBehavior }) {
-  window.scrollTo({ top: offset, behavior: options.behavior ?? 'instant' })
-}
-
 function useScrollMargin(enabled: boolean) {
   const listRef = useRef<HTMLDivElement>(null)
   const [scrollMargin, setScrollMargin] = useState(0)
@@ -135,7 +127,7 @@ export function VirtualSectionList({ sections, className }: VirtualSectionListPr
     overscan: 2,
     useFlushSync: false,
     directDomUpdates: true,
-    scrollToFn: windowScrollInstant,
+    scrollToFn: scrollWindowInstant,
   })
 
   if (!enabled) {

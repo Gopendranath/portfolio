@@ -1,10 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import {
-  type VirtualSection,
-  VirtualSectionList,
-  windowScrollInstant,
-} from '@/components/ui/virtual-section-list'
+import { type VirtualSection, VirtualSectionList } from '@/components/ui/virtual-section-list'
+import { scrollWindowInstant } from '@/lib/dom/scroll-to-instant'
 
 const sections: VirtualSection[] = Array.from({ length: 6 }, (_, index) => ({
   id: `section-${index}`,
@@ -164,7 +161,7 @@ it('corrects scroll offsets without animating them', () => {
   const scrollTo = vi.fn()
   vi.stubGlobal('scrollTo', scrollTo)
 
-  windowScrollInstant(480, {})
+  scrollWindowInstant(480, {})
 
   expect(scrollTo).toHaveBeenCalledWith({ top: 480, behavior: 'instant' })
 })
