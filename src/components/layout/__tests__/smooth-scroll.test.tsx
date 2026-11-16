@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react'
-import { afterEach, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { SmoothScroll } from '@/components/layout/smooth-scroll'
 import { scrollWindowInstant } from '@/lib/dom/scroll-to-instant'
 
@@ -10,7 +10,8 @@ const harness = vi.hoisted(() => ({
     resize: ReturnType<typeof vi.fn>
     destroy: ReturnType<typeof vi.fn>
   }>,
-  pathname: '/about',
+  listeners: [] as Array<() => void>,
+  unsubscribed: 0,
 }))
 
 vi.mock('lenis', () => ({
@@ -28,13 +29,24 @@ vi.mock('lenis', () => ({
 }))
 
 vi.mock('@tanstack/react-router', () => ({
-  useRouterState: ({ select }: { select: (state: unknown) => unknown }) =>
-    select({ location: { pathname: harness.pathname } }),
+  useRouter: () => ({
+    subscribe: (_event: string, listener: () => void) => {
+      harness.listeners.push(listener)
+
+      return () => {
+        harness.unsubscribed += 1
+      }
+    },
+  }),
 }))
 
-afterEach(() => {
+beforeEach(() => {
   harness.instances.length = 0
-  harness.pathname = '/about'
+  harness.listeners.length = 0
+  harness.unsubscribed = 0
+})
+
+afterEach(() => {
   vi.unstubAllGlobals()
 })
 
@@ -65,19 +77,22 @@ it('routes instant corrections through lenis and restores the fallback on unmoun
 
   unmount()
 
+  expect(harness.instances).toHaveLength(1)
   expect(lenis?.destroy).toHaveBeenCalled()
+  expect(harness.unsubscribed).toBe(1)
 
   scrollWindowInstant(700, {})
 
   expect(scrollTo).toHaveBeenCalledWith({ top: 700, behavior: 'instant' })
 })
 
-it('resizes lenis when the route changes', () => {
-  const { rerender } = render(<SmoothScroll />)
+it('resizes lenis when navigation resolves', () => {
+  render(<SmoothScroll />)
   const lenis = harness.instances[0]
 
-  harness.pathname = '/projects'
-  rerender(<SmoothScroll />)
+  for (const listener of harness.listeners) {
+    listener()
+  }
 
   expect(lenis?.resize).toHaveBeenCalled()
 })

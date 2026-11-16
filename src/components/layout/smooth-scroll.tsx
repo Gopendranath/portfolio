@@ -1,4 +1,4 @@
-import { useRouterState } from '@tanstack/react-router'
+import { useRouter } from '@tanstack/react-router'
 import Lenis from 'lenis'
 import { useEffect, useRef } from 'react'
 import { setImmediateScroller } from '@/lib/dom/scroll-to-instant'
@@ -15,7 +15,7 @@ import { setImmediateScroller } from '@/lib/dom/scroll-to-instant'
  * link from moving focus to the main landmark.
  */
 export function SmoothScroll() {
-  const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const router = useRouter()
   const lenisRef = useRef<Lenis | null>(null)
 
   useEffect(() => {
@@ -31,16 +31,18 @@ export function SmoothScroll() {
       lenis.scrollTo(offset, { immediate: true, force: true })
     })
 
+    // Page height changes on navigation; keep Lenis's limits in step.
+    const unsubscribe = router.subscribe('onResolved', () => {
+      lenis.resize()
+    })
+
     return () => {
+      unsubscribe()
       setImmediateScroller(null)
       lenisRef.current = null
       lenis.destroy()
     }
-  }, [])
-
-  useEffect(() => {
-    lenisRef.current?.resize()
-  }, [pathname])
+  }, [router])
 
   return null
 }
