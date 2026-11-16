@@ -17,7 +17,7 @@ export const Route = createFileRoute('/projects')({
 const projectSections: VirtualSection[] = [
   {
     id: 'projects-grid',
-    estimate: 1100,
+    estimate: 1040,
     content: (
       <div className="grid gap-4 md:grid-cols-2">
         {projects.map((project, index) => (
@@ -28,7 +28,7 @@ const projectSections: VirtualSection[] = [
   },
   {
     id: 'projects-more',
-    estimate: 90,
+    estimate: 60,
     content: (
       <p className="mt-12 font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
         More experiments on{' '}

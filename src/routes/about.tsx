@@ -19,7 +19,7 @@ export const Route = createFileRoute('/about')({
 const aboutSections: VirtualSection[] = [
   {
     id: 'about-stack',
-    estimate: 520,
+    estimate: 510,
     content: (
       <PageSection label="Stack" ariaLabel="Technical stack">
         <div className="mt-8 grid gap-8 sm:grid-cols-2">
@@ -37,7 +37,7 @@ const aboutSections: VirtualSection[] = [
   },
   {
     id: 'about-principles',
-    estimate: 300,
+    estimate: 290,
     content: (
       <PageSection label="How I work" ariaLabel="Working principles">
         <div className="mt-8 grid gap-8 md:grid-cols-3">

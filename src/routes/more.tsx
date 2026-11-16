@@ -19,7 +19,7 @@ export const Route = createFileRoute('/more')({
 const featureSections: VirtualSection[] = [
   {
     id: 'more-features',
-    estimate: 360,
+    estimate: 800,
     content: (
       <PageSection label="Features" ariaLabel="Site features">
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -41,7 +41,7 @@ const featureSections: VirtualSection[] = [
 const tailSections: VirtualSection[] = [
   {
     id: 'more-ssh',
-    estimate: 280,
+    estimate: 350,
     content: (
       <PageSection label="SSH access">
         <div className="mt-6 border border-line bg-surface/40 p-5">
@@ -66,7 +66,7 @@ const tailSections: VirtualSection[] = [
   },
   {
     id: 'more-colophon',
-    estimate: 320,
+    estimate: 230,
     content: (
       <PageSection label="Colophon">
         <StackTags items={siteStack} className="mt-6" />

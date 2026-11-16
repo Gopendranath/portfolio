@@ -17,32 +17,28 @@ class StubResizeObserver {
 const originalResizeObserver = globalThis.ResizeObserver
 
 const originalOffsetHeight = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetHeight')
+const originalOffsetTop = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetTop')
 
-function stubRects(top: () => number) {
+function stubLayout(listTop: () => number) {
   // TanStack Virtual measures items with `offsetHeight`, not client rects.
   Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
     configurable: true,
     get: () => 600,
   })
 
-  vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
-    this: HTMLElement,
-  ) {
-    const isList = this.dataset.scrollMargin !== undefined
-    const offset = isList ? top() : 0
-    return {
-      x: 0,
-      y: offset,
-      top: offset,
-      left: 0,
-      right: 800,
-      bottom: offset + 600,
-      width: 800,
-      height: 600,
-      toJSON: () => ({}),
-    } as DOMRect
+  // The list's document offset comes from the layout offset chain (`offsetTop`).
+  Object.defineProperty(HTMLElement.prototype, 'offsetTop', {
+    configurable: true,
+    get(this: HTMLElement) {
+      return this.dataset.scrollMargin === undefined ? 0 : listTop()
+    },
   })
 }
+
+beforeEach(() => {
+  // jsdom does not implement scrolling; the virtualizer writes scroll offsets.
+  vi.stubGlobal('scrollTo', () => {})
+})
 
 afterEach(() => {
   globalThis.ResizeObserver = originalResizeObserver
@@ -51,13 +47,12 @@ afterEach(() => {
     Object.defineProperty(HTMLElement.prototype, 'offsetHeight', originalOffsetHeight)
   }
 
+  if (originalOffsetTop) {
+    Object.defineProperty(HTMLElement.prototype, 'offsetTop', originalOffsetTop)
+  }
+
   vi.restoreAllMocks()
   vi.unstubAllGlobals()
-})
-
-beforeEach(() => {
-  // jsdom does not implement scrolling; the virtualizer writes scroll offsets.
-  vi.stubGlobal('scrollTo', () => {})
 })
 
 it('renders every section in flow when ResizeObserver is unavailable', () => {
@@ -72,7 +67,7 @@ it('renders every section in flow when ResizeObserver is unavailable', () => {
 
 it('mounts only the sections near the viewport when measurement is available', () => {
   globalThis.ResizeObserver = StubResizeObserver as unknown as typeof ResizeObserver
-  stubRects(() => 0)
+  stubLayout(() => 0)
 
   render(<VirtualSectionList sections={sections} />)
 
@@ -83,7 +78,7 @@ it('mounts only the sections near the viewport when measurement is available', (
 it('re-measures the scroll margin when the page above the list resizes', () => {
   globalThis.ResizeObserver = StubResizeObserver as unknown as typeof ResizeObserver
   let listTop = 200
-  stubRects(() => listTop)
+  stubLayout(() => listTop)
 
   render(<VirtualSectionList sections={sections} />)
 

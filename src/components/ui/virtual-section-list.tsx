@@ -50,9 +50,23 @@ function usePrintMedia() {
 
 /**
  * Offset of the list from the top of the document, so window scrolling and the
- * virtualizer's item positions agree. Re-measured when the content above the
- * list changes height (font swap, theme change, window resize).
+ * virtualizer's item positions agree. Uses the layout offset chain rather than
+ * bounding rects, which are skewed while the page-enter transform animates.
+ * Re-measured when the content above the list changes height (font swap, theme
+ * change, window resize).
  */
+function documentOffsetTop(element: HTMLElement) {
+  let top = 0
+  let node: HTMLElement | null = element
+
+  while (node) {
+    top += node.offsetTop
+    node = node.offsetParent as HTMLElement | null
+  }
+
+  return top
+}
+
 function useScrollMargin(enabled: boolean) {
   const listRef = useRef<HTMLDivElement>(null)
   const [scrollMargin, setScrollMargin] = useState(0)
@@ -65,7 +79,7 @@ function useScrollMargin(enabled: boolean) {
     }
 
     const update = () => {
-      setScrollMargin(Math.round(list.getBoundingClientRect().top + window.scrollY))
+      setScrollMargin(documentOffsetTop(list))
     }
 
     update()
@@ -117,10 +131,13 @@ export function VirtualSectionList({ sections, className }: VirtualSectionListPr
     )
   }
 
+  const items = virtualizer.getVirtualItems()
+  const { containerRef } = virtualizer
+
   return (
     <div ref={listRef} className={cn(className)} data-scroll-margin={scrollMargin}>
-      <div ref={virtualizer.containerRef} className="relative">
-        {virtualizer.getVirtualItems().map((item) => (
+      <div ref={containerRef} className="relative">
+        {items.map((item) => (
           <div
             key={item.key}
             data-index={item.index}
