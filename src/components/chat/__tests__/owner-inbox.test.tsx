@@ -133,6 +133,14 @@ describe('OwnerInbox', () => {
     expect(threadHeader).toHaveClass('h-20')
   })
 
+  it('keeps the inbox list native under the smooth scroller', () => {
+    render(<OwnerInbox onBack={vi.fn()} />)
+
+    const row = screen.getByRole('button', { name: /gitgitgit127/i })
+
+    expect(row.closest('[data-lenis-prevent]')).not.toBeNull()
+  })
+
   it('marks a new visitor message read while the thread is open', async () => {
     const user = userEvent.setup()
     const { rerender } = render(<OwnerInbox onBack={vi.fn()} />)

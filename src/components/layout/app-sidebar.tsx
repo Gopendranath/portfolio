@@ -11,7 +11,10 @@ import { PrimaryNav } from './primary-nav'
 
 export function AppSidebar() {
   return (
-    <aside className="fixed inset-y-0 left-0 z-30 hidden w-[280px] flex-col overflow-y-auto overscroll-contain border-r border-line bg-canvas/95 px-6 py-8 lg:flex">
+    <aside
+      className="fixed inset-y-0 left-0 z-30 hidden w-[280px] flex-col overflow-y-auto overscroll-contain border-r border-line bg-canvas/95 px-6 py-8 lg:flex"
+      data-lenis-prevent
+    >
       <Link to="/" className="group flex items-start gap-3">
         <span className="avatar-frame relative block size-10 shrink-0 overflow-hidden border border-line transition-colors group-hover:border-accent/60">
           <Avatar className="size-full" sizes="40px" priority />

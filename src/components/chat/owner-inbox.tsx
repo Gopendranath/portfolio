@@ -45,7 +45,7 @@ export function OwnerInbox({ onBack }: OwnerInboxProps) {
         backLabel="Back to assistant"
       />
 
-      <div className="min-h-0 flex-1 overflow-y-auto p-4">
+      <div className="min-h-0 flex-1 overflow-y-auto p-4" data-lenis-prevent>
         {threadsQuery.isLoading ? (
           <div className="space-y-2">
             <div className="h-16 animate-pulse border border-line bg-surface/40" />

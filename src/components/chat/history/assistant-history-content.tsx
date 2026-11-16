@@ -27,7 +27,7 @@ export function AssistantHistoryContent({
   onRetry,
 }: AssistantHistoryContentProps) {
   return (
-    <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4">
+    <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4" data-lenis-prevent>
       {isLoading ? (
         <div className="space-y-2" role="status" aria-label="Loading chats">
           <div className="h-14 animate-pulse border border-line bg-surface/40" />

@@ -33,6 +33,7 @@ export function MessageEditor({
         maxLength={MAX_MESSAGE_LENGTH}
         onChange={(event) => onChange(event.target.value)}
         onKeyDown={onKeyDown}
+        data-lenis-prevent
         className="block max-h-40 w-full resize-none overflow-y-auto border border-accent bg-canvas px-3 py-2 text-sm leading-relaxed text-ink focus:outline-none"
       />
       <div className="mt-2 flex justify-end gap-2">
