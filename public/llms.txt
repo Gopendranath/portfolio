@@ -41,7 +41,7 @@ Cloud and DevOps: AWS, Docker, Vercel, Netlify, Git, Linux.
 - [GitHub](https://github.com/Gopendranath) : Source for all projects above
 - [LinkedIn](https://linkedin.com/in/gns99) : Professional profile
 - [X](https://x.com/AssassinsEmper1) : Short-form posts
-- [t3rminal](https://t3rminal.vercel.app) : Separate terminal-style browser project
+- [Buy Me a Coffee](https://coff.ee/gopendranath) : Support my work
 - [Email](mailto:gopendranathsasmal7@gmail.com) : Preferred contact channel
 
 ## WebMCP

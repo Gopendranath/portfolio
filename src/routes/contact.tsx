@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { BuyMeCoffee } from '@/components/coffee/buy-me-coffee'
 import { ExternalLink } from '@/components/ui/external-link'
 import { FactList } from '@/components/ui/fact-list'
 import { ArrowRightIcon, DownloadIcon } from '@/components/ui/icons'
@@ -63,7 +64,19 @@ function ContactPage() {
         <div className="space-y-10">
           <div>
             <SectionLabel>Elsewhere</SectionLabel>
-            <SocialLinks showLabels className="mt-4 -ml-2" />
+            <div className="mt-4 grid grid-cols-[auto_auto] items-stretch justify-start gap-6">
+              <div className="[zoom:0.65]">
+                <BuyMeCoffee />
+              </div>
+              <div>
+                <SocialLinks
+                  exclude={['coffee']}
+                  className="h-full flex-col justify-between"
+                  boxClassName="size-14"
+                  iconClassName="size-7"
+                />
+              </div>
+            </div>
           </div>
 
           <div>

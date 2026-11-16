@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import { expect, it } from 'vitest'
 import { ProjectCard } from '@/components/projects/project-card'
 import type { Project } from '@/data/types'
@@ -8,7 +8,7 @@ const project: Project = {
   title: 'Test project with a deliberately long title for wrapping',
   year: '2026',
   summary: 'A short project summary for the card test.',
-  stack: ['React', 'TypeScript', 'Tailwind CSS'],
+  stack: ['React', 'TypeScript', 'Tailwind CSS', 'SomeUnknownTech'],
   links: [
     { label: 'Live', href: 'https://example.com/live' },
     { label: 'Code', href: 'https://github.com/example/repo' },
@@ -28,9 +28,14 @@ it('renders the project and safe external links', () => {
   expect(screen.getByText('01')).toBeInTheDocument()
   expect(screen.getByText('2026')).toBeInTheDocument()
 
-  for (const technology of project.stack) {
-    expect(screen.getByText(technology)).toBeInTheDocument()
-  }
+  const iconRow = screen.getByRole('list', { name: 'Technologies' })
+  const iconItems = within(iconRow).getAllByRole('listitem')
+  expect(iconItems).toHaveLength(3)
+  expect(within(iconRow).getByText('React', { selector: '.sr-only' })).toBeInTheDocument()
+  expect(iconRow.querySelectorAll('svg')).toHaveLength(3)
+
+  const textRow = screen.getByRole('list', { name: 'Other technologies' })
+  expect(within(textRow).getByText('SomeUnknownTech')).toBeInTheDocument()
 
   const links = screen.getAllByRole('link')
   expect(links).toHaveLength(project.links.length)

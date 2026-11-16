@@ -33,9 +33,9 @@ export const profile: Profile = {
       href: 'https://x.com/AssassinsEmper1',
     },
     {
-      id: 'website',
-      label: 't3rminal.vercel.app',
-      href: 'https://t3rminal.vercel.app',
+      id: 'coffee',
+      label: 'Buy Me a Coffee',
+      href: 'https://coff.ee/gopendranath',
     },
     {
       id: 'email',

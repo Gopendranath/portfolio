@@ -1,11 +1,28 @@
 import type { TechnologyIconName } from '@/components/ui/technology-icon'
 
-/** Display label → brand mark. Every item rendered by the About page must be listed. */
+/** Display label → brand mark. Every item rendered by the About page or project cards must be listed. */
 export const stackItemIcons: Record<string, TechnologyIconName> = {
   React: 'react',
+  'React 19': 'react',
   'Next.js': 'nextjs',
   TypeScript: 'typescript',
+  JavaScript: 'javascript',
   'Tailwind CSS': 'tailwind',
+  'Tailwind CSS 4': 'tailwind',
+  Tailwind: 'tailwind',
+  'Tailwind v4': 'tailwind',
+  'TanStack Router': 'tanstack',
+  'TanStack Query': 'reactquery',
+  Vitest: 'vitest',
+  'Vite 8': 'vite',
+  'Chrome Extension': 'chrome',
+  Firefox: 'firefox',
+  npm: 'npm',
+  pnpm: 'pnpm',
+  Bun: 'bun',
+  Deno: 'deno',
+  WebAssembly: 'webassembly',
+  Auth0: 'auth0',
   'shadcn/ui': 'shadcn',
   Redux: 'redux',
   Zustand: 'zustand',

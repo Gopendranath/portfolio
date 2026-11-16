@@ -17,5 +17,5 @@ it('renders a coloured icon beside every stack item', () => {
   expect(container.querySelectorAll('li > svg')).toHaveLength(allItems.length)
 
   const javaIcon = screen.getByText('Java').closest('li')?.querySelector('svg')
-  expect(javaIcon?.querySelector('path')).toHaveAttribute('fill', '#0074BD')
+  expect(javaIcon).toHaveStyle({ color: '#0074BD' })
 })

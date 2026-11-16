@@ -26,7 +26,7 @@ describe('get-profile', () => {
       { label: 'GitHub', href: 'https://github.com/Gopendranath' },
       { label: 'LinkedIn', href: 'https://linkedin.com/in/gns99' },
       { label: 'X', href: 'https://x.com/AssassinsEmper1' },
-      { label: 't3rminal.vercel.app', href: 'https://t3rminal.vercel.app' },
+      { label: 'Buy Me a Coffee', href: 'https://coff.ee/gopendranath' },
     ])
   })
 
@@ -80,7 +80,7 @@ describe('get-contact', () => {
       'GitHub',
       'LinkedIn',
       'X',
-      't3rminal.vercel.app',
+      'Buy Me a Coffee',
     ])
   })
 
