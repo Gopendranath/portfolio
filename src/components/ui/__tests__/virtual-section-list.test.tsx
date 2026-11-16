@@ -1,6 +1,10 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { type VirtualSection, VirtualSectionList } from '@/components/ui/virtual-section-list'
+import {
+  type VirtualSection,
+  VirtualSectionList,
+  windowScrollInstant,
+} from '@/components/ui/virtual-section-list'
 
 const sections: VirtualSection[] = Array.from({ length: 6 }, (_, index) => ({
   id: `section-${index}`,
@@ -107,4 +111,60 @@ it('renders every section while printing', () => {
   render(<VirtualSectionList sections={sections} />)
 
   expect(screen.getAllByText(/^section \d$/)).toHaveLength(sections.length)
+})
+
+it('unmounts sections that sit far outside the viewport', () => {
+  globalThis.ResizeObserver = StubResizeObserver as unknown as typeof ResizeObserver
+  stubLayout(() => 0)
+
+  const many: VirtualSection[] = Array.from({ length: 8 }, (_, index) => ({
+    id: `many-${index}`,
+    estimate: 600,
+    content: <p>row {index + 1}</p>,
+  }))
+
+  render(<VirtualSectionList sections={many} />)
+
+  const mounted = screen.getAllByText(/^row \d$/).length
+  expect(mounted).toBeLessThan(many.length)
+  expect(screen.getByText('row 1')).toBeInTheDocument()
+  expect(screen.queryByText('row 8')).not.toBeInTheDocument()
+})
+
+it('includes the offset parent border in the scroll margin', () => {
+  globalThis.ResizeObserver = StubResizeObserver as unknown as typeof ResizeObserver
+  stubLayout(() => 200)
+
+  const fakeParent = { clientTop: 12, offsetTop: 0, offsetParent: null }
+  const originalOffsetParent = Object.getOwnPropertyDescriptor(
+    HTMLElement.prototype,
+    'offsetParent',
+  )
+
+  Object.defineProperty(HTMLElement.prototype, 'offsetParent', {
+    configurable: true,
+    get(this: HTMLElement) {
+      return this.dataset.scrollMargin === undefined ? null : fakeParent
+    },
+  })
+
+  render(<VirtualSectionList sections={sections} />)
+
+  expect(document.querySelector('[data-scroll-margin]')).toHaveAttribute(
+    'data-scroll-margin',
+    '212',
+  )
+
+  if (originalOffsetParent) {
+    Object.defineProperty(HTMLElement.prototype, 'offsetParent', originalOffsetParent)
+  }
+})
+
+it('corrects scroll offsets without animating them', () => {
+  const scrollTo = vi.fn()
+  vi.stubGlobal('scrollTo', scrollTo)
+
+  windowScrollInstant(480, {})
+
+  expect(scrollTo).toHaveBeenCalledWith({ top: 480, behavior: 'instant' })
 })

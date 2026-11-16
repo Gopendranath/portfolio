@@ -61,10 +61,26 @@ function documentOffsetTop(element: HTMLElement) {
 
   while (node) {
     top += node.offsetTop
-    node = node.offsetParent as HTMLElement | null
+    const parent = node.offsetParent as HTMLElement | null
+
+    if (parent) {
+      // `offsetTop` is measured from the parent's padding edge.
+      top += parent.clientTop
+    }
+
+    node = parent
   }
 
-  return top
+  return Math.round(top)
+}
+
+/**
+ * Scroll adapter for the virtualizer. Measurement corrections must land in the
+ * same frame; the document sets `scroll-behavior: smooth`, which would animate
+ * them and leave the library's offset read-back lagging behind.
+ */
+export function windowScrollInstant(offset: number, options: { behavior?: ScrollBehavior }) {
+  window.scrollTo({ top: offset, behavior: options.behavior ?? 'instant' })
 }
 
 function useScrollMargin(enabled: boolean) {
@@ -119,6 +135,7 @@ export function VirtualSectionList({ sections, className }: VirtualSectionListPr
     overscan: 2,
     useFlushSync: false,
     directDomUpdates: true,
+    scrollToFn: windowScrollInstant,
   })
 
   if (!enabled) {
